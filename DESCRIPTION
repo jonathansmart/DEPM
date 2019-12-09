@@ -1,0 +1,23 @@
+Package: DEPM
+Type: Package
+Title: Estimate spawning biomass of fish stocks using the Daily Egg Production Method (DEPM)
+Version: 0.1.1
+Author: person("Jonathan", "Smart", email = "jonathan.smart@sa.gov.au", role = c("aut", "cre", "ctb"))
+Maintainer: Jonathan Smart <jonathan.smart@sa.gov.au>
+Description: A package to estimate shark life history using robust techniques.
+Encoding: UTF-8
+LazyData: true
+Depends: R (>= 3.3),  RcppEigen, TMB
+LinkingTo: TMB, RcppEigen
+Imports: plyr,
+    stats,
+    dplyr,
+    purrr,
+    RcppEigen,
+    tidyr,
+    TMB
+RoxygenNote: 6.0.1
+License: GPL-3
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr
