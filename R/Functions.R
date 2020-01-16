@@ -285,7 +285,10 @@ Estimate_Spawning_fraction <- function(data, Region = NULL, Time = NULL){
   if(length(Y_col)>1)
     Y_col <- Y_col[grep("yes",substr(tolower(Y_col),1,3))]
 
-  if(length(Y_col)>1) stop("Multiple `yes`` columns for spawning fraction identified")
+  if(length(Y_col)!=1)
+    Y_col <-  names(data)[grep("spawn", substr(tolower(names(data)),1,30))]
+
+  if(length(Y_col)>1) stop("Multiple columns for spawning fraction identified")
 
   Tot_col <-  names(data)[grep("tot", substr(tolower(names(data)),1,30))]
 
@@ -367,18 +370,19 @@ Estimate_Spawning_fraction <- function(data, Region = NULL, Time = NULL){
 #'     greater variance with increasing weight. This is estimated as a 4 parameter model where specified parameters can be fixed.
 #' @param data A dataframe with 2 numeric variables: Fish weight and fecundity (number of eggs). Names and order are not important
 #'    as the larger of the two variables is assumed to be number of eggs and is automatically assigned as this.
-#' @param parameters A list of 4 parameters tha must include: "alpha", "beta", "Sigma0" and "Sigma1"
+#' @param start_pars A list of 4 start_pars tha must include: "alpha", "beta", "Sigma0" and "Sigma1"
 #' @param prediction.int A numeric vector of weights to predict batch fecundity over. Must be on the same scale as the data
-#' @param fixed.pars A character vector of any parameters that require fixing.
+#' @param fixed.pars A character vector of any start_pars that require fixing.
 #' @param verbose If TRUE, parameter estimates are printed to the screen
+#' @param return.parameters If TRUE, parameter estimates are returned instead of estimates
 #' @useDynLib DEPM
 #' @return Parameter estimates are automatically printed to the screen. If a prediction interval is provided then predicted fecundity-at-weight
 #'     is provided at those intervals. If no prediction interval is provided than predictions for the raw data are returned. Variance (Var) is
-#'     returned for both options
+#'     returned for both options. if `return.parameters == TRUE`, parameter estimates are returned instead of estimates
 #' @import dplyr tidyr purrr stats
 #' @export
 #'
-Estimate_Batch_Fecundity <- function(data, parameters, prediction.int = NULL,  fixed.pars= NULL, verbose = TRUE){
+Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL, return.parameters = FALSE,  fixed.pars= NULL, verbose = FALSE){
 
   if(any(prediction.int < 1) ) stop("Prediction intervals must be in grams not kilos")
 
@@ -400,11 +404,11 @@ Estimate_Batch_Fecundity <- function(data, parameters, prediction.int = NULL,  f
 
   if(ncol(data) != 2) stop("Two columns needed in data")
 
-  if(!is.null(fixed.pars) &  any(!fixed.pars %in% names(parameters)))
+  if(!is.null(fixed.pars) &  any(!fixed.pars %in% names(start_pars)))
     stop("fixed.pars must be a vector of parameter names")
 
-  if(any(!names(parameters) %in% c("alpha","beta","Sigma0", "Sigma1") ))
-    stop("parameters must be a list containing starting values for the following parameters:
+  if(any(!names(start_pars) %in% c("alpha","beta","Sigma0", "Sigma1") ))
+    stop("start_pars must be a list containing starting values for the following parameters:
          alpha, beta, Sigma0 and Sigma1.\n Starting values must be provided even if a parameter is being fixed")
 
   if(mean(data[[1]]) < mean(data[[2]])){
@@ -424,12 +428,20 @@ Estimate_Batch_Fecundity <- function(data, parameters, prediction.int = NULL,  f
     for(i in 1:length(fixed_pars)){
       fixed_pars[[i]] <- factor(NA)
     }
-    model <- TMB::MakeADFun(data,parameters,DLL="DEPM",
+    model <- TMB::MakeADFun(data,start_pars,DLL="DEPM",
                        silent = TRUE,
                        checkParameterOrder=FALSE,
                        map = fixed_pars)
+    alpha <- ifelse(!is.na(as.numeric(fit$par["alpha"])),as.numeric(fit$par["alpha"]),start_pars$alpha)
+    beta <- ifelse(!is.na(as.numeric(fit$par["beta"])),as.numeric(fit$par["beta"]),start_pars$beta)
+    Sigma0 <- ifelse(!is.na(as.numeric(fit$par["Sigma0"])),as.numeric(fit$par["Sigma0"]),start_pars$Sigma0)
+    Sigma1 <- ifelse(!is.na(as.numeric(fit$par["Sigma1"])),as.numeric(fit$par["Sigma1"]),start_pars$Sigma1)
+
+    if(return.parameters == TRUE)
+      return(list(alpha = alpha, beta = beta, Sigma0 = Sigma0, Sigma1 = Sigma1))
+
   }else{
-    model <- TMB::MakeADFun(data,parameters,DLL="DEPM",checkParameterOrder=FALSE,silent = TRUE)
+    model <- TMB::MakeADFun(data,start_pars,DLL="DEPM",checkParameterOrder=FALSE,silent = TRUE)
   }
 
   #fit model
@@ -442,11 +454,17 @@ Estimate_Batch_Fecundity <- function(data, parameters, prediction.int = NULL,  f
 
   # get the predictions and parameters with standard errors from TMB
   Derived_Quants <- create_TMB_sd_report_data.frame(summary(rep))
+  if(return.parameters == TRUE){
+    final_pars <- head(Derived_Quants, 4)
+    return(final_pars)
+  }
 
-  alpha <- ifelse(!is.na(as.numeric(fit$par["alpha"])),as.numeric(fit$par["alpha"]),parameters$alpha)
-  beta <- ifelse(!is.na(as.numeric(fit$par["beta"])),as.numeric(fit$par["beta"]),parameters$beta)
-  Sigma0 <- ifelse(!is.na(as.numeric(fit$par["Sigma0"])),as.numeric(fit$par["Sigma0"]),parameters$Sigma0)
-  Sigma1 <- ifelse(!is.na(as.numeric(fit$par["Sigma1"])),as.numeric(fit$par["Sigma1"]),parameters$Sigma1)
+  alpha <- ifelse(!is.na(as.numeric(fit$par["alpha"])),as.numeric(fit$par["alpha"]),start_pars$alpha)
+  beta <- ifelse(!is.na(as.numeric(fit$par["beta"])),as.numeric(fit$par["beta"]),start_pars$beta)
+  Sigma0 <- ifelse(!is.na(as.numeric(fit$par["Sigma0"])),as.numeric(fit$par["Sigma0"]),start_pars$Sigma0)
+  Sigma1 <- ifelse(!is.na(as.numeric(fit$par["Sigma1"])),as.numeric(fit$par["Sigma1"]),start_pars$Sigma1)
+
+
 
   if(verbose == TRUE)
     cat("alpha = ",alpha,"\n beta =", beta, "\n Sigma0 =", Sigma0, "\n Sigma1 =", Sigma1,"\n" )
@@ -604,200 +622,6 @@ Estimate_proportion_female <- function(data, Weight, max.weight, bin.width, Time
 }
 
 
-#' Estimate mean weight (W) and mean (F) for the standard DEPM approach.
-#' @description The standard DEPM approach does not use weight bins and does not require a set of weight class parameters.
-#'     However, because of this it requires additional parameters for mean female weight (W) and mean batch fecundity (F).
-#'     These are produced using this function and can be combined with the other weight invariant parameters (P0, A, S and R)
-#'     using the combine_estimates() function. Two data.frames are required which contain weight data and batch fecundity data
-#'     which can be used to estimated each of these parameters.
-#' @param weight.data Adult data used to calculate the mean total female weight (W). This data set should ONLY include
-#'     females and should include variables for Total weight and/or gonad free weight (Total weight - Gonad weight). These
-#'     are used to calculate mean W and provide estimates the intended weight estimates to the fecundity estimator.
-#' @param TotalWt The column heading in weight.data that represents Total Weight in grams
-#' @param GonadFrWt The column heading in weight.data that represents Gonad Free Weight in grams. If Gonad weight is not being used
-#'     in the fecundity estimator (as total weight is used instead), then this parameter does not need to be specified.
-#' @param Time A string containing the column name for a timestep if desired as a grouping variable
-#' @param Region A string containing the column name for a region if desired as a grouping variable
-#' @param fecundity.data A data frame of weights and batch fecundity used to determine the relationship
-#'     which informs mean F. The weight data can be in Gonad free weight or total weight. If Gonad free weight is used,
-#'     then `GonadFrWt` needs to be specified as otherwise total weight will be incorrectly used to estimate fecundity.
-#'
-#' @param parameters  A list of 4 starting parameters for the batch fecundity relationship that
-#'     must include: "alpha", "beta", "Sigma0" and "Sigma1"
-#'
-#' @return A data.frame that includes the Mean W, variance of W, Mean F, variance of F and Time and Region if grouping variables were provided
-#' @export
-
-Estimate_mean_W_F <- function(weight.data, TotalWt, GonadFrWt= NULL, Time = NULL, Region = NULL, fecundity.data, parameters){
-  if(!is.null(Region) & !any(names(weight.data) %in% Region)) stop("Region column could not be determined")
-  if(!is.null(Time) & !any(names(weight.data) %in% Time)) stop("Time column could not be determined")
-  if(all(!names(weight.data) %in% TotalWt)) stop("Total Weight column incorrectly specified")
-  if(!is.null(GonadFrWt) & all(!names(weight.data) %in% GonadFrWt)) stop("Gonad Free Weight column incorrectly specified")
-  if(is.null(GonadFrWt)) {
-    message("Total weight used to estimate fecundity as gonad free weight was not provided")
-  }else{
-    if(GonadFrWt == TotalWt) {
-      GonadFrWt <- NULL # Total weight will be used automatically in this situation so make explicit to avoid bugs
-      message("Total weight used to estimate fecundity as gonad free weight was not provided")
-    }
-  }
-
-
-
-  if(is.null(Time) & !is.null(Region)){
-    processed_data <- dplyr::select(weight.data,
-                                    Region = paste(Region),
-                                    GonadFrWt =  paste(GonadFrWt),
-                                    TotalWt = paste(TotalWt))
-
-    processed_data <- na.omit(processed_data)
-
-    results <- expand.grid(Region = unique(processed_data$Region),
-                           Mean_W = NA,
-                           var_W = NA,
-                           Mean_F= NA,
-                           var_F= NA)
-
-    for(i in unique(processed_data$Region)){
-      tmp <- dplyr::filter(processed_data, Region == i)
-      TotalWt <- tmp$TotalWt
-      results[which(results$Region == i),"Mean_W"]  <- mean(TotalWt)
-      results[which(results$Region == i),"var_W"]  <- var(TotalWt)
-
-      if(is.null(GonadFrWt)){
-        prediction_wt <- TotalWt
-
-      }else{
-        prediction_wt <- tmp$GonadFrWt
-      }
-
-      # remove data that may not be in grams
-      prediction_wt <- prediction_wt[prediction_wt >1]
-
-      # The fecundity relationship is not time invariant but the mean weight used is.
-      Fec_results <- Estimate_Batch_Fecundity(fecundity.data, parameters,
-                                              prediction.int = prediction_wt,
-                                              verbose = FALSE)
-      results[which(results$Region == i),"Mean_F"] <- mean(Fec_results$Fecundity)
-      results[which(results$Region == i),"var_F"] <- var(Fec_results$Fecundity)
-
-    }
-
-
-  } else if(!is.null(Time) & is.null(Region)) {
-
-    processed_data <- dplyr::select(weight.data,
-                                    Time = paste(Time),
-                                    GonadFrWt =  paste(GonadFrWt),
-                                    TotalWt = paste(TotalWt))
-    processed_data <- na.omit(processed_data)
-
-    results <- expand.grid(Time = unique(processed_data$Time),
-                           Mean_W = NA,
-                           var_W = NA,
-                           Mean_F= NA,
-                           var_F= NA)
-
-    for(i in unique(processed_data$Time)){
-      tmp <- dplyr::filter(processed_data, Time == i)
-      TotalWt <- tmp$TotalWt
-      results[which(results$Time == i),"Mean_W"]  <- mean(TotalWt)
-      results[which(results$Time == i),"var_W"]  <- var(TotalWt)
-
-      if(is.null(GonadFrWt)){
-        prediction_wt <- TotalWt
-      }else{
-        prediction_wt <- tmp$GonadFrWt
-      }
-
-      # remove data that may not be in grams
-      prediction_wt <- prediction_wt[prediction_wt >1]
-
-      # The fecundity relationship is not time invariant but the mean weight used is.
-      Fec_results <- Estimate_Batch_Fecundity(fecundity.data, parameters,
-                                              prediction.int = prediction_wt,
-                                              verbose = FALSE)
-      results[which(results$Time == i),"Mean_F"] <- mean(Fec_results$Fecundity)
-      results[which(results$Time == i),"var_F"] <- var(Fec_results$Fecundity)
-    }
-
-  } else if(!is.null(Time) & !is.null(Region)) {
-
-    processed_data <- dplyr::select(weight.data,
-                                    Time = paste(Time),
-                                    Region = paste(Region),
-                                    GonadFrWt =  paste(GonadFrWt),
-                                    TotalWt = paste(TotalWt))
-    processed_data <- na.omit(processed_data)
-
-    results <-  tidyr::expand(processed_data, tidyr::nesting(Time = Time, Region = Region),
-                              Mean_W = NA,
-                              var_W = NA,
-                              Mean_F= NA,
-                              var_F= NA)
-
-    for(i in unique(processed_data$Time)){
-      for(j in unique(processed_data$Region)){
-        tmp <- dplyr::filter(processed_data, Time == i, Region == j)
-        TotalWt <- tmp$TotalWt
-        results[which(results$Time == i & results$Region == j),"Mean_W"]  <- mean(TotalWt)
-        results[which(results$Time == i & results$Region == j),"var_W"]  <- var(TotalWt)
-
-        if(is.null(GonadFrWt)){
-          prediction_wt <- TotalWt
-        }else{
-          prediction_wt <- tmp$GonadFrWt
-        }
-
-        # remove data that may not be in grams
-        prediction_wt <- prediction_wt[prediction_wt >1]
-
-        # The fecundity relationship is not time invariant but the mean weight used is.
-        Fec_results <- Estimate_Batch_Fecundity(fecundity.data, parameters,
-                                                prediction.int = prediction_wt,
-                                                verbose = FALSE)
-        results[which(results$Time == i & results$Region == j),"Mean_F"] <- mean(Fec_results$Fecundity)
-        results[which(results$Time == i & results$Region == j),"var_F"] <- var(Fec_results$Fecundity)
-      }
-    }
-
-  } else {
-    processed_data <- dplyr::select(weight.data,
-                                    GonadFrWt =  paste(GonadFrWt),
-                                    TotalWt = paste(TotalWt))
-
-    processed_data <- na.omit(processed_data)
-
-    TotalWt <- processed_data$TotalWt
-    Mean_W  <- mean(TotalWt)
-    var_W  <- var(TotalWt)
-
-    if(is.null(GonadFrWt)){
-      prediction_wt <- TotalWt
-    }else{
-      prediction_wt <- tmp$GonadFrWt
-    }
-
-    # remove data that may not be in grams
-    prediction_wt <- prediction_wt[prediction_wt >1]
-
-    # The fecundity relationship is not time invariant but the mean weight used is.
-    Fec_results <- Estimate_Batch_Fecundity(fecundity.data, parameters,
-                                            prediction.int = prediction_wt,
-                                            verbose = FALSE)
-    Mean_F <- mean(Fec_results$Fecundity)
-    var_F <- var(Fec_results$Fecundity)
-
-    results <- data.frame(Mean_W, var_W, Mean_F,var_F )
-  }
-
-  return(results)
-
-}
-
-
-
-
 #' Create a dataset of DEPM parameters to be passed to Estimate_biomass()
 #'
 #' @param P0 The results of Estimate_P0() with a single value of Z. Multiple values are not yet supported.
@@ -879,7 +703,6 @@ combine_estimates <- function(P0, A, R, S, W_F = NULL){
 #'    parameter variances specific to those surveys will be combined. Parameters that are used across years (for example a constant sex ratio)
 #'    will automatically be included for each survey even if other parameters are being specified for specific steps/Regions.
 #' @param P0 The results of Estimate_P0() with a single value of Z. Multiple values are not yet supported.
-#' @param A A data.frame of spawning area in meters^2. Can be specified for each Time/Region combination if necessary
 #' @param R A data.frame of sex ratios. Can be specified for each Time/Region combination if necessary
 #' @param S A data.frame of spawning fractions. Can be specified for each Time/Region combination if necessary
 #' @param W_F The results of  Estimate_mean_W_F(). This is optional and only required if using the standard DEPM methods.
@@ -890,7 +713,7 @@ combine_estimates <- function(P0, A, R, S, W_F = NULL){
 #'
 #'
 #'
-combine_variances <- function(P0, A, R, S, W_F = NULL){
+combine_variances <- function(P0,R, S, W_F = NULL){
 
   P0 <- dplyr::select(P0, -P0, -Z)
   results <-  dplyr::rename(P0, P0 = P0_se)
@@ -902,15 +725,6 @@ combine_variances <- function(P0, A, R, S, W_F = NULL){
   } else{
     results <- tryCatch(
       dplyr::left_join(results, dplyr::rename(R, R = "Variance")),
-      error = function(e) stop("Inconsistent use of time and region")
-    )
-  }
-
-  if(length(A)== 1) {
-    results$A <- as.numeric(A)
-  } else{
-    results <- tryCatch(
-      dplyr::left_join(results, A),
       error = function(e) stop("Inconsistent use of time and region")
     )
   }
@@ -1292,9 +1106,9 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
 
   } else if(any(names(adult.pars) %in% "Region")){
     resultlist <- list(
-      Nfem = expand.grid(Time = unique(adult.pars$Region), Nfem = NA, SD = NA ),
-      Biomass = expand.grid(Time = unique(adult.pars$Region),  Biomass = NA , SD = NA),
-      NfemWt = expand.grid(Time = unique(adult.pars$Region),
+      Nfem = expand.grid(Region = unique(adult.pars$Region), Nfem = NA, SD = NA ),
+      Biomass = expand.grid(Region = unique(adult.pars$Region),  Biomass = NA , SD = NA),
+      NfemWt = expand.grid(Region = unique(adult.pars$Region),
                            Nwt = seq(1, length(unique(weight.pars.vars$Wt_bin)),1), NfemWt = NA , SD = NA)
     )
 
@@ -1407,6 +1221,7 @@ Estimate_DEPM_Biomass <- function(adult.pars, adult.vars){
     CV2F1 = VF1 / (F1^2)
     CV2W1 = VW1 / (W1^2)
 
+
     #Compute variances for Bsp and Nfem
     VarNfem = Nfem^2 * (CV2P0 + CV2A + CV2S +CV2F1)
     VarBsp = Bsp^2 * (CV2P0 + CV2A + CV2R + CV2S + CV2F1 + CV2W1)
@@ -1447,7 +1262,8 @@ Estimate_DEPM_Biomass <- function(adult.pars, adult.vars){
 
 
         vars <-  VarBspNfemnw1(P0 = tmp$P0, A = tmp$A, R = tmp$R, S = tmp$S, F1 = tmp$.F, W1= tmp$W,
-                               VP0 = tmp_var$P0, VA= tmp_var$A, VR= tmp_var$R, VS= tmp_var$S, VF1= tmp_var$.F, VW1 = tmp_var$W)
+                               VP0 = tmp_var$P0, VA= tmp_var$A, VR= tmp_var$R, VS= tmp_var$S,
+                               VF1= tmp_var$.F, VW1 = tmp_var$W)
 
         resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i & resultlist[["Nfem"]]$Region == j,
                              "Nfem"] <- res$Nfem
@@ -1489,7 +1305,8 @@ Estimate_DEPM_Biomass <- function(adult.pars, adult.vars){
 
 
       vars <-  VarBspNfemnw1(P0 = tmp$P0, A = tmp$A, R = tmp$R, S = tmp$S, F1 = tmp$.F, W1= tmp$W,
-                             VP0 = tmp_var$P0, VA= tmp_var$A, VR= tmp_var$R, VS= tmp_var$S, VF1= tmp_var$.F, VW1 = tmp_var$W)
+                             VP0 = tmp_var$P0, VA= tmp_var$A, VR= tmp_var$R, VS= tmp_var$S,
+                             VF1= tmp_var$.F, VW1 = tmp_var$W)
 
 
       resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i, "Nfem"] <- res$Nfem
@@ -1529,7 +1346,8 @@ Estimate_DEPM_Biomass <- function(adult.pars, adult.vars){
 
 
       vars <-  VarBspNfemnw1(P0 = tmp$P0, A = tmp$A, R = tmp$R, S = tmp$S, F1 = tmp$.F, W1= tmp$W,
-                             VP0 = tmp_var$P0, VA= tmp_var$A, VR= tmp_var$R, VS= tmp_var$S, VF1= tmp_var$.F, VW1 = tmp_var$W)
+                             VP0 = tmp_var$P0, VA= tmp_var$A, VR= tmp_var$R, VS= tmp_var$S,
+                             VF1= tmp_var$.F, VW1 = tmp_var$W)
 
 
       resultlist[["Nfem"]][resultlist[["Nfem"]]$Region == j,"Nfem"] <- res$Nfem
@@ -1564,3 +1382,402 @@ Estimate_DEPM_Biomass <- function(adult.pars, adult.vars){
 
   return(resultlist)
 }
+
+
+
+
+#' Estimate mean weight (W) and mean (F) for the standard DEPM approach.
+#' @description The standard DEPM approach does not use weight bins and does not require a set of weight class parameters.
+#'     However, because of this it requires additional parameters for mean female weight (W) and mean batch fecundity (F).
+#'     These are produced using this function and can be combined with the other weight invariant parameters (P0, A, S and R)
+#'     using the combine_estimates() function. Two data.frames are required which contain weight data and batch fecundity data
+#'     which can be used to estimated each of these parameters.
+#' @param weight.data Adult data used to calculate the mean total female weight (W). This data set should ONLY include
+#'     females and should include variables for Total weight and/or gonad free weight (Total weight - Gonad weight). These
+#'     are used to calculate mean W and provide estimates the intended weight estimates to the fecundity estimator.
+#' @param TotalWt The column heading in weight.data that represents Total Weight in grams
+#' @param GonadFrWt The column heading in weight.data that represents Gonad Free Weight in grams. If Gonad weight is not being used
+#'     in the fecundity estimator (as total weight is used instead), then this parameter does not need to be specified.
+#' @param Time A string containing the column name for a timestep if desired as a grouping variable
+#' @param Region A string containing the column name for a region if desired as a grouping variable
+#'
+#' @param parameters  A list of 4 starting parameters for the batch fecundity relationship that
+#'     must include: "alpha", "beta", "Sigma0" and "Sigma1"
+#'
+#' @return A data.frame that includes the Mean W, variance of W, Mean F, variance of F, the covariance of the fecundity-at-weight data and Time and Region if grouping variables were provided
+#' @export
+
+Estimate_mean_W_F <- function(weight.data, TotalWt, GonadFrWt= NULL, Time = NULL, Region = NULL, parameters=NULL){
+  if(!is.null(Region) & !any(names(weight.data) %in% Region)) stop("Region column could not be determined")
+  if(!is.null(Time) & !any(names(weight.data) %in% Time)) stop("Time column could not be determined")
+  if(all(!names(weight.data) %in% TotalWt)) stop("Total Weight column incorrectly specified")
+  if(!is.null(GonadFrWt) & all(!names(weight.data) %in% GonadFrWt)) stop("Gonad Free Weight column incorrectly specified")
+  if(is.null(GonadFrWt)) {
+    message("Total weight used to estimate fecundity as gonad free weight was not provided")
+  }else{
+    if(GonadFrWt == TotalWt) {
+      GonadFrWt <- NULL # Total weight will be used automatically in this situation so make explicit to avoid bugs
+      message("Total weight used to estimate fecundity as gonad free weight was not provided")
+    }
+  }
+  if(is.null(parameters)) stop("Batch fecundity relationship parameters must be provided from the Estimate_batch_fecundity() function")
+  if(!is.data.frame(parameters)) stop("Batch fecundity relationship parameters should be list obtained from the Estimate_batch_fecundity() function with 'return.parameters == TRUE'")
+
+
+  # extract individual parameters from the parameter list
+  alpha <- parameters[parameters$Parameter== "alpha","Val"]
+  beta <- parameters[parameters$Parameter== "beta","Val"]
+  Sigma0 <- parameters[parameters$Parameter== "Sigma0","Val"]
+  Sigma1 <- parameters[parameters$Parameter== "Sigma1","Val"]
+
+
+  if(is.null(Time) & !is.null(Region)){
+    processed_data <- dplyr::select(weight.data,
+                                    Region = paste(Region),
+                                    GonadFrWt =  paste(GonadFrWt),
+                                    TotalWt = paste(TotalWt))
+
+    processed_data <- na.omit(processed_data)
+
+    results <- expand.grid(Region = unique(processed_data$Region),
+                           Mean_W = NA,
+                           var_W = NA,
+                           Mean_F= NA,
+                           var_F= NA)
+
+    for(i in unique(processed_data$Region)){
+      tmp <- dplyr::filter(processed_data, Region == i)
+      TotalWt <- tmp$TotalWt
+      results[which(results$Region == i),"Mean_W"]  <- mean(TotalWt)
+      results[which(results$Region == i),"var_W"]  <- var(TotalWt)/length(TotalWt) #variance of the mean
+
+      if(is.null(GonadFrWt)){
+        prediction_wt <- TotalWt
+
+      }else{
+        prediction_wt <- tmp$GonadFrWt
+      }
+
+      # remove data that may not be in grams
+      prediction_wt <- prediction_wt[prediction_wt >1]
+
+      # The fecundity relationship is not time invariant but the mean weight used is.
+      Fec_results <- data.frame(Wt = prediction_wt,
+                                Fecundity = alpha * prediction_wt^beta)
+      Fec_results <-  dplyr::mutate(Fec_results, Var = (Sigma0*Fecundity^Sigma1)^2)
+
+      results[which(results$Region == i),"Mean_F"] <- mean(Fec_results$Fecundity)
+      results[which(results$Region == i),"var_F"] <- (1/length(Fec_results$Fecundity)^2)*(sum(Fec_results$var))
+      #var(Fec_results$Fecundity)/length(Fec_results$Fecundity)
+
+    }
+
+
+  } else if(!is.null(Time) & is.null(Region)) {
+
+    processed_data <- dplyr::select(weight.data,
+                                    Time = paste(Time),
+                                    GonadFrWt =  paste(GonadFrWt),
+                                    TotalWt = paste(TotalWt))
+    processed_data <- na.omit(processed_data)
+
+    results <- expand.grid(Time = unique(processed_data$Time),
+                           Mean_W = NA,
+                           var_W = NA,
+                           Mean_F= NA,
+                           var_F= NA)
+
+    for(i in unique(processed_data$Time)){
+      tmp <- dplyr::filter(processed_data, Time == i)
+      TotalWt <- tmp$TotalWt
+      results[which(results$Time == i),"Mean_W"]  <- mean(TotalWt)
+      results[which(results$Time == i),"var_W"]  <- var(TotalWt)/length(TotalWt)
+
+      if(is.null(GonadFrWt)){
+        prediction_wt <- TotalWt
+      }else{
+        prediction_wt <- tmp$GonadFrWt
+      }
+
+      # remove data that may not be in grams
+      prediction_wt <- prediction_wt[prediction_wt >1]
+
+      Fec_results <- data.frame(Wt = prediction_wt,
+                            Fecundity = alpha * prediction_wt^beta)
+      Fec_results <-  dplyr::mutate(Fec_results, Var = (Sigma0*Fecundity^Sigma1)^2)
+
+      results[which(results$Time == i),"Mean_F"] <- mean(Fec_results$Fecundity)
+      results[which(results$Time == i),"var_F"] <- (1/length(Fec_results$Fecundity)^2)*(sum(Fec_results$var))
+      #var(Fec_results$Fecundity)/length(Fec_results$Fecundity)
+    }
+
+  } else if(!is.null(Time) & !is.null(Region)) {
+
+    processed_data <- dplyr::select(weight.data,
+                                    Time = paste(Time),
+                                    Region = paste(Region),
+                                    GonadFrWt =  paste(GonadFrWt),
+                                    TotalWt = paste(TotalWt))
+    processed_data <- na.omit(processed_data)
+
+    results <-  tidyr::expand(processed_data, tidyr::nesting(Time = Time, Region = Region),
+                              Mean_W = NA,
+                              var_W = NA,
+                              Mean_F= NA,
+                              var_F= NA)
+
+    for(i in unique(processed_data$Time)){
+      for(j in unique(processed_data$Region)){
+        tmp <- dplyr::filter(processed_data, Time == i, Region == j)
+        TotalWt <- tmp$TotalWt
+        results[which(results$Time == i & results$Region == j),"Mean_W"]  <- mean(TotalWt)
+        results[which(results$Time == i & results$Region == j),"var_W"]  <- var(TotalWt)/length(TotalWt)
+
+        if(is.null(GonadFrWt)){
+          prediction_wt <- TotalWt
+        }else{
+          prediction_wt <- tmp$GonadFrWt
+        }
+
+        # remove data that may not be in grams
+        prediction_wt <- prediction_wt[prediction_wt >1]
+
+        Fec_results <- data.frame(Wt = prediction_wt,
+                                  Fecundity = alpha * prediction_wt^beta)
+        Fec_results <-  dplyr::mutate(Fec_results, Var = (Sigma0*Fecundity^Sigma1)^2)
+
+        results[which(results$Time == i & results$Region == j),"Mean_F"] <- mean(Fec_results$Fecundity)
+        results[which(results$Time == i & results$Region == j),"var_F"] <- (1/length(Fec_results$Fecundity)^2)*(sum(Fec_results$var))
+        #var(Fec_results$Fecundity)/length(Fec_results$Fecundity)
+      }
+    }
+
+  } else {
+    processed_data <- dplyr::select(weight.data,
+                                    GonadFrWt =  paste(GonadFrWt),
+                                    TotalWt = paste(TotalWt))
+
+    processed_data <- na.omit(processed_data)
+
+    TotalWt <- processed_data$TotalWt
+    Mean_W  <- mean(TotalWt)
+    var_W  <- var(TotalWt)/length(TotalWt)
+
+    if(is.null(GonadFrWt)){
+      prediction_wt <- TotalWt
+    }else{
+      prediction_wt <- tmp$GonadFrWt
+    }
+
+    # remove data that may not be in grams
+    prediction_wt <- prediction_wt[prediction_wt >1]
+
+    Fec_results <- data.frame(Wt = prediction_wt,
+                              Fecundity = alpha * prediction_wt^beta)
+    Fec_results <-  dplyr::mutate(Fec_results, Var = (Sigma0*Fecundity^Sigma1)^2)
+
+    Mean_F <- mean(Fec_results$Fecundity)
+    var_F <- (1/length(Fec_results$Fecundity)^2)*(sum(Fec_results$var))
+    #var(Fec_results$Fecundity)/length(Fec_results$Fecundity)
+
+    results <- data.frame(Mean_W, var_W, Mean_F,var_F )
+  }
+
+  return(results)
+
+}
+
+
+
+#' Estimate mean weight (W) and mean (F) for the standard DEPM approach.
+#' @description The standard DEPM approach does not use weight bins and does not require a set of weight class parameters.
+#'     However, because of this it requires additional parameters for mean female weight (W) and mean batch fecundity (F).
+#'     These are produced using this function and can be combined with the other weight invariant parameters (P0, A, S and R)
+#'     using the combine_estimates() function. Two data.frames are required which contain weight data and batch fecundity data
+#'     which can be used to estimated each of these parameters.
+#' @param weight.data Adult data used to calculate the mean total female weight (W). This data set should ONLY include
+#'     females and should include variables for Total weight and/or gonad free weight (Total weight - Gonad weight). These
+#'     are used to calculate mean W and provide estimates the intended weight estimates to the fecundity estimator.
+#' @param TotalWt The column heading in weight.data that represents Total Weight in grams
+#' @param GonadFrWt The column heading in weight.data that represents Gonad Free Weight in grams. If Gonad weight is not being used
+#'     in the fecundity estimator (as total weight is used instead), then this parameter does not need to be specified.
+#' @param Time A string containing the column name for a timestep if desired as a grouping variable
+#' @param Region A string containing the column name for a region if desired as a grouping variable
+#' @param fecundity.data A data frame of weights and batch fecundity used to determine the relationship
+#'     which informs mean F. The weight data can be in Gonad free weight or total weight. If Gonad free weight is used,
+#'     then `GonadFrWt` needs to be specified as otherwise total weight will be incorrectly used to estimate fecundity.
+#'
+#' @param parameters  A list of 4 starting parameters for the batch fecundity relationship that
+#'     must include: "alpha", "beta", "Sigma0" and "Sigma1"
+#'
+#' @return A data.frame that includes the Mean W, variance of W, Mean F, variance of F, the covariance of the fecundity-at-weight data and Time and Region if grouping variables were provided
+#' @export
+
+#
+# Estimate_mean_W_F <- function(weight.data, TotalWt, GonadFrWt= NULL, Time = NULL, Region = NULL, fecundity.data, parameters){
+#   if(!is.null(Region) & !any(names(weight.data) %in% Region)) stop("Region column could not be determined")
+#   if(!is.null(Time) & !any(names(weight.data) %in% Time)) stop("Time column could not be determined")
+#   if(all(!names(weight.data) %in% TotalWt)) stop("Total Weight column incorrectly specified")
+#   if(!is.null(GonadFrWt) & all(!names(weight.data) %in% GonadFrWt)) stop("Gonad Free Weight column incorrectly specified")
+#   if(is.null(GonadFrWt)) {
+#     message("Total weight used to estimate fecundity as gonad free weight was not provided")
+#   }else{
+#     if(GonadFrWt == TotalWt) {
+#       GonadFrWt <- NULL # Total weight will be used automatically in this situation so make explicit to avoid bugs
+#       message("Total weight used to estimate fecundity as gonad free weight was not provided")
+#     }
+#   }
+#
+#
+#
+#   if(is.null(Time) & !is.null(Region)){
+#     processed_data <- dplyr::select(weight.data,
+#                                     Region = paste(Region),
+#                                     GonadFrWt =  paste(GonadFrWt),
+#                                     TotalWt = paste(TotalWt))
+#
+#     processed_data <- na.omit(processed_data)
+#
+#     results <- expand.grid(Region = unique(processed_data$Region),
+#                            Mean_W = NA,
+#                            var_W = NA,
+#                            Mean_F= NA,
+#                            var_F= NA)
+#
+#     for(i in unique(processed_data$Region)){
+#       tmp <- dplyr::filter(processed_data, Region == i)
+#       TotalWt <- tmp$TotalWt
+#       results[which(results$Region == i),"Mean_W"]  <- mean(TotalWt)
+#       results[which(results$Region == i),"var_W"]  <- var(TotalWt)
+#
+#       if(is.null(GonadFrWt)){
+#         prediction_wt <- TotalWt
+#
+#       }else{
+#         prediction_wt <- tmp$GonadFrWt
+#       }
+#
+#       # remove data that may not be in grams
+#       prediction_wt <- prediction_wt[prediction_wt >1]
+#
+#       # The fecundity relationship is not time invariant but the mean weight used is.
+#       Fec_results <- Estimate_Batch_Fecundity(fecundity.data, parameters,
+#                                               prediction.int = prediction_wt,
+#                                               verbose = FALSE)
+#       results[which(results$Region == i),"Mean_F"] <- mean(Fec_results$Fecundity)
+#       results[which(results$Region == i),"var_F"] <- var(Fec_results$Fecundity)
+#
+#     }
+#
+#
+#   } else if(!is.null(Time) & is.null(Region)) {
+#
+#     processed_data <- dplyr::select(weight.data,
+#                                     Time = paste(Time),
+#                                     GonadFrWt =  paste(GonadFrWt),
+#                                     TotalWt = paste(TotalWt))
+#     processed_data <- na.omit(processed_data)
+#
+#     results <- expand.grid(Time = unique(processed_data$Time),
+#                            Mean_W = NA,
+#                            var_W = NA,
+#                            Mean_F= NA,
+#                            var_F= NA)
+#
+#     for(i in unique(processed_data$Time)){
+#       tmp <- dplyr::filter(processed_data, Time == i)
+#       TotalWt <- tmp$TotalWt
+#       results[which(results$Time == i),"Mean_W"]  <- mean(TotalWt)
+#       results[which(results$Time == i),"var_W"]  <- var(TotalWt)
+#
+#       if(is.null(GonadFrWt)){
+#         prediction_wt <- TotalWt
+#       }else{
+#         prediction_wt <- tmp$GonadFrWt
+#       }
+#
+#       # remove data that may not be in grams
+#       prediction_wt <- prediction_wt[prediction_wt >1]
+#
+#       # The fecundity relationship is not time invariant but the mean weight used is.
+#       Fec_results <- Estimate_Batch_Fecundity(fecundity.data, parameters,
+#                                               prediction.int = prediction_wt,
+#                                               verbose = FALSE)
+#       results[which(results$Time == i),"Mean_F"] <- mean(Fec_results$Fecundity)
+#       results[which(results$Time == i),"var_F"] <- var(Fec_results$Fecundity)
+#     }
+#
+#   } else if(!is.null(Time) & !is.null(Region)) {
+#
+#     processed_data <- dplyr::select(weight.data,
+#                                     Time = paste(Time),
+#                                     Region = paste(Region),
+#                                     GonadFrWt =  paste(GonadFrWt),
+#                                     TotalWt = paste(TotalWt))
+#     processed_data <- na.omit(processed_data)
+#
+#     results <-  tidyr::expand(processed_data, tidyr::nesting(Time = Time, Region = Region),
+#                               Mean_W = NA,
+#                               var_W = NA,
+#                               Mean_F= NA,
+#                               var_F= NA)
+#
+#     for(i in unique(processed_data$Time)){
+#       for(j in unique(processed_data$Region)){
+#         tmp <- dplyr::filter(processed_data, Time == i, Region == j)
+#         TotalWt <- tmp$TotalWt
+#         results[which(results$Time == i & results$Region == j),"Mean_W"]  <- mean(TotalWt)
+#         results[which(results$Time == i & results$Region == j),"var_W"]  <- var(TotalWt)
+#
+#         if(is.null(GonadFrWt)){
+#           prediction_wt <- TotalWt
+#         }else{
+#           prediction_wt <- tmp$GonadFrWt
+#         }
+#
+#         # remove data that may not be in grams
+#         prediction_wt <- prediction_wt[prediction_wt >1]
+#
+#         # The fecundity relationship is not time invariant but the mean weight used is.
+#         Fec_results <- Estimate_Batch_Fecundity(fecundity.data, parameters,
+#                                                 prediction.int = prediction_wt,
+#                                                 verbose = FALSE)
+#         results[which(results$Time == i & results$Region == j),"Mean_F"] <- mean(Fec_results$Fecundity)
+#         results[which(results$Time == i & results$Region == j),"var_F"] <- var(Fec_results$Fecundity)
+#       }
+#     }
+#
+#   } else {
+#     processed_data <- dplyr::select(weight.data,
+#                                     GonadFrWt =  paste(GonadFrWt),
+#                                     TotalWt = paste(TotalWt))
+#
+#     processed_data <- na.omit(processed_data)
+#
+#     TotalWt <- processed_data$TotalWt
+#     Mean_W  <- mean(TotalWt)
+#     var_W  <- var(TotalWt)
+#
+#     if(is.null(GonadFrWt)){
+#       prediction_wt <- TotalWt
+#     }else{
+#       prediction_wt <- tmp$GonadFrWt
+#     }
+#
+#     # remove data that may not be in grams
+#     prediction_wt <- prediction_wt[prediction_wt >1]
+#
+#     # The fecundity relationship is not time invariant but the mean weight used is.
+#     Fec_results <- Estimate_Batch_Fecundity(fecundity.data, parameters,
+#                                             prediction.int = prediction_wt,
+#                                             verbose = FALSE)
+#     Mean_F <- mean(Fec_results$Fecundity)
+#     var_F <- var(Fec_results$Fecundity)
+#
+#     results <- data.frame(Mean_W, var_W, Mean_F,var_F )
+#   }
+#
+#   return(results)
+#
+# }
+
