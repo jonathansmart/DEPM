@@ -10,14 +10,16 @@ Maintainer: Jonathan Smart <jonathan.smart@sa.gov.au>
 Description: A package to estimate shark life history using robust techniques.
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 3.3),  RcppEigen, TMB
+Depends: R (>= 3.3)
 LinkingTo: TMB, RcppEigen
 Imports: plyr,
-    stats,
+    scales,
+    lubridate,
+    tidyverse,
     dplyr,
     purrr,
-    RcppEigen,
     tidyr,
+    stats,
     TMB
 RoxygenNote: 6.0.1
 License: GPL-3

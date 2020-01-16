@@ -40,6 +40,9 @@ Five datasets are required to use the DEPMWt approach:
 Spawning Area (*A*) is not calculated as part of this package but its estimates will be included as one of the final steps.
 
 ```{r, include = FALSE}
+
+library(scales)
+library(lubridate)
 # Data for P0
 egg_data_raw <- read.csv("G:\\ModelGrp\\Snapper\\DEPM 2019 method comparison\\Data\\raw_egg_density_Snapper_18.csv")
 

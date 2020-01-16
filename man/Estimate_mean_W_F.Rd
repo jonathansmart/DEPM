@@ -5,7 +5,7 @@
 \title{Estimate mean weight (W) and mean (F) for the standard DEPM approach.}
 \usage{
 Estimate_mean_W_F(weight.data, TotalWt, GonadFrWt = NULL, Time = NULL,
-  Region = NULL, fecundity.data, parameters)
+  Region = NULL, parameters = NULL)
 }
 \arguments{
 \item{weight.data}{Adult data used to calculate the mean total female weight (W). This data set should ONLY include
@@ -21,15 +21,11 @@ in the fecundity estimator (as total weight is used instead), then this paramete
 
 \item{Region}{A string containing the column name for a region if desired as a grouping variable}
 
-\item{fecundity.data}{A data frame of weights and batch fecundity used to determine the relationship
-which informs mean F. The weight data can be in Gonad free weight or total weight. If Gonad free weight is used,
-then `GonadFrWt` needs to be specified as otherwise total weight will be incorrectly used to estimate fecundity.}
-
 \item{parameters}{A list of 4 starting parameters for the batch fecundity relationship that
 must include: "alpha", "beta", "Sigma0" and "Sigma1"}
 }
 \value{
-A data.frame that includes the Mean W, variance of W, Mean F, variance of F and Time and Region if grouping variables were provided
+A data.frame that includes the Mean W, variance of W, Mean F, variance of F, the covariance of the fecundity-at-weight data and Time and Region if grouping variables were provided
 }
 \description{
 The standard DEPM approach does not use weight bins and does not require a set of weight class parameters.

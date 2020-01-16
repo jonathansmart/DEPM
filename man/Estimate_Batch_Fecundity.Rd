@@ -4,25 +4,27 @@
 \alias{Estimate_Batch_Fecundity}
 \title{Estimate batch fecundity}
 \usage{
-Estimate_Batch_Fecundity(data, parameters, prediction.int = NULL,
-  fixed.pars = NULL, verbose = TRUE)
+Estimate_Batch_Fecundity(data, start_pars, prediction.int = NULL,
+  return.parameters = FALSE, fixed.pars = NULL, verbose = FALSE)
 }
 \arguments{
 \item{data}{A dataframe with 2 numeric variables: Fish weight and fecundity (number of eggs). Names and order are not important
 as the larger of the two variables is assumed to be number of eggs and is automatically assigned as this.}
 
-\item{parameters}{A list of 4 parameters tha must include: "alpha", "beta", "Sigma0" and "Sigma1"}
+\item{start_pars}{A list of 4 start_pars tha must include: "alpha", "beta", "Sigma0" and "Sigma1"}
 
 \item{prediction.int}{A numeric vector of weights to predict batch fecundity over. Must be on the same scale as the data}
 
-\item{fixed.pars}{A character vector of any parameters that require fixing.}
+\item{return.parameters}{If TRUE, parameter estimates are returned instead of estimates}
+
+\item{fixed.pars}{A character vector of any start_pars that require fixing.}
 
 \item{verbose}{If TRUE, parameter estimates are printed to the screen}
 }
 \value{
 Parameter estimates are automatically printed to the screen. If a prediction interval is provided then predicted fecundity-at-weight
     is provided at those intervals. If no prediction interval is provided than predictions for the raw data are returned. Variance (Var) is
-    returned for both options
+    returned for both options. if `return.parameters == TRUE`, parameter estimates are returned instead of estimates
 }
 \description{
 Batch fecundity (number of eggs by female fish weight) is estimated with an allometric error structure allowing

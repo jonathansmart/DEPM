@@ -4,12 +4,10 @@
 \alias{combine_variances}
 \title{Create a dataset of DEPM parameter variances to be passed to Estimate_biomass()}
 \usage{
-combine_variances(P0, A, R, S, W_F = NULL)
+combine_variances(P0, R, S, W_F = NULL)
 }
 \arguments{
 \item{P0}{The results of Estimate_P0() with a single value of Z. Multiple values are not yet supported.}
-
-\item{A}{A data.frame of spawning area in meters^2. Can be specified for each Time/Region combination if necessary}
 
 \item{R}{A data.frame of sex ratios. Can be specified for each Time/Region combination if necessary}
 
