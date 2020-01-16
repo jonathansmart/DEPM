@@ -22,7 +22,7 @@ The function can determine these columns based on similarly named variables}
 A data.frame of P0 estimates and standard errors for each included Region and Time as well as the values of Z provided
 }
 \description{
-Daily egg production is estimated using mean egg density-at-age for each sample which is combined with a pre-defined
+Daily egg production is estimated using mean egg density-at-age for each sample based on a pre-defined
     estimate of egg mortality (Z). If multple years and/or regions are included in the data then a separate estimate of P0 can be
-    provided by specifying the columns that correspond to these variables
+    provided by specifying the columns that correspond to these variables.
 }

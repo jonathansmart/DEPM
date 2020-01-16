@@ -8,10 +8,13 @@ Estimate_DEPMWt_biomass(adult.pars, adult.vars, weight.pars.vars)
 }
 \arguments{
 \item{adult.pars}{The output of `combine_estimates`. This included each of the DEPM parameters estimated using this package.
-These can be grouped by Timestep/Region and will be used to estimate results for each combination of these}
+These can be grouped by Timestep/Region and will be used to estimate results for each combination of these.Multiple egg mortalities will produce multiple annual
+results.}
 
 \item{adult.vars}{The output of `combine_variances`. This included each of the DEPM parameters estimated using this package.
-These can be grouped by Timestep/Region and will be used to estimate results for each combination of these}
+These can be grouped by Timestep/Region and will be used to estimate results for each combination of these.
+Multiple egg mortalities will produce multiple annual
+results.}
 
 \item{weight.pars.vars}{A dataframe that must include the columns: "Wt_bin", "Prop", "Prop_var", "Wt", "Fecundity", "Fec_var". These correspond
 to weight bin number (must start at 1), proportion of females in each weight bin, the multinomial variance of the proportion of females

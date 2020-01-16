@@ -7,7 +7,7 @@
 combine_estimates(P0, A, R, S, W_F = NULL)
 }
 \arguments{
-\item{P0}{The results of Estimate_P0() with a single value of Z. Multiple values are not yet supported.
+\item{P0}{The results of Estimate_P0() which can include several egg mortalities (Z).
 Can be specified for each Time/Region combination if necessary}
 
 \item{A}{A data.frame of spawning area in meters^2. Can be specified for each Time/Region combination if necessary}

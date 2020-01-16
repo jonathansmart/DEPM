@@ -7,7 +7,8 @@
 combine_variances(P0, R, S, W_F = NULL)
 }
 \arguments{
-\item{P0}{The results of Estimate_P0() with a single value of Z. Multiple values are not yet supported.}
+\item{P0}{The results of Estimate_P0() which can include several egg mortalities (Z).
+Can be specified for each Time/Region combination if necessary}
 
 \item{R}{A data.frame of sex ratios. Can be specified for each Time/Region combination if necessary}
 

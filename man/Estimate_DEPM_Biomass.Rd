@@ -9,7 +9,7 @@ Estimate_DEPM_Biomass(adult.pars, adult.vars)
 }
 \arguments{
 \item{adult.pars}{The output of `combine_estimates` with mean Weight and mean F included. This included each of the DEPM parameters estimated using this package.
-These can be grouped by Timestep/Region and will be used to estimate results for each combination of these}
+These can be grouped by Timestep/Region and will be used to estimate results for each combination of these.}
 
 \item{adult.vars}{The output of `combine_variances`with var Weight and var F inlcuded. This included each of the DEPM parameters estimated using this package.
 These can be grouped by Timestep/Region and will be used to estimate results for each combination of these}
