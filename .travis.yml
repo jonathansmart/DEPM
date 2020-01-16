@@ -6,3 +6,6 @@ cache: packages
 # do not build vignettes as SARDI data is not included in the package and vignettes need to be built from Jon Smarts machine
 r_build_args: --no-build-vignettes --no-manual
 r_check_args: --no-build-vignettes --no-manual --timings
+
+# Some warnings occur by not building vignettes so handle this
+warnings_are_errors: false
