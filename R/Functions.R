@@ -1,7 +1,7 @@
 #' Calculate Daily Egg Production (P0)
-#' @description Daily egg production is estimated using mean egg density-at-age for each sample which is combined with a pre-defined
+#' @description Daily egg production is estimated using mean egg density-at-age for each sample based on a pre-defined
 #'     estimate of egg mortality (Z). If multple years and/or regions are included in the data then a separate estimate of P0 can be
-#'     provided by specifying the columns that correspond to these variables
+#'     provided by specifying the columns that correspond to these variables.
 #' @param data A data.frame that contains at least the following columns for Age,  density, and hatching time.
 #'     The function can determine these columns based on similarly named variables
 #' @param site A string containing the column name to idenify the site or sample
@@ -625,7 +625,7 @@ Estimate_proportion_female <- function(data, Weight, max.weight, bin.width, Time
 
 #' Create a dataset of DEPM parameters to be passed to Estimate_biomass()
 #'
-#' @param P0 The results of Estimate_P0() with a single value of Z. Multiple values are not yet supported.
+#' @param P0 The results of Estimate_P0() which can include several egg mortalities (Z).
 #'     Can be specified for each Time/Region combination if necessary
 #' @param A A data.frame of spawning area in meters^2. Can be specified for each Time/Region combination if necessary
 #' @param R The results of Estimate_sex_ratio(). Can be specified for each Time/Region combination if necessary
@@ -644,7 +644,7 @@ Estimate_proportion_female <- function(data, Weight, max.weight, bin.width, Time
 #'
 combine_estimates <- function(P0, A, R, S, W_F = NULL){
 
-  P0 <- dplyr::select(P0, -P0_se, -Z)
+  P0 <- dplyr::select(P0, -P0_se)
   results <- P0
   R <- dplyr::select(R, -Variance, -SE,-CV  )
   S <- dplyr::select(S, -Variance, -SE,-CV   )
@@ -703,7 +703,8 @@ combine_estimates <- function(P0, A, R, S, W_F = NULL){
 #'    is compatible with the Estimate_biomass() function to facilitate its use. If multiple time steps/Regions are included then
 #'    parameter variances specific to those surveys will be combined. Parameters that are used across years (for example a constant sex ratio)
 #'    will automatically be included for each survey even if other parameters are being specified for specific steps/Regions.
-#' @param P0 The results of Estimate_P0() with a single value of Z. Multiple values are not yet supported.
+#' @param P0 The results of Estimate_P0() which can include several egg mortalities (Z).
+#'     Can be specified for each Time/Region combination if necessary
 #' @param R A data.frame of sex ratios. Can be specified for each Time/Region combination if necessary
 #' @param S A data.frame of spawning fractions. Can be specified for each Time/Region combination if necessary
 #' @param W_F The results of  Estimate_mean_W_F(). This is optional and only required if using the standard DEPM methods.
@@ -716,7 +717,7 @@ combine_estimates <- function(P0, A, R, S, W_F = NULL){
 #'
 combine_variances <- function(P0,R, S, W_F = NULL){
 
-  P0 <- dplyr::select(P0, -P0, -Z)
+  P0 <- dplyr::select(P0, -P0)
   results <-  dplyr::rename(P0, P0 = P0_se)
   R <- dplyr::select(R, -`Ratio estimate`, -SE,-CV  )
   S <- dplyr::select(S, -`Ratio estimate`, -SE,-CV   )
@@ -814,9 +815,12 @@ combine_wt_class_estimates <- function(prop.fem.data, fecundity.data){
 #' Combined DEPM parameters to calculate spawning biomass, total number of females and the number of females per weight class using the DEPMwt approach
 #'
 #' @param adult.pars The output of `combine_estimates`. This included each of the DEPM parameters estimated using this package.
-#'     These can be grouped by Timestep/Region and will be used to estimate results for each combination of these
+#'     These can be grouped by Timestep/Region and will be used to estimate results for each combination of these.Multiple egg mortalities will produce multiple annual
+#'     results.
 #' @param adult.vars The output of `combine_variances`. This included each of the DEPM parameters estimated using this package.
-#'     These can be grouped by Timestep/Region and will be used to estimate results for each combination of these
+#'     These can be grouped by Timestep/Region and will be used to estimate results for each combination of these.
+#'     Multiple egg mortalities will produce multiple annual
+#'     results.
 #' @param weight.pars.vars  A dataframe that must include the columns: "Wt_bin", "Prop", "Prop_var", "Wt", "Fecundity", "Fec_var". These correspond
 #'     to weight bin number (must start at 1), proportion of females in each weight bin, the multinomial variance of the proportion of females
 #'     in each weight bin, weight of each weight bin, fecundity-at-weight of that weight bin and the variance of fecundity-at-weight for that
@@ -849,7 +853,7 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
     #   if(nw==1 & PNw !=1) stop("The sole value for PNw must equal 1.")
     #   #If these conditions (means for F and W, PNw=1)  apply, the equations for Nfem and Bsp as coded below will work as written in the traditional Parker equation.
     # }
-      #Check inputs
+    #Check inputs
     if(length(Ww) != nw) stop("length(Ww) != nw")
     if(length(Fw) != nw) stop("length(Fw) != nw")
     if(length(PNw) != nw) stop("length(PNw) != nw")
@@ -975,22 +979,92 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
   if(any(names(adult.pars) %in% "Region" ) & any(names(adult.pars) %in% "Time")){
     # List of results to be filled: Number of females, Biomass and number of females at weight class
     resultlist <- list(
-      Nfem =  tidyr::expand(adult.pars, tidyr::nesting(Time = Time, Region = Region),  Nfem = NA, SD = NA ),
-      Biomass = tidyr::expand(adult.pars, tidyr::nesting(Time = Time, Region = Region),  Biomass = NA, SD = NA ),
-      NfemWt = tidyr::expand(weight.pars.vars, tidyr::nesting(Time = Time, Region = Region, Nwt = Wt_bin), NfemWt = NA , SD = NA)
-      )
+      Nfem =  tidyr::expand(adult.pars, tidyr::nesting(Time = Time, Region = Region, Z = Z),  Nfem = NA, SD = NA ),
+      Biomass = tidyr::expand(adult.pars, tidyr::nesting(Time = Time, Region = Region, Z = Z),  Biomass = NA, SD = NA ),
+      NfemWt = tidyr::expand(weight.pars.vars, tidyr::nesting(Time = Time, Region = Region, Nwt = Wt_bin), Z = unique(adult.pars$Z), NfemWt = NA , SD = NA)
+    )
 
     # Loop over Time and Region and save estimates and variances to correct position in resultlist
     for(i in unique(adult.pars$Time)){
       for(j in unique(adult.pars$Region)){
+        for(k in unique(adult.pars$Z)){
+          tmp <-  dplyr::filter(adult.pars, Time == i, Region == j, Z == k)
 
-        tmp <-  dplyr::filter(adult.pars, Time == i, Region == j)
+          if(nrow(tmp) == 0)next
+
+          tmp_var <-  dplyr::filter(adult.vars, Time == i, Region == j, Z == k)
+
+          wt_tmp <-  dplyr::filter(weight.pars.vars,Time == i, Region == j, !is.na(Wt))
+
+          res <- BspNfemNfemWt(P0 = tmp$P0, A = tmp$A, R = tmp$R, S = tmp$S,
+                               Ww = wt_tmp$Wt, Fw = wt_tmp$Fecundity, PNw = wt_tmp$Prop, nw = max(wt_tmp$Wt_bin))
+
+          bspvar <- sqrt(VarBsp(P0 = tmp$P0, VP0 = tmp_var$P0^2,
+                                A = tmp$A, VA = 0,
+                                R = tmp$R,  VR = tmp_var$R,
+                                S = tmp$S,  VS = tmp_var$S,
+                                Ww = wt_tmp$Wt,
+                                nw = max(wt_tmp$Wt_bin),
+                                Fw = wt_tmp$Fecundity, VFw = wt_tmp$Fec_var,
+                                PNw = wt_tmp$Prop, VPNw = wt_tmp$Prop_var ))/1000
+
+
+          NfemVar <- sqrt(VarNfem(P0 = tmp$P0, VP0 = tmp_var$P0^2,
+                                  A = tmp$A, VA = 0,
+                                  S = tmp$S,  VS = tmp_var$S,
+                                  nw = max(wt_tmp$Wt_bin),
+                                  Fw = wt_tmp$Fecundity, VFw = wt_tmp$Fec_var,
+                                  PNw = wt_tmp$Prop, VPNw = wt_tmp$Prop_var ))
+
+
+          NfemWtVar <- sqrt(VarNfemWt(P0 = tmp$P0, VP0 = tmp_var$P0^2,
+                                      A = tmp$A, VA = 0,
+                                      S = tmp$S,  VS = tmp_var$S,
+                                      nw = max(wt_tmp$Wt_bin),
+                                      Fw = wt_tmp$Fecundity, VFw = wt_tmp$Fec_var,
+                                      PNw = wt_tmp$Prop, VPNw = wt_tmp$Prop_var ))
+
+
+          resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i & resultlist[["Nfem"]]$Region == j & resultlist[["Nfem"]]$Z == k,
+                               "Nfem"] <- res$Nfem
+
+          resultlist[["Biomass"]][resultlist[["Biomass"]]$Time == i & resultlist[["Biomass"]]$Region == j & resultlist[["Biomass"]]$Z == k,
+                                  "Biomass"] <- res$Bsp/1000
+
+          resultlist[["NfemWt"]][resultlist[["NfemWt"]]$Time == i & resultlist[["NfemWt"]]$Region == j & resultlist[["NfemWt"]]$Z == k,
+                                 "NfemWt" ] <- res$NfemWt
+
+          resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i & resultlist[["Nfem"]]$Region == j & resultlist[["Nfem"]]$Z == k,
+                               "SD"] <- NfemVar
+
+          resultlist[["Biomass"]][resultlist[["Biomass"]]$Time == i & resultlist[["Biomass"]]$Region == j & resultlist[["Biomass"]]$Z == k,
+                                  "SD"] <- bspvar
+
+          resultlist[["NfemWt"]][resultlist[["NfemWt"]]$Time == i & resultlist[["NfemWt"]]$Region == j & resultlist[["NfemWt"]]$Z == k,
+                                 "SD" ] <- NfemWtVar
+        }
+      }
+    }
+
+  } else if(any(names(adult.pars) %in% "Time")){
+    resultlist <- list(
+      Nfem = expand.grid(Time = unique(adult.pars$Time), Z = unique(adult.pars$Z), Nfem = NA, SD = NA ),
+      Biomass = expand.grid(Time = unique(adult.pars$Time),Z = unique(adult.pars$Z),  Biomass = NA , SD = NA),
+      NfemWt = expand.grid(Time = unique(adult.pars$Time),Z = unique(adult.pars$Z),
+                           Nwt = seq(1, length(unique(weight.pars.vars$Wt_bin)),1), NfemWt = NA , SD = NA)
+    )
+
+    for(i in unique(adult.pars$Time)){
+      for(k in unique(adult.pars$Z)){
+
+
+        tmp <-  dplyr::filter(adult.pars,Time == i, Z == k)
 
         if(nrow(tmp) == 0)next
 
-        tmp_var <-  dplyr::filter(adult.vars, Time == i, Region == j)
+        tmp_var <- dplyr::filter(adult.vars,Time == i, Z == k)
 
-        wt_tmp <-  dplyr::filter(weight.pars.vars,Time == i, Region == j, !is.na(Wt))
+        wt_tmp <- dplyr::filter(weight.pars.vars,Time == i , !is.na(Wt))
 
         res <- BspNfemNfemWt(P0 = tmp$P0, A = tmp$A, R = tmp$R, S = tmp$S,
                              Ww = wt_tmp$Wt, Fw = wt_tmp$Fecundity, PNw = wt_tmp$Prop, nw = max(wt_tmp$Wt_bin))
@@ -1021,108 +1095,101 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
                                     PNw = wt_tmp$Prop, VPNw = wt_tmp$Prop_var ))
 
 
-        resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i & resultlist[["Nfem"]]$Region == j,
-                             "Nfem"] <- res$Nfem
+        resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i& resultlist[["Nfem"]]$Z == k, "Nfem"] <- res$Nfem
 
-        resultlist[["Biomass"]][resultlist[["Biomass"]]$Time == i & resultlist[["Biomass"]]$Region == j,
-                                "Biomass"] <- res$Bsp/1000
+        resultlist[["Biomass"]][resultlist[["Biomass"]]$Time == i & resultlist[["Biomass"]]$Z == k,"Biomass"] <- res$Bsp/1000
 
-        resultlist[["NfemWt"]][resultlist[["NfemWt"]]$Time == i & resultlist[["NfemWt"]]$Region == j,
-                               "NfemWt" ] <- res$NfemWt
+        resultlist[["NfemWt"]][resultlist[["NfemWt"]]$Time == i& resultlist[["NfemWt"]]$Z == k,"NfemWt" ] <- res$NfemWt
 
-        resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i & resultlist[["Nfem"]]$Region == j,
-                             "SD"] <- NfemVar
+        resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i & resultlist[["Nfem"]]$Z == k,"SD"] <- NfemVar
 
-        resultlist[["Biomass"]][resultlist[["Biomass"]]$Time == i & resultlist[["Biomass"]]$Region == j,
-                                "SD"] <- bspvar
+        resultlist[["Biomass"]][resultlist[["Biomass"]]$Time == i& resultlist[["Biomass"]]$Z == k,"SD"] <- bspvar
 
-        resultlist[["NfemWt"]][resultlist[["NfemWt"]]$Time == i & resultlist[["NfemWt"]]$Region == j,
-                               "SD" ] <- NfemWtVar
-
+        resultlist[["NfemWt"]][resultlist[["NfemWt"]]$Time == i& resultlist[["NfemWt"]]$Z == k, "SD" ] <- NfemWtVar
       }
-    }
-
-  } else if(any(names(adult.pars) %in% "Time")){
-    resultlist <- list(
-      Nfem = expand.grid(Time = unique(adult.pars$Time), Nfem = NA, SD = NA ),
-      Biomass = expand.grid(Time = unique(adult.pars$Time),  Biomass = NA , SD = NA),
-      NfemWt = expand.grid(Time = unique(adult.pars$Time),
-                           Nwt = seq(1, length(unique(weight.pars.vars$Wt_bin)),1), NfemWt = NA , SD = NA)
-    )
-
-    for(i in unique(adult.pars$Time)){
-
-
-      tmp <-  dplyr::filter(adult.pars,Time == i)
-
-      if(nrow(tmp) == 0)next
-
-      tmp_var <- dplyr::filter(adult.vars,Time == i)
-
-      wt_tmp <- dplyr::filter(weight.pars.vars,Time == i , !is.na(Wt))
-
-      res <- BspNfemNfemWt(P0 = tmp$P0, A = tmp$A, R = tmp$R, S = tmp$S,
-                           Ww = wt_tmp$Wt, Fw = wt_tmp$Fecundity, PNw = wt_tmp$Prop, nw = max(wt_tmp$Wt_bin))
-
-      bspvar <- sqrt(VarBsp(P0 = tmp$P0, VP0 = tmp_var$P0^2,
-                            A = tmp$A, VA = 0,
-                            R = tmp$R,  VR = tmp_var$R,
-                            S = tmp$S,  VS = tmp_var$S,
-                            Ww = wt_tmp$Wt,
-                            nw = max(wt_tmp$Wt_bin),
-                            Fw = wt_tmp$Fecundity, VFw = wt_tmp$Fec_var,
-                            PNw = wt_tmp$Prop, VPNw = wt_tmp$Prop_var ))/1000
-
-
-      NfemVar <- sqrt(VarNfem(P0 = tmp$P0, VP0 = tmp_var$P0^2,
-                              A = tmp$A, VA = 0,
-                              S = tmp$S,  VS = tmp_var$S,
-                              nw = max(wt_tmp$Wt_bin),
-                              Fw = wt_tmp$Fecundity, VFw = wt_tmp$Fec_var,
-                              PNw = wt_tmp$Prop, VPNw = wt_tmp$Prop_var ))
-
-
-      NfemWtVar <- sqrt(VarNfemWt(P0 = tmp$P0, VP0 = tmp_var$P0^2,
-                                  A = tmp$A, VA = 0,
-                                  S = tmp$S,  VS = tmp_var$S,
-                                  nw = max(wt_tmp$Wt_bin),
-                                  Fw = wt_tmp$Fecundity, VFw = wt_tmp$Fec_var,
-                                  PNw = wt_tmp$Prop, VPNw = wt_tmp$Prop_var ))
-
-
-      resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i, "Nfem"] <- res$Nfem
-
-      resultlist[["Biomass"]][resultlist[["Biomass"]]$Time == i ,"Biomass"] <- res$Bsp/1000
-
-      resultlist[["NfemWt"]][resultlist[["NfemWt"]]$Time == i,"NfemWt" ] <- res$NfemWt
-
-      resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i ,"SD"] <- NfemVar
-
-      resultlist[["Biomass"]][resultlist[["Biomass"]]$Time == i,"SD"] <- bspvar
-
-      resultlist[["NfemWt"]][resultlist[["NfemWt"]]$Time == i, "SD" ] <- NfemWtVar
-
     }
 
 
   } else if(any(names(adult.pars) %in% "Region")){
     resultlist <- list(
-      Nfem = expand.grid(Region = unique(adult.pars$Region), Nfem = NA, SD = NA ),
-      Biomass = expand.grid(Region = unique(adult.pars$Region),  Biomass = NA , SD = NA),
-      NfemWt = expand.grid(Region = unique(adult.pars$Region),
+      Nfem = expand.grid(Region = unique(adult.pars$Region),Z = unique(adult.pars$Z), Nfem = NA, SD = NA ),
+      Biomass = expand.grid(Region = unique(adult.pars$Region),Z = unique(adult.pars$Z),  Biomass = NA , SD = NA),
+      NfemWt = expand.grid(Region = unique(adult.pars$Region),Z = unique(adult.pars$Z),
                            Nwt = seq(1, length(unique(weight.pars.vars$Wt_bin)),1), NfemWt = NA , SD = NA)
     )
 
 
     for(j in unique(adult.pars$Region)){
+      for(k in unique(adult.pars$Z)){
+        tmp<- dplyr::filter(adult.pars, Region == j, Z == k)
 
-      tmp<- dplyr::filter(adult.pars, Region == j)
+        if(nrow(tmp) == 0)next
+
+        tmp_var <- dplyr::filter(adult.vars, Region == j, Z == k)
+
+        wt_tmp <-  dplyr::filter(weight.pars.vars, Region == j, !is.na(Wt))
+
+        res <- BspNfemNfemWt(P0 = tmp$P0, A = tmp$A, R = tmp$R, S = tmp$S,
+                             Ww = wt_tmp$Wt, Fw = wt_tmp$Fecundity, PNw = wt_tmp$Prop, nw = max(wt_tmp$Wt_bin))
+
+        bspvar <- sqrt(VarBsp(P0 = tmp$P0, VP0 = tmp_var$P0^2,
+                              A = tmp$A, VA = 0,
+                              R = tmp$R,  VR = tmp_var$R,
+                              S = tmp$S,  VS = tmp_var$S,
+                              Ww = wt_tmp$Wt,
+                              nw = max(wt_tmp$Wt_bin),
+                              Fw = wt_tmp$Fecundity, VFw = wt_tmp$Fec_var,
+                              PNw = wt_tmp$Prop, VPNw = wt_tmp$Prop_var ))/1000
+
+
+        NfemVar <- sqrt(VarNfem(P0 = tmp$P0, VP0 = tmp_var$P0^2,
+                                A = tmp$A, VA = 0,
+                                S = tmp$S,  VS = tmp_var$S,
+                                nw = max(wt_tmp$Wt_bin),
+                                Fw = wt_tmp$Fecundity, VFw = wt_tmp$Fec_var,
+                                PNw = wt_tmp$Prop, VPNw = wt_tmp$Prop_var ))
+
+
+        NfemWtVar <- sqrt(VarNfemWt(P0 = tmp$P0, VP0 = tmp_var$P0^2,
+                                    A = tmp$A, VA = 0,
+                                    S = tmp$S,  VS = tmp_var$S,
+                                    nw = max(wt_tmp$Wt_bin),
+                                    Fw = wt_tmp$Fecundity, VFw = wt_tmp$Fec_var,
+                                    PNw = wt_tmp$Prop, VPNw = wt_tmp$Prop_var ))
+
+
+        resultlist[["Nfem"]][resultlist[["Nfem"]]$Region == j& resultlist[["Nfem"]]$Z == k,"Nfem"] <- res$Nfem
+
+        resultlist[["Biomass"]][resultlist[["Biomass"]]$Region == j& resultlist[["Biomass"]]$Z == k,"Biomass"] <- res$Bsp/1000
+
+        resultlist[["NfemWt"]][ resultlist[["NfemWt"]]$Region == j& resultlist[["NfemWt"]]$Z == k, "NfemWt" ] <- res$NfemWt
+
+        resultlist[["Nfem"]][resultlist[["Nfem"]]$Region == j& resultlist[["Nfem"]]$Z == k,"SD"] <- NfemVar
+
+        resultlist[["Biomass"]][ resultlist[["Biomass"]]$Region == j& resultlist[["Biomass"]]$Z == k,"SD"] <- bspvar
+
+        resultlist[["NfemWt"]][resultlist[["NfemWt"]]$Region == j& resultlist[["NfemWt"]]$Z == k, "SD" ] <- NfemWtVar
+      }
+    }
+
+
+  } else {
+
+    resultlist <- list(
+      Nfem = expand.grid(Z = unique(adult.pars$Z), Nfem = NA, SD = NA ),
+      Biomass = expand.grid(Z = unique(adult.pars$Z),  Biomass = NA , SD = NA),
+      NfemWt = expand.grid(Z = unique(adult.pars$Z),
+                           Nwt = seq(1, length(unique(weight.pars.vars$Wt_bin)),1), NfemWt = NA , SD = NA)
+    )
+    for(k in unique(adult.pars$Z)){
+
+      tmp<- dplyr::filter(adult.pars, Z == k)
 
       if(nrow(tmp) == 0)next
 
-      tmp_var <- dplyr::filter(adult.vars, Region == j)
+      tmp_var <- dplyr::filter(adult.vars,  Z == k)
 
-      wt_tmp <-  dplyr::filter(weight.pars.vars, Region == j, !is.na(Wt))
+      wt_tmp <-  dplyr::filter(weight.pars.vars, !is.na(Wt))
 
       res <- BspNfemNfemWt(P0 = tmp$P0, A = tmp$A, R = tmp$R, S = tmp$S,
                            Ww = wt_tmp$Wt, Fw = wt_tmp$Fecundity, PNw = wt_tmp$Prop, nw = max(wt_tmp$Wt_bin))
@@ -1143,8 +1210,6 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
                               nw = max(wt_tmp$Wt_bin),
                               Fw = wt_tmp$Fecundity, VFw = wt_tmp$Fec_var,
                               PNw = wt_tmp$Prop, VPNw = wt_tmp$Prop_var ))
-
-
       NfemWtVar <- sqrt(VarNfemWt(P0 = tmp$P0, VP0 = tmp_var$P0^2,
                                   A = tmp$A, VA = 0,
                                   S = tmp$S,  VS = tmp_var$S,
@@ -1152,24 +1217,21 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
                                   Fw = wt_tmp$Fecundity, VFw = wt_tmp$Fec_var,
                                   PNw = wt_tmp$Prop, VPNw = wt_tmp$Prop_var ))
 
+      resultlist[["Nfem"]][ resultlist[["Nfem"]]$Z == k,"Nfem"] <- res$Nfem
 
-      resultlist[["Nfem"]][resultlist[["Nfem"]]$Region == j,"Nfem"] <- res$Nfem
+      resultlist[["Biomass"]][ resultlist[["Biomass"]]$Z == k,"Biomass"] <- res$Bsp/1000
 
-      resultlist[["Biomass"]][resultlist[["Biomass"]]$Region == j,"Biomass"] <- res$Bsp/1000
+      resultlist[["NfemWt"]][  resultlist[["NfemWt"]]$Z == k, "NfemWt" ] <- res$NfemWt
 
-      resultlist[["NfemWt"]][ resultlist[["NfemWt"]]$Region == j, "NfemWt" ] <- res$NfemWt
+      resultlist[["Nfem"]][ resultlist[["Nfem"]]$Z == k,"SD"] <- NfemVar
 
-      resultlist[["Nfem"]][resultlist[["Nfem"]]$Region == j,"SD"] <- NfemVar
+      resultlist[["Biomass"]][  resultlist[["Biomass"]]$Z == k,"SD"] <- bspvar
 
-      resultlist[["Biomass"]][ resultlist[["Biomass"]]$Region == j,"SD"] <- bspvar
+      resultlist[["NfemWt"]][resultlist[["NfemWt"]]$Z == k, "SD" ] <- NfemWtVar
 
-      resultlist[["NfemWt"]][resultlist[["NfemWt"]]$Region == j, "SD" ] <- NfemWtVar
-
+      message("No 'Time' or 'Region variables detected")
     }
 
-
-  } else {
-    stop("Could not determine Time and Region columns")
   }
 
   return(resultlist)
@@ -1180,7 +1242,7 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
 #' DEPM approach based off the Parker equation.
 #'
 #' @param adult.pars The output of `combine_estimates` with mean Weight and mean F included. This included each of the DEPM parameters estimated using this package.
-#'     These can be grouped by Timestep/Region and will be used to estimate results for each combination of these
+#'     These can be grouped by Timestep/Region and will be used to estimate results for each combination of these.
 #' @param adult.vars The output of `combine_variances`with var Weight and var F inlcuded. This included each of the DEPM parameters estimated using this package.
 #'     These can be grouped by Timestep/Region and will be used to estimate results for each combination of these
 #'
