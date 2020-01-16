@@ -4,7 +4,8 @@ DEPM
 ====
 
 <!-- badges: start -->
-<!-- badges: end -->
+[![Travis build status](https://travis-ci.org/jonathansmart/DEPM.svg?branch=master)](https://travis-ci.org/jonathansmart/DEPM) <!-- badges: end -->
+
 Installation
 ------------
 
