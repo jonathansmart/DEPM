@@ -1,5 +1,5 @@
 ---
-title: "DEPMWt Estimation"
+title: "DEPM_Estimation"
 author: "Jonathan Smart"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -24,18 +24,17 @@ library(tidyverse)
 ```
 
 # Introduction
-A recent advancement in Daily Egg Production Methods (DEPM) is the development of the DEPMWt approach (McGarvey et al. in review). This approach is similar to a traditional DEPM performed using the methods of Parker (1980) except that rather than using the mean body weight and mean fecundity of female fish as DEPM parameters, these quantities are instead broken down into weight bins. The benefits of these weight bins are that weight and fecundity are much better described when the weight structure of a  population is not normally distributed and therefore more precise estimates of biomass are obtained.
 
-The `DEPM` package includes functions that perform the DEPMWt approach as well as a traditional DEPM approach, with several functions used in both approaches. Here, an example of the DEPMWt approach is given using South Australian Snapper (*Pagrus auratus*).
+The traditional Daily Egg Production Method (DEPM) has been used to determine Spawning Stock Biomass of fish populations for over 40 years (Parker 1980). While this package is designed to facilitate the use of an update the this approach (DEPMWt; McGarvey et al in review), many aspects of the approach (i.e. estimation of some key DEPM parameters) remain the same. Therefore, the traditional DEPM methods are also included in this package.  Here, an example of the DEPM approach is given using South Australian Snapper (*Pagrus auratus*).
 
 # Necessary data
-Five datasets are required to use the DEPMWt approach:
+Five datasets are required to use the DEPM approach:
 
 * Egg density data to estmate daily egg production ($P_{0}$)
 * Adult sex ratios to estimate *R*
 * Female spawning fractions to estimate *S*
-* Female total weights to estimate the proportion of females in each weight bin ($PN_{wt}$)
-* Female total weight and batch fecundities to determine a fecundity-at-weight relationship ($F_{wt}$)
+* Female total weights to estimate mean adult female weight (*W*)
+* Female total weight and batch fecundities to estimate mean female fecunity (*F*)
 
 Spawning Area (*A*) is not calculated as part of this package but its estimates will be included as one of the final steps.
 
@@ -112,22 +111,16 @@ R_data <- read.csv("G:\\ModelGrp\\Snapper\\DEPM 2019 method comparison\\Data\\Se
   select(-Sample.code) %>% as.data.frame()
 
 # Data for Adult Wt (All years)
-Wt_data <- read.csv("G:\\ModelGrp\\Snapper\\DEPM 2019 method comparison\\Data\\Female_wt.csv") %>%
-  rename(Tot.Wt = WT..g.) %>%
-  mutate(Year = lubridate::year(lubridate::dmy(Process_Date)),
-         Year_Region = paste0(Year,Region),
-         Year = case_when( Year == 2018 ~ 2018,
-                           Region %in% c("NSG", "SSG") ~ 2013,
-                           Region %in% c("NGSV", "SGSV") ~ 2014,
-                           TRUE ~ NA_real_)) %>%
-  filter(Year == 2018) %>% select(Region, CFL, Tot.Wt)
+Wt_data <- read.csv("G:\\ModelGrp\\Snapper\\DEPM 2019 method comparison\\Data\\TotWt_GFwt.csv")  %>%
+  mutate(Tot.Wt = Tot_WT..kgs.*1000, Gonad_free_Wt = Tot.Wt - Gonad.Wt) %>%
+  filter(Sex == "F", Gonad.Wt < Tot.Wt, Year == 2018)
 
 # Data for Batch Fecundity
 Batch_Fec_data <- read.csv("G:\\ModelGrp\\Snapper\\DEPM 2019 method comparison\\Data\\batch_fecundity_data.csv")
 
 # raw fecundity data for total weight
-fecundity_data_TotWT <- Batch_Fec_data %>%
-  select(Total_Wt,batch_fecund )
+fecundity_data_GonardFrWT <- Batch_Fec_data %>%
+  select(Gonad_fr_wt,batch_fecund )
 
 ```
 
@@ -210,65 +203,34 @@ sex_ratio_results
 
 ```
 
-## Female weight data
+## Female weight  and fecundity 
 
-The key difference between teh DEPMWt approach and the traditional DEPM is how female weight and fecundity are handled. In the DEPMWt approach, female weight is broken into discrete weight bins and their variance is described using a multinomial distribution. This is handled by the `Estimate_proportion_female()` function which requires a dataframe of total female weight. This data.frame only needs one column but this does not need to be subset from a larger dataset as the column is specified by the `Weight` argument. Other columns are ignored unless (like other parameter functions), a `Region` or `Time` argument is specified.
+The key difference between teh DEPMWt approach and the traditional DEPM is how female weight and fecundity are handled. In the DEPMWt approach, female weight is broken into discrete weight bins and their variance is described using a multinomial distribution. However, in the traditional DEPM 
+approach, the *W* parameter is used and represents the mean female weight its variance. Similarly, fecundity is also expressed as the mean number of eggs per adult female and its variance.
 
-To break the female weights into bins, an upper bound and a bin width is required. Here 27 weight bins are applied for Snapper begining at zero and ending at 13500g in 500g bins.
-
-**NOTE: Weight data must be Total Weight in grams**
-
-```{r}
-head(Wt_data)
-
-Prop_fem_results <- Estimate_proportion_female(Wt_data, 
-                                               Weight =  "Tot.Wt",
-                                               max.weight = 13500,
-                                               bin.width = 500,
-                                               Region = "Region")
-
-```
-
-
-The returned results are the weight bin number (not the weight of the bin), sample size, proportion of females in each bin and the multinomial variance of the bins. Here `Region` is specified so these values are grouped according.
-
-The proportions of females in each weight bin and their standard deviations (calculated from the variances) demonstrate how this data is not normally distributed. Therefore, this is now explicitly included in the biomass estimates along with much more precise estimates of variance.
-
-```{r fig.height=6, fig.width=6}
-
-head(Prop_fem_results)
-
-ggplot(Prop_fem_results, 
-       aes(Wt_bin, Prop, ymin = Prop-sqrt(Prop_var), ymax = Prop + sqrt(Prop_var)))+
-  geom_col()+ 
-  geom_errorbar()+
-  facet_wrap(~Region)+
-  theme_bw()
-```
-
-## Fecundity-at-weight
-
-As weight is no longer expressed as a mean and variance, fecundity must follow suit. Therefore, the fecundity at each weight bin must now be calculated using the the `Estimate_Batch_Fecundity()` function. This function is quite useful as it can return three sets of outputs:
+**Fecundity**
+Fecundity needs to be summarised in a couple of ways. Firstly, a batch-fecundity-at-weight relationship is required for **gonad free weight** which can be used to predict the fecundity of fish that whose histology has not been examined. This relationship can be estimated using the `Estimate_Batch_Fecundity()` function. This function is quite useful as it can return three sets of outputs:
 
 * A data.frame of parameters and their variances for the relationship (these can also be printed to the screen) by setting `return.parameters = TRUE`.
 * A dataframe with the predicted fecundity for each weight along with SD and 95% confidence intervals
 * A dataframe with the predicted fecundity at specified weights and their variance. By providing the mid-points of weight bins, this will return the fecundity-at-weight for each bin and becomes the new inputs for estimating biomass.
 
 The batch fecundity relationship estimator uses an allometric relationship which allows for wider variance with larger weights. Therefore, there are four parameters returned, alpha, beta and two sigma parameters that determine how variance changes with weight.
-A dataframe with two columns must be provided that includes **Total weight in grams** and the number of eggs for that fish. The function will determine which is which based on their scales (number of eggs > Wt in grams). A set of starting parameters are required and are provided to the `start_pars` argument as a list. The estimated parameters are printed to the screen if `verbose = TRUE`.
+A dataframe with two columns must be provided that includes **gonad free weight in grams** and the number of eggs for that fish. The function will determine which is which based on their scales (number of eggs > Wt in grams). A set of starting parameters are required and are provided to the `start_pars` argument as a list. The estimated parameters are printed to the screen if `verbose = TRUE`.
+
 
 ```{r fig.height=6, fig.width=6}
 
-head(fecundity_data_TotWT)
+head(fecundity_data_GonardFrWT)
 
 # List of starting parameters for the batch fecundity estimator
 parameters <- list( alpha= 110, beta = 0.85 , Sigma0 = 10.5, Sigma1 = 0.7)
 
 # Return parameters
-Estimate_Batch_Fecundity(fecundity_data_TotWT, start_pars = parameters, return.parameters = TRUE)
+Batch_fec_pars <- Estimate_Batch_Fecundity(fecundity_data_GonardFrWT, start_pars = parameters, return.parameters = TRUE)
 
 # Return batch fecundity estimates
-Batch_fecundity_relationship <- Estimate_Batch_Fecundity(fecundity_data_TotWT, start_pars = parameters, verbose = FALSE)
+Batch_fecundity_relationship <- Estimate_Batch_Fecundity(fecundity_data_GonardFrWT, start_pars = parameters, verbose = FALSE)
 
 #plot of relationship
 ggplot(Batch_fecundity_relationship, aes(Wt, y = Predicted, ymin = low, ymax  = upp))+
@@ -280,18 +242,27 @@ ggplot(Batch_fecundity_relationship, aes(Wt, y = Predicted, ymin = low, ymax  = 
 
 ```
 
-In order to determine the fecundity for each weight bin, the mid points of those bins are provided to the `predition.int` argument as a vector. A dataframe is then returned with the weight bin mid point, the estimate of fecundity at that weight and its variance.
+**Weight**
+The parameters for *W* and *F* are determined using a single function called `Estimate_mean_W_F()`. This function requires:
+
+* A dataframe of `weight.data` which will be used to estimate *W* and estimate *F* based on the fecundity-at-weight relationship.
+* A character string for `TotalWt` indicating the variable name for Total weight in grams. This will be used to estimate *W*.
+* A character string for `GonadFrWt` indicating the variable name for gonad free weight in grams. This will be used to estimate *F* for each weight. If gonad free weight is not available, then this argument can be left `NULL` which will prompt the function to estimate fecundity based on total weight instead. **NOTE: If total weight is used to determine *F* then total weight should be used in return batch fecundity parameters from  `Estimate_Batch_Fecundity()` as well  **
+* A dataframe of batch fecundity relationship parameters from `Estimate_Batch_Fecundity()` with `return.parameters = TRUE`. The object returned from this call can be directly provided to `Estimate_mean_W_F()`.
+
+As with other functions, providng `Time`/`Region` variable names will group the results either spationally, temporally or both. Here a `Region` grouping is applied.
 
 ```{r}
-# The mid points of each weight bin need to be used to estimate fecundity.
-mid_points <- seq(250, 13500, 500)
+# data structure
+head(Wt_data)
 
-
-# Estimates for biomass calculation
-fecundity_at_Wtbins <- Estimate_Batch_Fecundity(fecundity_data_TotWT, start_pars = parameters, prediction.int = mid_points, verbose = FALSE)
-
-head(fecundity_at_Wtbins)
-
+# Estimate mean W and mean F using total weight and gonad free weight, respectively.
+F_W_results <- Estimate_mean_W_F(weight.data = Wt_data,
+                              TotalWt = "Tot.Wt",
+                              GonadFrWt = "Gonad_free_Wt",
+                              Region = "Region",
+                              parameters = Batch_fec_pars)
+F_W_results
 ```
 
 ## Spawning Area (*A*)
@@ -316,14 +287,14 @@ head(Area)
 
 # Combining parameters as inputs for biomass estimation
 
-With all of the parameters now available to calculate spawning stock biomass, these now need to be combined into a dataset that can be input into the `Estimate_DEPMWt_biomass()` function. For the DEPMWt approach, three objects are needed:
+With all of the parameters now available to calculate spawning stock biomass, these now need to be combined into a dataset that can be input into the `Estimate_DEPM_Biomass()` function. For the DEPM approach, two objects are needed:
 
-## Combining non-weight bin parameter estimates
+## Combining parameter estimates
 A dataframe of all of the parameter estimates can be assembled using `combine_estimates()` where each of the parameter objects are provided as arguments.
 
 
 ```{r}
-Adults_pars <- combine_estimates(P0 = P0_results, R = sex_ratio_results, S = Spawn_results, A = Area)
+Adults_pars <- combine_estimates(P0 = P0_results, R = sex_ratio_results, S = Spawn_results, A = Area, W_F = F_W_results)
 Adults_pars
 ```
 
@@ -333,12 +304,12 @@ Where a parameter is estimated as time invariant, it will be automatically alloc
 Adults_pars[Adults_pars$Region == "SSG", "R"] <- 0.5741385
 ```
 
-## Combining non-weight bin parameter variances
+## Combining parameter variances
 
-Variance estimates are needed by `Estimate_DEPMWt_biomass()` in order to determine the precision of the biomass estimates. These are provided in the same fashion as the parameter estimates using `combine_variances()`.
+Variance estimates are needed by `Estimate_DEPM_Biomass()` in order to determine the precision of the biomass estimates. These are provided in the same fashion as the parameter estimates using `combine_variances()`.
 
 ```{r}
-Adults_vars <- combine_variances(P0_results, R = sex_ratio_results, S = Spawn_results)
+Adults_vars <- combine_variances(P0_results, R = sex_ratio_results, S = Spawn_results, W_F = F_W_results)
 Adults_vars
 ```
 
@@ -348,30 +319,17 @@ The same manual insertions can be performed on this object:
 Adults_vars[Adults_vars$Region == "SSG", "R"] <- 0.0018484630
 ```
 
-
-## Combining proportion female and fecundity parameters
-
-As the proportions of females and the fecundity at each weight bin have a different structure, they have their own function to combine them into a single object. Much like `combine_estimates()` and `combine_variances()`, this function is called `combine_wt_class_estimates()` and only requires these two dataframes which will be combined according to `Region`/`Time` groupings. Manually adjusting these results is not recomended.
-
-```{r}
-weight_class_pars <- combine_wt_class_estimates(prop.fem.data = Prop_fem_results,
-                                                fecundity.data = fecundity_at_Wtbins)
-head(weight_class_pars)
-```
-
 # Spawning Stock Biomass Estimation
 
-All of the hard work is done once all of the parameters and their variances have been estimated and organised. The final step is to combine them using `Estimate_DEPMWt_biomass()`. This function requires each of these objects and will return a list of results which include the spawning stock biomass, total number of females and the number of females in each weight bin.
+All of the hard work is done once all of the parameters and their variances have been estimated and organised. The final step is to combine them using `Estimate_DEPM_Biomass()`. This function requires each of these objects and will return a list of results which include the spawning stock biomass and total number of females.
 
 ```{r}
 # Estimate Biomass
-Snapper_biomass_results <- Estimate_DEPMWt_biomass(adult.pars = Adults_pars,
-                                          adult.vars = Adults_vars,
-                                          weight.pars.vars = weight_class_pars)
-# a list of three outputs is returned
+Snapper_biomass_results <- Estimate_DEPM_Biomass(adult.pars = Adults_pars,
+                                          adult.vars = Adults_vars)
+# a list of two outputs is returned
 Snapper_biomass_results$Biomass # biomass in kgs  
 Snapper_biomass_results$Nfem # number of females
-head(Snapper_biomass_results$NfemWt) # number of females in each weight bin
 
 ```
 
@@ -382,11 +340,10 @@ The list of dataframes returned from the function can then be saved and used for
 # Create new objects
 Snapper_biomass <- Snapper_biomass_results$Biomass
 Snapper_Nfem <- Snapper_biomass_results$Nfem
-Snapper_NfemWt <- Snapper_biomass_results$NfemWt
 
 ```
 
-**Plot biomass with 95% CIs**
+**Plot biomass with SD**
 ```{r fig.height=6, fig.width=6}
 
 ggplot(Snapper_biomass, aes(Region,Biomass, 
@@ -410,25 +367,6 @@ ggplot(Snapper_Nfem, aes(Region,Nfem,
   scale_y_continuous(name = "Number of females", labels = scales::comma, breaks = scales::pretty_breaks(5))+
   theme_bw()
 
-```
-
-**Plot number of females in each weight bin**
-```{r fig.height=6, fig.width=6}
-
-#plot female weights
-ggplot(Snapper_NfemWt,
-       aes(Nwt,NfemWt, ymin = NfemWt - SD,
-                                                      ymax = NfemWt + SD))+
-  facet_wrap(~Region, ncol = 2)+
-  geom_col()+
-  geom_errorbar()+
-  expand_limits(y = 0)+
-  scale_y_continuous(name = "Number of females", labels = scales::comma)+
-  scale_x_continuous(name = "Weight class (g)", 
-                     breaks = scales::pretty_breaks(6), 
-                     labels = function(x){x * 250})+
-  theme_bw()+
-  theme(axis.text.x = element_text(angle = 90))
 ```
 
 # Testing assumptions for pre-specified egg mortality (*Z*)
@@ -475,30 +413,24 @@ Area$A <- c(2822201039, #NGSV
             3239913469) # SSG
 
 
-Multi_Z_adult_pars <- combine_estimates(P0 = Multi_Z_P0_results, R = sex_ratio_results, S = Spawn_results, A = Area)
+Multi_Z_adult_pars <- combine_estimates(P0 = Multi_Z_P0_results, R = sex_ratio_results, S = Spawn_results, A = Area, W_F = F_W_results)
 
-Multi_Z_adult_vars <- combine_variances(P0 = Multi_Z_P0_results, R = sex_ratio_results, S = Spawn_results)
+Multi_Z_adult_vars <- combine_variances(P0 = Multi_Z_P0_results, R = sex_ratio_results, S = Spawn_results, W_F = F_W_results)
 ```
 
 A new object with *Z* as a grouping will now be produced which can be passed to the biomass estimation function.
 
 ```{r}
 Multi_Z_adult_pars
-```
 
-The `weight_class_pars` object created earlier does not need to incorporate the new *Z*s and can be provided straight to the function.
-
-```{r}
 # Estimate Biomass
-Snapper_biomass_results <- Estimate_DEPMWt_biomass(adult.pars = Multi_Z_adult_pars,
-                                          adult.vars = Multi_Z_adult_vars,
-                                          weight.pars.vars = weight_class_pars)
+Snapper_biomass_results <- Estimate_DEPM_Biomass(adult.pars = Multi_Z_adult_pars,
+                                          adult.vars = Multi_Z_adult_vars)
 
 
 # Create new objects
 Snapper_biomass <- Snapper_biomass_results$Biomass
 Snapper_Nfem <- Snapper_biomass_results$Nfem
-Snapper_NfemWt <- Snapper_biomass_results$NfemWt
 ```
 
 These results can then be examined to determine how biomass is influenced by the specification of *Z*.
@@ -509,8 +441,8 @@ These results can then be examined to determine how biomass is influenced by the
 Snapper_biomass$Z <- as.factor(Snapper_biomass$Z) # convert Z to a factor for easy plotting
 
 ggplot(Snapper_biomass, aes(Z,Biomass, fill = Z,
-                            ymin = Biomass - SD,
-                            ymax = Biomass + SD))+
+                            ymin = Biomass - SD*1.96,
+                            ymax = Biomass + SD*1.96))+
   geom_crossbar( alpha = .8)+
   facet_wrap(~Region, ncol =2)+
   scale_fill_viridis_d()+

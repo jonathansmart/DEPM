@@ -1325,7 +1325,7 @@ Estimate_DEPM_Biomass <- function(adult.pars, adult.vars){
 
 
         vars <-  VarBspNfemnw1(P0 = tmp$P0, A = tmp$A, R = tmp$R, S = tmp$S, F1 = tmp$.F, W1= tmp$W,
-                               VP0 = tmp_var$P0, VA= tmp_var$A, VR= tmp_var$R, VS= tmp_var$S,
+                               VP0 = tmp_var$P0, VA= 0, VR= tmp_var$R, VS= tmp_var$S,
                                VF1= tmp_var$.F, VW1 = tmp_var$W)
 
         resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i & resultlist[["Nfem"]]$Region == j,
@@ -1368,7 +1368,7 @@ Estimate_DEPM_Biomass <- function(adult.pars, adult.vars){
 
 
       vars <-  VarBspNfemnw1(P0 = tmp$P0, A = tmp$A, R = tmp$R, S = tmp$S, F1 = tmp$.F, W1= tmp$W,
-                             VP0 = tmp_var$P0, VA= tmp_var$A, VR= tmp_var$R, VS= tmp_var$S,
+                             VP0 = tmp_var$P0, VA= 0, VR= tmp_var$R, VS= tmp_var$S,
                              VF1= tmp_var$.F, VW1 = tmp_var$W)
 
 
@@ -1389,8 +1389,8 @@ Estimate_DEPM_Biomass <- function(adult.pars, adult.vars){
 
   } else if(any(names(adult.pars) %in% "Region")){
     resultlist <- list(
-      Nfem = expand.grid(Time = unique(adult.pars$Region), Nfem = NA, SD = NA ),
-      Biomass = expand.grid(Time = unique(adult.pars$Region),  Biomass = NA , SD = NA)
+      Nfem = expand.grid(Region = unique(adult.pars$Region), Nfem = NA, SD = NA ),
+      Biomass = expand.grid(Region = unique(adult.pars$Region),  Biomass = NA , SD = NA)
     )
 
 
@@ -1409,7 +1409,7 @@ Estimate_DEPM_Biomass <- function(adult.pars, adult.vars){
 
 
       vars <-  VarBspNfemnw1(P0 = tmp$P0, A = tmp$A, R = tmp$R, S = tmp$S, F1 = tmp$.F, W1= tmp$W,
-                             VP0 = tmp_var$P0, VA= tmp_var$A, VR= tmp_var$R, VS= tmp_var$S,
+                             VP0 = tmp_var$P0, VA= 0, VR= tmp_var$R, VS= tmp_var$S,
                              VF1= tmp_var$.F, VW1 = tmp_var$W)
 
 
@@ -1434,7 +1434,7 @@ Estimate_DEPM_Biomass <- function(adult.pars, adult.vars){
                    Ww = adult.pars$W, Fw = adult.pars$.F)
 
     vars <-  VarBspNfemnw1(P0 = adult.pars$P0, A = adult.pars$A, R = adult.pars$R, S = adult.pars$S, F1 = adult.pars$.F, W1= adult.pars$W,
-                           VP0 = adult.vars$P0, VA= adult.vars$A, VR= adult.vars$R, VS= adult.vars$S, VF1= adult.vars$.F, VW1 = adult.vars$W)
+                           VP0 = adult.vars$P0, VA= 0, VR= adult.vars$R, VS= adult.vars$S, VF1= adult.vars$.F, VW1 = adult.vars$W)
 
     resultlist <- list(Nfem = data.frame(Nfem = res$Nfem,
                                          SD = sqrt(vars$VarNfem)),
@@ -1530,7 +1530,7 @@ Estimate_mean_W_F <- function(weight.data, TotalWt, GonadFrWt= NULL, Time = NULL
       Fec_results <-  dplyr::mutate(Fec_results, Var = (Sigma0*Fecundity^Sigma1)^2)
 
       results[which(results$Region == i),"Mean_F"] <- mean(Fec_results$Fecundity)
-      results[which(results$Region == i),"var_F"] <- (1/length(Fec_results$Fecundity)^2)*(sum(Fec_results$var))
+      results[which(results$Region == i),"var_F"] <- (1/length(Fec_results$Fecundity)^2)*(sum(Fec_results$Var))
       #var(Fec_results$Fecundity)/length(Fec_results$Fecundity)
 
     }
@@ -1570,7 +1570,7 @@ Estimate_mean_W_F <- function(weight.data, TotalWt, GonadFrWt= NULL, Time = NULL
       Fec_results <-  dplyr::mutate(Fec_results, Var = (Sigma0*Fecundity^Sigma1)^2)
 
       results[which(results$Time == i),"Mean_F"] <- mean(Fec_results$Fecundity)
-      results[which(results$Time == i),"var_F"] <- (1/length(Fec_results$Fecundity)^2)*(sum(Fec_results$var))
+      results[which(results$Time == i),"var_F"] <- (1/length(Fec_results$Fecundity)^2)*(sum(Fec_results$Var))
       #var(Fec_results$Fecundity)/length(Fec_results$Fecundity)
     }
 
@@ -1610,7 +1610,7 @@ Estimate_mean_W_F <- function(weight.data, TotalWt, GonadFrWt= NULL, Time = NULL
         Fec_results <-  dplyr::mutate(Fec_results, Var = (Sigma0*Fecundity^Sigma1)^2)
 
         results[which(results$Time == i & results$Region == j),"Mean_F"] <- mean(Fec_results$Fecundity)
-        results[which(results$Time == i & results$Region == j),"var_F"] <- (1/length(Fec_results$Fecundity)^2)*(sum(Fec_results$var))
+        results[which(results$Time == i & results$Region == j),"var_F"] <- (1/length(Fec_results$Fecundity)^2)*(sum(Fec_results$Var))
         #var(Fec_results$Fecundity)/length(Fec_results$Fecundity)
       }
     }
@@ -1640,7 +1640,7 @@ Estimate_mean_W_F <- function(weight.data, TotalWt, GonadFrWt= NULL, Time = NULL
     Fec_results <-  dplyr::mutate(Fec_results, Var = (Sigma0*Fecundity^Sigma1)^2)
 
     Mean_F <- mean(Fec_results$Fecundity)
-    var_F <- (1/length(Fec_results$Fecundity)^2)*(sum(Fec_results$var))
+    var_F <- (1/length(Fec_results$Fecundity)^2)*(sum(Fec_results$Var))
     #var(Fec_results$Fecundity)/length(Fec_results$Fecundity)
 
     results <- data.frame(Mean_W, var_W, Mean_F,var_F )
