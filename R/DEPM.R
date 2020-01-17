@@ -2,6 +2,8 @@
 #'
 #' @name DEPM
 #' @author Jonathan Smart
+#' @author Richard McGarvey
+#' @author Janet Matthews
 #' @description Estimate spawning biomass for a fish population using the Daily Egg Production Method
 #' @docType package
 NULL

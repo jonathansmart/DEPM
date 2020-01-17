@@ -38,7 +38,7 @@ The package contains functions that estimate the individual DEPM parameters: dai
 
 # How-to guides 
 
-Two vignettes are available that wil guide users through both approaches and can be accessed using:
+Two vignettes are available that can guide users through both approaches and can be accessed using:
 
 ```{r, eval=FALSE}
 browseVignettes("DEPM") # access all package vignettes

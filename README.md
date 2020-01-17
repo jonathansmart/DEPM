@@ -26,12 +26,12 @@ The package contains functions that estimate the individual DEPM parameters: dai
 How-to guides
 =============
 
-Two vignettes are available that wil guide users through both approaches and can be accessed using:
+Two vignettes are available that can guide users through both approaches and can be accessed using:
 
 ``` r
 browseVignettes("DEPM") # access all package vignettes
 
 vignette("DEPMWt_Estimation") # How-to guide for the DEPMWt approach
 
-vignette("DEPM_Estimation")
+vignette("DEPM_Estimation") # How-to guide for the Traditional DEPM approach
 ```

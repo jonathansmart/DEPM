@@ -25,7 +25,7 @@ library(tidyverse)
 
 # Introduction
 
-The traditional Daily Egg Production Method (DEPM) has been used to determine Spawning Stock Biomass of fish populations for over 40 years (Parker 1980). While this package is designed to facilitate the use of revised approach to DEPM (DEPMWt; McGarvey et al in review), many aspects of the approach (i.e. estimation of some key DEPM parameters) remain the same. Therefore, the traditional DEPM methods are also included in this package.  Here, an example of the DEPM approach is given using South Australian Snapper (*Pagrus auratus*).
+The traditional Daily Egg Production Method (DEPM) has been used to determine Spawning Stock Biomass of fish populations for over 40 years. While this package is designed to facilitate the use of revised approach to DEPM (DEPMWt; McGarvey et al in review), many aspects of the approach (i.e. estimation of some key DEPM parameters) remain the same. Therefore, the traditional DEPM methods are also included in this package.  Here, an example of the DEPM approach is given using South Australian Snapper (*Pagrus auratus*).
 
 # Necessary data
 Five datasets are required to use the DEPM approach:
@@ -458,11 +458,6 @@ ggplot(Snapper_biomass, aes(Z,Biomass, fill = Z,
 McGarvey, R., Steer, M. A., Smart, J. J., Matthews, D. J. and Matthews, J. M.(in review). Generalizing the Parker model equation of DEPM:    incorporating size dependence of population numbers and batch fecundity
 
 McGarvey, R., Steer, M.A., Matthews, J.M., Ward, T.M. (2018). A stage-based estimator of daily egg production. ICES J. Mar. Sci. 75(5), 1638-1646.
-
-Parker, K. 1980. A direct method for estimating northern anchovy, Engraulis mordax, spawning biomass. . FIsheries Bulletin 78:541-544.
-
-
-
 
 
 
