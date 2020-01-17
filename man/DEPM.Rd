@@ -10,4 +10,8 @@ Estimate spawning biomass for a fish population using the Daily Egg Production M
 }
 \author{
 Jonathan Smart
+
+Richard McGarvey
+
+Janet Matthews
 }

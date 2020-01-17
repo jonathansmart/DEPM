@@ -426,7 +426,7 @@ ggplot(Snapper_NfemWt,
   scale_y_continuous(name = "Number of females", labels = scales::comma)+
   scale_x_continuous(name = "Weight class (g)", 
                      breaks = scales::pretty_breaks(6), 
-                     labels = function(x){x * 250})+
+                     labels = function(x){x * 500})+
   theme_bw()+
   theme(axis.text.x = element_text(angle = 90))
 ```

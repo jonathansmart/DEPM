@@ -430,16 +430,21 @@ Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL, re
       fixed_pars[[i]] <- factor(NA)
     }
     model <- TMB::MakeADFun(data,start_pars,DLL="DEPM",
-                       silent = TRUE,
-                       checkParameterOrder=FALSE,
-                       map = fixed_pars)
+                            silent = TRUE,
+                            # checkParameterOrder=FALSE,
+                            map = fixed_pars)
+    fit   <- nlminb(model$par, model$fn, model$gr)
+    rep   <- TMB::sdreport(model, getReportCovariance = T)
     alpha <- ifelse(!is.na(as.numeric(fit$par["alpha"])),as.numeric(fit$par["alpha"]),start_pars$alpha)
     beta <- ifelse(!is.na(as.numeric(fit$par["beta"])),as.numeric(fit$par["beta"]),start_pars$beta)
     Sigma0 <- ifelse(!is.na(as.numeric(fit$par["Sigma0"])),as.numeric(fit$par["Sigma0"]),start_pars$Sigma0)
     Sigma1 <- ifelse(!is.na(as.numeric(fit$par["Sigma1"])),as.numeric(fit$par["Sigma1"]),start_pars$Sigma1)
 
-    if(return.parameters == TRUE)
-      return(list(alpha = alpha, beta = beta, Sigma0 = Sigma0, Sigma1 = Sigma1))
+    Derived_Quants <- create_TMB_sd_report_data.frame(summary(rep))
+    if(return.parameters == TRUE){
+      final_pars <- head(Derived_Quants, length(fixed.pars))
+      return(final_pars)
+    }
 
   }else{
     model <- TMB::MakeADFun(data,start_pars,DLL="DEPM",checkParameterOrder=FALSE,silent = TRUE)
@@ -489,7 +494,7 @@ Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL, re
     results <- dplyr::select(results, -Parameter)
     results <- purrr::set_names(results, c("Wt", "Fecundity", "Predicted", "SD"))
     results <- dplyr::mutate(results, upp = Predicted +((Sigma0*Predicted^Sigma1)*1.96),
-             low = Predicted -((Sigma0*Predicted^Sigma1)*1.96))
+                             low = Predicted -((Sigma0*Predicted^Sigma1)*1.96))
   }
 
   return(results)
