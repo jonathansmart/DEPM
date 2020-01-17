@@ -1302,8 +1302,8 @@ Estimate_DEPM_Biomass <- function(adult.pars, adult.vars){
   if(any(names(adult.pars) %in% "Region" ) & any(names(adult.pars) %in% "Time")){
     # List of results to be filled: Number of females, Biomass and number of females at weight class
     resultlist <- list(
-      Nfem =  tidyr::expand(adult.pars, tidyr::nesting(Time = Time, Region = Region),  Nfem = NA, SD = NA ),
-      Biomass = tidyr::expand(adult.pars, tidyr::nesting(Time = Time, Region = Region),  Biomass = NA, SD = NA )
+      Nfem =  tidyr::expand(adult.pars, tidyr::nesting(Time = Time, Region = Region, Z = Z),  Nfem = NA, SD = NA ),
+      Biomass = tidyr::expand(adult.pars, tidyr::nesting(Time = Time, Region = Region, Z = Z),  Biomass = NA, SD = NA )
     )
 
 
@@ -1311,12 +1311,12 @@ Estimate_DEPM_Biomass <- function(adult.pars, adult.vars){
     # Loop over Time and Region and save estimates and variances to correct position in resultlist
     for(i in unique(adult.pars$Time)){
       for(j in unique(adult.pars$Region)){
-
-        tmp <-  dplyr::filter(adult.pars, Time == i, Region == j)
+        for(k in unique(adult.pars$Z)){
+        tmp <-  dplyr::filter(adult.pars, Time == i, Region == j, Z == k)
 
         if(nrow(tmp) == 0)next
 
-        tmp_var <-  dplyr::filter(adult.vars, Time == i, Region == j)
+        tmp_var <-  dplyr::filter(adult.vars, Time == i, Region == j, Z == k)
 
 
         res <- BspNfem(P0 = tmp$P0, A = tmp$A, R = tmp$R, S = tmp$S,
@@ -1328,38 +1328,48 @@ Estimate_DEPM_Biomass <- function(adult.pars, adult.vars){
                                VP0 = tmp_var$P0, VA= 0, VR= tmp_var$R, VS= tmp_var$S,
                                VF1= tmp_var$.F, VW1 = tmp_var$W)
 
-        resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i & resultlist[["Nfem"]]$Region == j,
+        # resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i & resultlist[["Nfem"]]$Region == j,
+        #                      "Nfem"] <- res$Nfem
+        #
+        # resultlist[["Biomass"]][resultlist[["Biomass"]]$Time == i & resultlist[["Biomass"]]$Region == j,
+        #                         "Biomass"] <- res$Bsp/1000
+
+        resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i & resultlist[["Nfem"]]$Region == j & resultlist[["Nfem"]]$Z == k,
                              "Nfem"] <- res$Nfem
 
-        resultlist[["Biomass"]][resultlist[["Biomass"]]$Time == i & resultlist[["Biomass"]]$Region == j,
+        resultlist[["Biomass"]][resultlist[["Biomass"]]$Time == i & resultlist[["Biomass"]]$Region == j & resultlist[["Biomass"]]$Z == k,
                                 "Biomass"] <- res$Bsp/1000
 
-
-
-        resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i & resultlist[["Nfem"]]$Region == j,
+        resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i & resultlist[["Nfem"]]$Region == j & resultlist[["Nfem"]]$Z == k,
                              "SD"] <- sqrt(vars$VarNfem)
 
-        resultlist[["Biomass"]][resultlist[["Biomass"]]$Time == i & resultlist[["Biomass"]]$Region == j,
+        resultlist[["Biomass"]][resultlist[["Biomass"]]$Time == i & resultlist[["Biomass"]]$Region == j & resultlist[["Biomass"]]$Z == k,
                                 "SD"] <- sqrt(vars$VarBsp)/1000
 
+        # resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i & resultlist[["Nfem"]]$Region == j,
+        #                      "SD"] <- sqrt(vars$VarNfem)
+        #
+        # resultlist[["Biomass"]][resultlist[["Biomass"]]$Time == i & resultlist[["Biomass"]]$Region == j,
+        #                         "SD"] <- sqrt(vars$VarBsp)/1000
 
+        }
       }
     }
 
   } else if(any(names(adult.pars) %in% "Time")){
     resultlist <- list(
-      Nfem = expand.grid(Time = unique(adult.pars$Time), Nfem = NA, SD = NA ),
-      Biomass = expand.grid(Time = unique(adult.pars$Time),  Biomass = NA , SD = NA)
+      Nfem = expand.grid(Time = unique(adult.pars$Time), Z = unique(adult.pars$Z), Nfem = NA, SD = NA ),
+      Biomass = expand.grid(Time = unique(adult.pars$Time), Z = unique(adult.pars$Z),  Biomass = NA , SD = NA)
     )
 
     for(i in unique(adult.pars$Time)){
+      for(k in unique(adult.pars$Z)){
 
-
-      tmp <-  dplyr::filter(adult.pars,Time == i)
+        tmp <-  dplyr::filter(adult.pars,Time == i, Z == k)
 
       if(nrow(tmp) == 0)next
 
-      tmp_var <- dplyr::filter(adult.vars,Time == i)
+        tmp_var <- dplyr::filter(adult.vars,Time == i, Z == k)
 
 
       res <- BspNfem(P0 = tmp$P0, A = tmp$A, R = tmp$R, S = tmp$S,
@@ -1372,35 +1382,40 @@ Estimate_DEPM_Biomass <- function(adult.pars, adult.vars){
                              VF1= tmp_var$.F, VW1 = tmp_var$W)
 
 
-      resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i, "Nfem"] <- res$Nfem
+      # resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i, "Nfem"] <- res$Nfem
+      #
+      # resultlist[["Biomass"]][resultlist[["Biomass"]]$Time == i ,"Biomass"] <- res$Bsp/1000
+      resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i& resultlist[["Nfem"]]$Z == k, "Nfem"] <- res$Nfem
 
-      resultlist[["Biomass"]][resultlist[["Biomass"]]$Time == i ,"Biomass"] <- res$Bsp/1000
+      resultlist[["Biomass"]][resultlist[["Biomass"]]$Time == i & resultlist[["Biomass"]]$Z == k,"Biomass"] <- res$Bsp/1000
 
+#
+#       resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i ,"SD"] <- sqrt(vars$VarNfem)
+#
+#       resultlist[["Biomass"]][resultlist[["Biomass"]]$Time == i,"SD"] <- sqrt(vars$VarBsp)/1000
 
+      resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i & resultlist[["Nfem"]]$Z == k,"SD"] <- sqrt(vars$VarNfem)
 
-      resultlist[["Nfem"]][resultlist[["Nfem"]]$Time == i ,"SD"] <- sqrt(vars$VarNfem)
+      resultlist[["Biomass"]][resultlist[["Biomass"]]$Time == i& resultlist[["Biomass"]]$Z == k,"SD"] <- sqrt(vars$VarBsp)/1000
 
-      resultlist[["Biomass"]][resultlist[["Biomass"]]$Time == i,"SD"] <- sqrt(vars$VarBsp)/1000
-
-
-
+      }
     }
 
 
   } else if(any(names(adult.pars) %in% "Region")){
     resultlist <- list(
-      Nfem = expand.grid(Region = unique(adult.pars$Region), Nfem = NA, SD = NA ),
-      Biomass = expand.grid(Region = unique(adult.pars$Region),  Biomass = NA , SD = NA)
+      Nfem = expand.grid(Region = unique(adult.pars$Region),Z = unique(adult.pars$Z), Nfem = NA, SD = NA ),
+      Biomass = expand.grid(Region = unique(adult.pars$Region),Z = unique(adult.pars$Z),  Biomass = NA , SD = NA)
     )
 
 
     for(j in unique(adult.pars$Region)){
+      for(k in unique(adult.pars$Z)){
+        tmp<- dplyr::filter(adult.pars, Region == j, Z == k)
 
-      tmp<- dplyr::filter(adult.pars, Region == j)
+        if(nrow(tmp) == 0)next
 
-      if(nrow(tmp) == 0)next
-
-      tmp_var <- dplyr::filter(adult.vars, Region == j)
+        tmp_var <- dplyr::filter(adult.vars, Region == j, Z == k)
 
 
       res <- BspNfem(P0 = tmp$P0, A = tmp$A, R = tmp$R, S = tmp$S,
@@ -1413,22 +1428,39 @@ Estimate_DEPM_Biomass <- function(adult.pars, adult.vars){
                              VF1= tmp_var$.F, VW1 = tmp_var$W)
 
 
-      resultlist[["Nfem"]][resultlist[["Nfem"]]$Region == j,"Nfem"] <- res$Nfem
+      # resultlist[["Nfem"]][resultlist[["Nfem"]]$Region == j,"Nfem"] <- res$Nfem
+      #
+      # resultlist[["Biomass"]][resultlist[["Biomass"]]$Region == j,"Biomass"] <- res$Bsp/1000
+      resultlist[["Nfem"]][resultlist[["Nfem"]]$Region == j& resultlist[["Nfem"]]$Z == k,"Nfem"] <- res$Nfem
 
-      resultlist[["Biomass"]][resultlist[["Biomass"]]$Region == j,"Biomass"] <- res$Bsp/1000
-
-
-
-      resultlist[["Nfem"]][resultlist[["Nfem"]]$Region == j,"SD"] <- sqrt(vars$VarNfem)
-
-      resultlist[["Biomass"]][ resultlist[["Biomass"]]$Region == j,"SD"] <- sqrt(vars$VarBsp)/1000
+      resultlist[["Biomass"]][resultlist[["Biomass"]]$Region == j& resultlist[["Biomass"]]$Z == k,"Biomass"] <- res$Bsp/1000
 
 
+      # resultlist[["Nfem"]][resultlist[["Nfem"]]$Region == j,"SD"] <- sqrt(vars$VarNfem)
+      #
+      # resultlist[["Biomass"]][ resultlist[["Biomass"]]$Region == j,"SD"] <- sqrt(vars$VarBsp)/1000
 
+      resultlist[["Nfem"]][resultlist[["Nfem"]]$Region == j& resultlist[["Nfem"]]$Z == k,"SD"] <- sqrt(vars$VarNfem)
+
+      resultlist[["Biomass"]][ resultlist[["Biomass"]]$Region == j& resultlist[["Biomass"]]$Z == k,"SD"] <- sqrt(vars$VarBsp)/1000
+      }
     }
 
 
   } else {
+    resultlist <- list(
+      Nfem = expand.grid(Z = unique(adult.pars$Z), Nfem = NA, SD = NA ),
+      Biomass = expand.grid(Z = unique(adult.pars$Z),  Biomass = NA , SD = NA))
+
+      for(k in unique(adult.pars$Z)){
+
+        tmp<- dplyr::filter(adult.pars, Z == k)
+
+        if(nrow(tmp) == 0)next
+
+        tmp_var <- dplyr::filter(adult.vars,  Z == k)
+
+
 
     res <- BspNfem(P0 = adult.pars$P0, A = adult.pars$A, R = adult.pars$R, S = adult.pars$S,
                    Ww = adult.pars$W, Fw = adult.pars$.F)
@@ -1436,11 +1468,21 @@ Estimate_DEPM_Biomass <- function(adult.pars, adult.vars){
     vars <-  VarBspNfemnw1(P0 = adult.pars$P0, A = adult.pars$A, R = adult.pars$R, S = adult.pars$S, F1 = adult.pars$.F, W1= adult.pars$W,
                            VP0 = adult.vars$P0, VA= 0, VR= adult.vars$R, VS= adult.vars$S, VF1= adult.vars$.F, VW1 = adult.vars$W)
 
-    resultlist <- list(Nfem = data.frame(Nfem = res$Nfem,
-                                         SD = sqrt(vars$VarNfem)),
-                       Biomass = data.frame(Biomass = res$Bsp/1000,
-                                            SD = sqrt(vars$VarBsp)/1000))
+    # resultlist <- list(Nfem = data.frame(Nfem = res$Nfem,
+    #                                      SD = sqrt(vars$VarNfem)),
+    #                    Biomass = data.frame(Biomass = res$Bsp/1000,
+    #                                         SD = sqrt(vars$VarBsp)/1000))
 
+    resultlist[["Nfem"]][ resultlist[["Nfem"]]$Z == k,"Nfem"] <- res$Nfem
+
+    resultlist[["Biomass"]][ resultlist[["Biomass"]]$Z == k,"Biomass"] <- res$Bsp/1000
+    resultlist[["Nfem"]][ resultlist[["Nfem"]]$Z == k,"SD"] <- sqrt(vars$VarNfem)
+
+    resultlist[["Biomass"]][  resultlist[["Biomass"]]$Z == k,"SD"] <- sqrt(vars$VarBsp)/1000
+
+    message("No 'Time' or 'Region variables detected")
+
+      }
   }
 
   return(resultlist)

@@ -441,8 +441,8 @@ These results can then be examined to determine how biomass is influenced by the
 Snapper_biomass$Z <- as.factor(Snapper_biomass$Z) # convert Z to a factor for easy plotting
 
 ggplot(Snapper_biomass, aes(Z,Biomass, fill = Z,
-                            ymin = Biomass - SD*1.96,
-                            ymax = Biomass + SD*1.96))+
+                            ymin = Biomass - SD,
+                            ymax = Biomass + SD))+
   geom_crossbar( alpha = .8)+
   facet_wrap(~Region, ncol =2)+
   scale_fill_viridis_d()+
