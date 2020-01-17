@@ -33,5 +33,5 @@ browseVignettes("DEPM") # access all package vignettes
 
 vignette("DEPMWt_Estimation") # How-to guide for the DEPMWt approach
 
-# Vignette for the Traditional DEPM approach is forthcoming.
+vignette("DEPM_Estimation")
 ```
