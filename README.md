@@ -13,7 +13,7 @@ You can install the released version of DEPM from [Github](https://github.com/jo
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("jonathansmart/DEPM")
+devtools::install_github("jonathansmart/DEPM", build_vignettes = TRUE)
 ```
 
 The DEPM package is a tool to estimate Spawning Stock Biomass for fish populations using Daily Egg Production Methods (DEPM). Two methods are available in this package:

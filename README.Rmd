@@ -25,7 +25,7 @@ You can install the released version of DEPM from [Github](https://github.com/jo
 
 ```{r gh-installation, eval = FALSE}
 # install.packages("devtools")
-devtools::install_github("jonathansmart/DEPM")
+devtools::install_github("jonathansmart/DEPM", build_vignettes = TRUE)
 ```
 
 
