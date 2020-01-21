@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 # output: word_document
 vignette: >
-  %\VignetteIndexEntry{DEPMWt Estimation}
+  %\VignetteIndexEntry{DEPM Estimation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

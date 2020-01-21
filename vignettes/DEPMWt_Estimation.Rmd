@@ -4,6 +4,7 @@ author: "Jonathan Smart"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 # output: word_document
+# output: pdf_document
 vignette: >
   %\VignetteIndexEntry{DEPMWt Estimation}
   %\VignetteEngine{knitr::rmarkdown}
