@@ -25,20 +25,21 @@ library(tidyverse)
 ```
 
 # Introduction
-A recent advancement in Daily Egg Production Methods (DEPM) is the development of the DEPMWt approach (McGarvey et al. in review). This approach is similar to a traditional DEPM performed using the methods of Parker (1980) except that rather than using the mean body weight and mean fecundity of female fish as DEPM parameters, these quantities are instead broken down into weight bins. The benefits of these weight bins are that weight and fecundity are much better described when the weight structure of a  population is not normally distributed and therefore more precise estimates of biomass are obtained.
+A recent advancement in Daily Egg Production Methods (DEPM) is the development of the DEPMWt approach (McGarvey et al. in review ). This extends the traditional DEPM of Parker (1980; Lasker et al. 1985) by making explicit the dependence on body size of population numbers and fecundity of female fish. In place of overall means for body weight and batch fecundity, these DEPM inputs are broken down into weight bins. Accounting for the size-dependence of population structure and fecundity gives a more accurate description, notably when the population weight distribution is not normal or fecundity varies non-linearly.
 
-The `DEPM` package includes functions that perform the DEPMWt approach as well as a traditional DEPM approach, with several functions used in both approaches. Here, an example of the DEPMWt approach is given using South Australian Snapper (*Pagrus auratus*).
+A second modification of traditional DEPM incorporated into this package is a method to estimate the daily egg production, P0, using a stage-based approach (McGarvey et al. 2018). The simplifies the estimation of P0 with no lumping of egg stages into discrete daily cohorts, no assumption that all fish spawn at a fixed hour of each day, and no need to infer egg mortality by regression for each survey from the often very highly variable tow sample measures of egg density. But prior values of egg mortality rate are assumed.
+The DEPM package includes functions to estimate DEPM inputs using data from egg surveys and adult sampling, and their standard errors. Final estimates and their standard errors of spawning biomass and total number of female spawners are obtained under both the DEPMWt and traditional DEPM approaches, and of absolute female population numbers by weight class using DEPMWt. Here, an example application of the DEPMWt approach is given using data from South Australian snapper  (*Pagrus auratus*).
 
 # Necessary data
 Five datasets are required to use the DEPMWt approach:
 
-* Egg density data to estmate daily egg production ($P_{0}$)
+* Egg density suvery sample data to estimate daily egg production ($P_{0}$)   
 * Adult sex ratios to estimate *R*
 * Female spawning fractions to estimate *S*
-* Female total weights to estimate the proportion of females in each weight bin ($PN_{wt}$)
+* Female total weights to estimate the proportion of females in each weight bin ($p_{w}^{\text{N}}$)
 * Female total weight and batch fecundities to determine a fecundity-at-weight relationship ($F_{wt}$)
 
-Spawning Area (*A*) is not calculated as part of this package but its estimates will be included as one of the final steps.
+Spawning area (*A*) is not calculated as part of this package but its estimates will be included as one of the final steps.
 
 ```{r, include = FALSE}
 
@@ -135,7 +136,7 @@ fecundity_data_TotWT <- Batch_Fec_data %>%
 # DEPMWt parameter estimation
 ## Daily egg production ($P_{0}$)
 
-Daily egg production is estimated using a stage based estimator (McGarvey et al. 2018) via the function `Estimate_P0()` which requires a dataset that has been formatted as such:
+Daily egg production is estimated using a stage-based estimator (McGarvey et al. 2018) via the function `Estimate_P0()` which requires a dataset that has been formatted as such:
 
 ```{r}
 # egg density structure
@@ -213,9 +214,9 @@ sex_ratio_results
 
 ## Female weight data
 
-The key difference between teh DEPMWt approach and the traditional DEPM is how female weight and fecundity are handled. In the DEPMWt approach, female weight is broken into discrete weight bins and their variance is described using a multinomial distribution. This is handled by the `Estimate_proportion_female()` function which requires a dataframe of total female weight. This data.frame only needs one column but this does not need to be subset from a larger dataset as the column is specified by the `Weight` argument. Other columns are ignored unless (like other parameter functions), a `Region` or `Time` argument is specified.
+The key difference between the DEPMWt approach and the traditional DEPM is how female weight and fecundity are handled. In the DEPMWt approach, female weight is broken into discrete weight bins and their variance is described using a multinomial distribution. This is handled by the `Estimate_proportion_female()` function which requires a dataframe of total female weight. This dataframe only needs one column but this does not need to be subset from a larger dataset as the column is specified by the `Weight` argument. Other columns are ignored unless (like other parameter functions), a `Region` or `Time` argument is specified.
 
-To break the female weights into bins, an upper bound and a bin width is required. Here 27 weight bins are applied for Snapper begining at zero and ending at 13500g in 500g bins.
+To break the female weights into bins, an upper bound and a bin width is required. In this example, 27 weight bins are applied for Snapper beginning at zero and ending at 13500g in 500g bins.
 
 **NOTE: Weight data must be Total Weight in grams**
 
@@ -251,7 +252,7 @@ ggplot(Prop_fem_results,
 
 As weight is no longer expressed as a mean and variance, fecundity must follow suit. Therefore, the fecundity at each weight bin must now be calculated using the the `Estimate_Batch_Fecundity()` function. This function is quite useful as it can return three sets of outputs:
 
-* A data.frame of parameters and their variances for the relationship (these can also be printed to the screen) by setting `return.parameters = TRUE`.
+* A dataframe of parameters and their variances for the relationship (these can also be printed to the screen) by setting `return.parameters = TRUE`.
 * A dataframe with the predicted fecundity for each weight along with SD and 95% confidence intervals
 * A dataframe with the predicted fecundity at specified weights and their variance. By providing the mid-points of weight bins, this will return the fecundity-at-weight for each bin and becomes the new inputs for estimating biomass.
 
@@ -281,7 +282,7 @@ ggplot(Batch_fecundity_relationship, aes(Wt, y = Predicted, ymin = low, ymax  = 
 
 ```
 
-In order to determine the fecundity for each weight bin, the mid points of those bins are provided to the `predition.int` argument as a vector. A dataframe is then returned with the weight bin mid point, the estimate of fecundity at that weight and its variance.
+In order to determine the fecundity for each weight bin, the mid-points of those bins are provided to the `predition.int` argument as a vector. A dataframe is then returned with the weight bin mid point, the estimate of fecundity at that weight and its variance.
 
 ```{r}
 # The mid points of each weight bin need to be used to estimate fecundity.
@@ -434,7 +435,7 @@ ggplot(Snapper_NfemWt,
 
 # Testing assumptions for pre-specified egg mortality (*Z*)
 
-As the $P_{0}$ estimation methods in this package require a specified level of egg mortality (*Z*), it is sensible to test the sensitivities of the $P_{0}$ estimates, as well as the DEPMWt results to different *Z* values. Testing different values of *Z* can be done by passing a vector of values to the `z` argument of `Estimate_P0()`:
+As the $P_{0}$ estimation methods in this package require a specified level of egg mortality (*Z*) as piror input, it is sensible to test the sensitivities of the $P_{0}$ estimates, as well as the DEPMWt results to different *Z* values. Testing different values of *Z* can be done by passing a vector of values to the `z` argument of `Estimate_P0()`:
 
 ```{r}
 Multi_Z_P0_results <- Estimate_P0(data = egg_data,
@@ -450,7 +451,7 @@ This will return a different $P_{0}$ estimate for each value of *Z* for each `Ti
 Multi_Z_P0_results
 ```
 
-For South Australian Snapper, the resulting $P_{0}$ estimates are very similar.
+For South Australian Snapper, the resulting $P_{0}$ estimates vary percentage-wise less than *Z* itself.  McGarvey and Kinloch (2001) analytically demonstrated relatively low sensitivity of $P_{0}$  and estimated spawning biomass to assumed *Z*.
 
 ```{r fig.height=6, fig.width=6}
 
@@ -523,6 +524,10 @@ ggplot(Snapper_biomass, aes(Z,Biomass, fill = Z,
 
 
 # References
+Lasker, R. (Ed). 1985. An egg production method for estimating spawning biomass of pelagic fish: application to the northern anchovy,   Engraulis mordax. NOAA Technical Report, Natl. Mar. Fish. Serv., 36. 99 pp.
+
+McGarvey, R., and Kinloch, M. A. 2001. An analysis of the sensitivity of stock biomass estimates derived from the daily egg production method (DEPM) to uncertainty in egg mortality rates. Fisheries Research, 49(3): 303-307.
+
 McGarvey, R., Steer, M. A., Smart, J. J., Matthews, D. J. and Matthews, J. M.(in review). Generalizing the Parker model equation of DEPM:    incorporating size dependence of population numbers and batch fecundity
 
 McGarvey, R., Steer, M.A., Matthews, J.M., Ward, T.M. (2018). A stage-based estimator of daily egg production. ICES J. Mar. Sci. 75(5), 1638-1646.

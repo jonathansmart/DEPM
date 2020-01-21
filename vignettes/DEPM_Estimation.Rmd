@@ -25,16 +25,16 @@ library(tidyverse)
 
 # Introduction
 
-The traditional Daily Egg Production Method (DEPM) has been used to determine Spawning Stock Biomass of fish populations for over 40 years. While this package is designed to facilitate the use of revised approach to DEPM (DEPMWt; McGarvey et al in review), many aspects of the approach (i.e. estimation of some key DEPM parameters) remain the same. Therefore, the traditional DEPM methods are also included in this package.  Here, an example of the DEPM approach is given using South Australian Snapper (*Pagrus auratus*).
+The traditional Daily Egg Production Method (DEPM) has been used to determine spawning stock biomass of fish populations for over 40 years. While this package is primarily designed to facilitate the use of revised approaches to DEPM, including  (stage-based estimation of daily egg production (McGarvey et al. 2018) and female adult size-dependence of population numbers and batch fecundity (DEPMWt; McGarvey et al in review), many aspects of the approach (i.e. estimation of some key DEPM parameters) remain the same. Therefore, the traditional DEPM methods are also included in this package.  Here, an example of the DEPM approach is given using South Australian snapper (*Pagrus auratus*).
 
 # Necessary data
 Five datasets are required to use the DEPM approach:
 
-* Egg density data to estmate daily egg production ($P_{0}$)
+* Egg density data to estimate daily egg production ($P_{0}$)
 * Adult sex ratios to estimate *R*
 * Female spawning fractions to estimate *S*
 * Female total weights to estimate mean adult female weight (*W*)
-* Female total weight and batch fecundities to estimate mean female fecunity (*F*)
+* Female total weight and batch fecundities to estimate mean female fecundity (*F*)
 
 Spawning Area (*A*) is not calculated as part of this package but its estimates will be included as one of the final steps.
 
@@ -127,7 +127,7 @@ fecundity_data_GonardFrWT <- Batch_Fec_data %>%
 # DEPMWt parameter estimation
 ## Daily egg production ($P_{0}$)
 
-Daily egg production is estimated using a stage based estimator (McGarvey et al. 2018) via the function `Estimate_P0()` which requires a dataset that has been formatted as such:
+Daily egg production is estimated using a stage-based estimator (McGarvey et al. 2018) via the function `Estimate_P0()` which requires a dataset that has been formatted as such:
 
 ```{r}
 # egg density structure
@@ -148,7 +148,7 @@ This dataset is in a long format where every row is a density estimate of the eg
 
 Additional columns can be included in the dataset, so the user does not need to remove variables that could be useful to them later on. For example, in the `egg_data` dataset, the `Stage_num` variable represents the development stage of each density estimate in each sample. However as each row of this dataset is a different observation, this variable is not needed by the function.
 
-The function also has the ability to break the data down spatially and temporaly. If the `Region` and `Time` arguments are not used then $P_{0}$ will be estimated using all of the data. If you provide either `Region` or `Time` then a $P_{0}$ will be returned for each Region/Time combination. Therefore, a time series of data can analysed in a single function call. Here is an example using 4 DEPM surveys conducted in different areas but in the same year.
+The function also has the ability to break the data down spatially and temporally. If the `Region` and `Time` arguments are not used then $P_{0}$ will be estimated using all of the data. If you provide either `Region` or `Time` then a $P_{0}$ will be returned for each Region/Time combination. Therefore, a time series of data can analysed in a single function call. Here is an example using 4 DEPM surveys conducted in different areas but in the same year.
 The results are returned as a dataframe where each row is a survey and the estimate, standard error and specified mortality are returned.
 
 ```{r}
