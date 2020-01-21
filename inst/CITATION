@@ -1,0 +1,17 @@
+citHeader("To cite DEPM in publications use:")
+
+note <- sprintf("R package version %s", meta$Version)
+
+citEntry(
+  entry    = "Manual",
+  title    = "DEPM: Estimate spawning biomass for a fish population using the Daily Egg Production Method",
+  author   = personList(as.person("Jonathan Smart"),
+                        as.person("Richard McGarvey"),
+                        as.person("Janet Matthews")),
+  year = 2020,
+  note = note,
+  url = "https://github.com/jonathansmart/DEPM",
+  textVersion = paste("Smart, J. J. et al", "2020",
+                      "DEPM: Estimate spawning biomass for a fish population using the Daily Egg Production Method",
+                      "https://github.com/jonathansmart/DEPM")
+)

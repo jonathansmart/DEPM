@@ -1,0 +1,7 @@
+pandoc: 1.19.2.1
+pkgdown: 1.4.1
+pkgdown_sha: ~
+articles:
+  DEPMWt_Estimation: DEPMWt_Estimation.html
+  DEPM_Estimation: DEPM_Estimation.html
+
