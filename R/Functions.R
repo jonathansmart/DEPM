@@ -376,9 +376,10 @@ Estimate_Spawning_fraction <- function(data, Region = NULL, Time = NULL){
 #' @param verbose If TRUE, parameter estimates are printed to the screen
 #' @param return.parameters If TRUE, parameter estimates are returned instead of estimates
 #' @useDynLib DEPM
-#' @return Parameter estimates are automatically printed to the screen. If a prediction interval is provided then predicted fecundity-at-weight
-#'     is provided at those intervals. If no prediction interval is provided than predictions for the raw data are returned. Variance (Var) is
-#'     returned for both options. if `return.parameters == TRUE`, parameter estimates are returned instead of estimates
+#' @return  If a prediction interval is provided then predicted fecundity-at-weight is provided at those intervals.
+#'     with their standard error, standard deviation and 95% confidence intervals If no prediction interval is provided
+#'     then predictions for the raw data are returned with variance calculated as (Sigma0*Fecundity^Sigma1)^2, where 'Fecundity' is
+#'     the estimate fecundity-at-weight. If `return.parameters == TRUE`, parameter estimates are returned instead of estimated fecundity.
 #' @import TMB
 #' @importFrom stats cov na.omit nlminb sd var
 #' @export
@@ -492,8 +493,10 @@ Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL, re
     results <- dplyr::filter(Derived_Quants,Parameter == "F_pred")
     results <- dplyr::bind_cols(Wt = data$x, Observed = data$y,results)
     results <- dplyr::select(results, -Parameter)
-    results <- purrr::set_names(results, c("Wt", "Fecundity", "Predicted", "SD"))
-    results <- dplyr::mutate(results, upp = Predicted +((Sigma0*Predicted^Sigma1)*1.96),
+    results <- purrr::set_names(results, c("Wt", "Fecundity", "Predicted", "SE"))
+    results <- dplyr::mutate(results,
+                             SD = (Sigma0*Predicted^Sigma1),
+                             upp = Predicted +((Sigma0*Predicted^Sigma1)*1.96),
                              low = Predicted -((Sigma0*Predicted^Sigma1)*1.96))
   }
 
