@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">DEPM</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.3</span>
       </span>
     </div>
 
@@ -85,7 +85,7 @@
       <h1>DEPM Estimation</h1>
                         <h4 class="author">Jonathan Smart</h4>
             
-            <h4 class="date">2020-01-21</h4>
+            <h4 class="date">2020-01-23</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/jonathansmart/DEPM/blob/master/vignettes/DEPM_Estimation.Rmd"><code>vignettes/DEPM_Estimation.Rmd</code></a></small>
       <div class="hidden name"><code>DEPM_Estimation.Rmd</code></div>
@@ -293,8 +293,8 @@ F_W_results &lt;-<span class="st"> </span><span class="kw"><a href="../reference
 F_W_results
 <span class="co">#&gt;   Region    Mean_W     var_W    Mean_F     var_F</span>
 <span class="co">#&gt; 1   NGSV 1166.5000 31129.417  80851.28 232341876</span>
-<span class="co">#&gt; 2    SSG  507.5385  2063.444  38843.33  68653911</span>
-<span class="co">#&gt; 3    NSG  849.7143  8405.862  62139.22 130450028</span>
+<span class="co">#&gt; 2    SSG  507.5385  2063.444  38843.33  68653909</span>
+<span class="co">#&gt; 3    NSG  849.7143  8405.862  62139.22 130450027</span>
 <span class="co">#&gt; 4   SGSV 2440.0174  9619.222 157896.28  60117239</span></code></pre></div>
 </div>
 <div id="spawning-area-a" class="section level2">
@@ -328,9 +328,7 @@ Area<span class="op">$</span>A &lt;-<span class="st"> </span><span class="kw"><a
 <a href="#combining-parameter-estimates" class="anchor"></a>Combining parameter estimates</h2>
 <p>A dataframe of all of the parameter estimates can be assembled using <code><a href="../reference/combine_estimates.html">combine_estimates()</a></code> where each of the parameter objects are provided as arguments.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Adults_pars &lt;-<span class="st"> </span><span class="kw"><a href="../reference/combine_estimates.html">combine_estimates</a></span>(<span class="dt">P0 =</span> P0_results, <span class="dt">R =</span> sex_ratio_results, <span class="dt">S =</span> Spawn_results, <span class="dt">A =</span> Area, <span class="dt">W_F =</span> F_W_results)
-<span class="co">#&gt; Joining, by = "Region"</span>
-<span class="co">#&gt; Joining, by = "Region"</span>
-<span class="co">#&gt; Joining, by = "Region"</span>
+<span class="co">#&gt; Joining, by = "Region"Joining, by = "Region"Joining, by = "Region"</span>
 Adults_pars
 <span class="co">#&gt; # A tibble: 4 x 8</span>
 <span class="co">#&gt;   Region    P0     Z     R          A     S     W      .F</span>
@@ -347,16 +345,15 @@ Adults_pars
 <a href="#combining-parameter-variances" class="anchor"></a>Combining parameter variances</h2>
 <p>Variance estimates are needed by <code><a href="../reference/Estimate_DEPM_Biomass.html">Estimate_DEPM_Biomass()</a></code> in order to determine the precision of the biomass estimates. These are provided in the same fashion as the parameter estimates using <code><a href="../reference/combine_variances.html">combine_variances()</a></code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Adults_vars &lt;-<span class="st"> </span><span class="kw"><a href="../reference/combine_variances.html">combine_variances</a></span>(P0_results, <span class="dt">R =</span> sex_ratio_results, <span class="dt">S =</span> Spawn_results, <span class="dt">W_F =</span> F_W_results)
-<span class="co">#&gt; Joining, by = "Region"</span>
-<span class="co">#&gt; Joining, by = "Region"</span>
+<span class="co">#&gt; Joining, by = "Region"Joining, by = "Region"</span>
 Adults_vars
 <span class="co">#&gt; # A tibble: 4 x 7</span>
 <span class="co">#&gt;   Region     P0     Z        R       S      W         .F</span>
 <span class="co">#&gt;   &lt;fct&gt;   &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;</span>
 <span class="co">#&gt; 1 NGSV   0.391    0.4 0.00952  0.00298 31129. 232341876.</span>
-<span class="co">#&gt; 2 NSG    0.218    0.4 0.000714 0.00298  8406. 130450028.</span>
+<span class="co">#&gt; 2 NSG    0.218    0.4 0.000714 0.00298  8406. 130450027.</span>
 <span class="co">#&gt; 3 SGSV   0.129    0.4 0.00117  0.00298  9619.  60117239.</span>
-<span class="co">#&gt; 4 SSG    0.0849   0.4 0.00185  0.00298  2063.  68653911.</span></code></pre></div>
+<span class="co">#&gt; 4 SSG    0.0849   0.4 0.00185  0.00298  2063.  68653909.</span></code></pre></div>
 <p>The same manual insertions can be performed on this object:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Adults_vars[Adults_vars<span class="op">$</span>Region <span class="op">==</span><span class="st"> "SSG"</span>, <span class="st">"R"</span>] &lt;-<span class="st"> </span><span class="fl">0.0018484630</span></code></pre></div>
 </div>
@@ -377,10 +374,10 @@ Snapper_biomass_results<span class="op">$</span>Biomass <span class="co"># bioma
 <span class="co">#&gt; 4    SSG 0.4  74034.45  35203.11</span>
 Snapper_biomass_results<span class="op">$</span>Nfem <span class="co"># number of females</span>
 <span class="co">#&gt;   Region   Z     Nfem        SD</span>
-<span class="co">#&gt; 1   NGSV 0.4 98236.85 36190.284</span>
+<span class="co">#&gt; 1   NGSV 0.4 98236.85 36190.285</span>
 <span class="co">#&gt; 2    NSG 0.4 39769.09 21125.869</span>
 <span class="co">#&gt; 3   SGSV 0.4 10555.33  7269.314</span>
-<span class="co">#&gt; 4    SSG 0.4 83749.38 38604.627</span></code></pre></div>
+<span class="co">#&gt; 4    SSG 0.4 83749.38 38604.628</span></code></pre></div>
 <p>The list of dataframes returned from the function can then be saved and used for plotting</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
 <span class="co"># Create new objects</span>
@@ -393,7 +390,7 @@ Snapper_Nfem &lt;-<span class="st"> </span>Snapper_biomass_results<span class="o
                             <span class="dt">ymax =</span> Biomass <span class="op">+</span><span class="st"> </span>SD))<span class="op">+</span>
 <span class="st">  </span><span class="kw">geom_crossbar</span>(<span class="dt">fill =</span> <span class="st">"royalblue"</span>, <span class="dt">alpha =</span> .<span class="dv">8</span>)<span class="op">+</span>
 <span class="st">  </span><span class="kw">expand_limits</span>(<span class="dt">y =</span> <span class="dv">0</span>)<span class="op">+</span>
-<span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">"Biomass (kg)"</span>, <span class="dt">labels =</span> scales<span class="op">::</span>comma, <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/pretty_breaks.html">pretty_breaks</a></span>(<span class="dv">5</span>))<span class="op">+</span>
+<span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">"Biomass (kg)"</span>, <span class="dt">labels =</span> scales<span class="op">::</span>comma, <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/breaks_pretty.html">pretty_breaks</a></span>(<span class="dv">5</span>))<span class="op">+</span>
 <span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
 <p><img src="DEPM_Estimation_files/figure-html/unnamed-chunk-17-1.png" width="576"></p>
 <p><strong>Plot total number of females</strong></p>
@@ -403,7 +400,7 @@ Snapper_Nfem &lt;-<span class="st"> </span>Snapper_biomass_results<span class="o
                             <span class="dt">ymax =</span> Nfem <span class="op">+</span><span class="st"> </span>SD))<span class="op">+</span>
 <span class="st">  </span><span class="kw">geom_crossbar</span>(<span class="dt">fill =</span> <span class="st">"purple"</span>, <span class="dt">alpha =</span> .<span class="dv">8</span>)<span class="op">+</span>
 <span class="st">  </span><span class="kw">expand_limits</span>(<span class="dt">y =</span> <span class="dv">0</span>)<span class="op">+</span>
-<span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">"Number of females"</span>, <span class="dt">labels =</span> scales<span class="op">::</span>comma, <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/pretty_breaks.html">pretty_breaks</a></span>(<span class="dv">5</span>))<span class="op">+</span>
+<span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">"Number of females"</span>, <span class="dt">labels =</span> scales<span class="op">::</span>comma, <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/breaks_pretty.html">pretty_breaks</a></span>(<span class="dv">5</span>))<span class="op">+</span>
 <span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
 <p><img src="DEPM_Estimation_files/figure-html/unnamed-chunk-18-1.png" width="576"></p>
 </div>
@@ -451,13 +448,10 @@ Area<span class="op">$</span>A &lt;-<span class="st"> </span><span class="kw"><a
 
 
 Multi_Z_adult_pars &lt;-<span class="st"> </span><span class="kw"><a href="../reference/combine_estimates.html">combine_estimates</a></span>(<span class="dt">P0 =</span> Multi_Z_P0_results, <span class="dt">R =</span> sex_ratio_results, <span class="dt">S =</span> Spawn_results, <span class="dt">A =</span> Area, <span class="dt">W_F =</span> F_W_results)
-<span class="co">#&gt; Joining, by = "Region"</span>
-<span class="co">#&gt; Joining, by = "Region"</span>
-<span class="co">#&gt; Joining, by = "Region"</span>
+<span class="co">#&gt; Joining, by = "Region"Joining, by = "Region"Joining, by = "Region"</span>
 
 Multi_Z_adult_vars &lt;-<span class="st"> </span><span class="kw"><a href="../reference/combine_variances.html">combine_variances</a></span>(<span class="dt">P0 =</span> Multi_Z_P0_results, <span class="dt">R =</span> sex_ratio_results, <span class="dt">S =</span> Spawn_results, <span class="dt">W_F =</span> F_W_results)
-<span class="co">#&gt; Joining, by = "Region"</span>
-<span class="co">#&gt; Joining, by = "Region"</span></code></pre></div>
+<span class="co">#&gt; Joining, by = "Region"Joining, by = "Region"</span></code></pre></div>
 <p>A new object with <em>Z</em> as a grouping will now be produced which can be passed to the biomass estimation function.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Multi_Z_adult_pars
 <span class="co">#&gt;    Region        P0   Z         R          A        S         W        .F</span>
@@ -494,7 +488,7 @@ Snapper_biomass<span class="op">$</span>Z &lt;-<span class="st"> </span><span cl
 <span class="st">  </span><span class="kw">facet_wrap</span>(<span class="op">~</span>Region, <span class="dt">ncol =</span><span class="dv">2</span>)<span class="op">+</span>
 <span class="st">  </span><span class="kw">scale_fill_viridis_d</span>()<span class="op">+</span>
 <span class="st">  </span><span class="kw">expand_limits</span>(<span class="dt">y =</span> <span class="dv">0</span>)<span class="op">+</span>
-<span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">"Biomass (kg)"</span>, <span class="dt">labels =</span> scales<span class="op">::</span>comma, <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/pretty_breaks.html">pretty_breaks</a></span>(<span class="dv">5</span>))<span class="op">+</span>
+<span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">"Biomass (kg)"</span>, <span class="dt">labels =</span> scales<span class="op">::</span>comma, <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/breaks_pretty.html">pretty_breaks</a></span>(<span class="dv">5</span>))<span class="op">+</span>
 <span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
 <p><img src="DEPM_Estimation_files/figure-html/unnamed-chunk-24-1.png" width="576"></p>
 </div>

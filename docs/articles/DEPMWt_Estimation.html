@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">DEPM</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.3</span>
       </span>
     </div>
 
@@ -85,7 +85,7 @@
       <h1>DEPMWt Estimation</h1>
                         <h4 class="author">Jonathan Smart</h4>
             
-            <h4 class="date">2020-01-21</h4>
+            <h4 class="date">2020-01-23</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/jonathansmart/DEPM/blob/master/vignettes/DEPMWt_Estimation.Rmd"><code>vignettes/DEPMWt_Estimation.Rmd</code></a></small>
       <div class="hidden name"><code>DEPMWt_Estimation.Rmd</code></div>
@@ -290,7 +290,7 @@ parameters &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.
 <span class="co"># Return parameters</span>
 <span class="kw"><a href="../reference/Estimate_Batch_Fecundity.html">Estimate_Batch_Fecundity</a></span>(fecundity_data_TotWT, <span class="dt">start_pars =</span> parameters, <span class="dt">return.parameters =</span> <span class="ot">TRUE</span>)
 <span class="co">#&gt;   Parameter         Val         var</span>
-<span class="co">#&gt; 1     alpha 118.1105923 57.97564446</span>
+<span class="co">#&gt; 1     alpha 118.1105923 57.97564448</span>
 <span class="co">#&gt; 2      beta   0.9215988  0.05831767</span>
 <span class="co">#&gt; 3    Sigma0  11.0284006 12.06341963</span>
 <span class="co">#&gt; 4    Sigma1   0.7440693  0.08895222</span>
@@ -354,8 +354,7 @@ Area<span class="op">$</span>A &lt;-<span class="st"> </span><span class="kw"><a
 <a href="#combining-non-weight-bin-parameter-estimates" class="anchor"></a>Combining non-weight bin parameter estimates</h2>
 <p>A dataframe of all of the parameter estimates can be assembled using <code><a href="../reference/combine_estimates.html">combine_estimates()</a></code> where each of the parameter objects are provided as arguments.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Adults_pars &lt;-<span class="st"> </span><span class="kw"><a href="../reference/combine_estimates.html">combine_estimates</a></span>(<span class="dt">P0 =</span> P0_results, <span class="dt">R =</span> sex_ratio_results, <span class="dt">S =</span> Spawn_results, <span class="dt">A =</span> Area)
-<span class="co">#&gt; Joining, by = "Region"</span>
-<span class="co">#&gt; Joining, by = "Region"</span>
+<span class="co">#&gt; Joining, by = "Region"Joining, by = "Region"</span>
 Adults_pars
 <span class="co">#&gt; # A tibble: 4 x 6</span>
 <span class="co">#&gt;   Region    P0     Z     R          A     S</span>
@@ -445,7 +444,7 @@ Snapper_NfemWt &lt;-<span class="st"> </span>Snapper_biomass_results<span class=
                             <span class="dt">ymax =</span> Biomass <span class="op">+</span><span class="st"> </span>SD))<span class="op">+</span>
 <span class="st">  </span><span class="kw">geom_crossbar</span>(<span class="dt">fill =</span> <span class="st">"royalblue"</span>, <span class="dt">alpha =</span> .<span class="dv">8</span>)<span class="op">+</span>
 <span class="st">  </span><span class="kw">expand_limits</span>(<span class="dt">y =</span> <span class="dv">0</span>)<span class="op">+</span>
-<span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">"Biomass (kg)"</span>, <span class="dt">labels =</span> scales<span class="op">::</span>comma, <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/pretty_breaks.html">pretty_breaks</a></span>(<span class="dv">5</span>))<span class="op">+</span>
+<span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">"Biomass (kg)"</span>, <span class="dt">labels =</span> scales<span class="op">::</span>comma, <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/breaks_pretty.html">pretty_breaks</a></span>(<span class="dv">5</span>))<span class="op">+</span>
 <span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
 <p><img src="DEPMWt_Estimation_files/figure-html/unnamed-chunk-20-1.png" width="576"></p>
 <p><strong>Plot total number of females</strong></p>
@@ -455,7 +454,7 @@ Snapper_NfemWt &lt;-<span class="st"> </span>Snapper_biomass_results<span class=
                             <span class="dt">ymax =</span> Nfem <span class="op">+</span><span class="st"> </span>SD))<span class="op">+</span>
 <span class="st">  </span><span class="kw">geom_crossbar</span>(<span class="dt">fill =</span> <span class="st">"purple"</span>, <span class="dt">alpha =</span> .<span class="dv">8</span>)<span class="op">+</span>
 <span class="st">  </span><span class="kw">expand_limits</span>(<span class="dt">y =</span> <span class="dv">0</span>)<span class="op">+</span>
-<span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">"Number of females"</span>, <span class="dt">labels =</span> scales<span class="op">::</span>comma, <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/pretty_breaks.html">pretty_breaks</a></span>(<span class="dv">5</span>))<span class="op">+</span>
+<span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">"Number of females"</span>, <span class="dt">labels =</span> scales<span class="op">::</span>comma, <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/breaks_pretty.html">pretty_breaks</a></span>(<span class="dv">5</span>))<span class="op">+</span>
 <span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
 <p><img src="DEPMWt_Estimation_files/figure-html/unnamed-chunk-21-1.png" width="576"></p>
 <p><strong>Plot number of females in each weight bin</strong></p>
@@ -470,7 +469,7 @@ Snapper_NfemWt &lt;-<span class="st"> </span>Snapper_biomass_results<span class=
 <span class="st">  </span><span class="kw">expand_limits</span>(<span class="dt">y =</span> <span class="dv">0</span>)<span class="op">+</span>
 <span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">"Number of females"</span>, <span class="dt">labels =</span> scales<span class="op">::</span>comma)<span class="op">+</span>
 <span class="st">  </span><span class="kw">scale_x_continuous</span>(<span class="dt">name =</span> <span class="st">"Weight class (g)"</span>, 
-                     <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/pretty_breaks.html">pretty_breaks</a></span>(<span class="dv">6</span>), 
+                     <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/breaks_pretty.html">pretty_breaks</a></span>(<span class="dv">6</span>), 
                      <span class="dt">labels =</span> <span class="cf">function</span>(x){x <span class="op">*</span><span class="st"> </span><span class="dv">500</span>})<span class="op">+</span>
 <span class="st">  </span><span class="kw">theme_bw</span>()<span class="op">+</span>
 <span class="st">  </span><span class="kw">theme</span>(<span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">angle =</span> <span class="dv">90</span>))</code></pre></div>
@@ -520,8 +519,7 @@ Area<span class="op">$</span>A &lt;-<span class="st"> </span><span class="kw"><a
 
 
 Multi_Z_adult_pars &lt;-<span class="st"> </span><span class="kw"><a href="../reference/combine_estimates.html">combine_estimates</a></span>(<span class="dt">P0 =</span> Multi_Z_P0_results, <span class="dt">R =</span> sex_ratio_results, <span class="dt">S =</span> Spawn_results, <span class="dt">A =</span> Area)
-<span class="co">#&gt; Joining, by = "Region"</span>
-<span class="co">#&gt; Joining, by = "Region"</span>
+<span class="co">#&gt; Joining, by = "Region"Joining, by = "Region"</span>
 
 Multi_Z_adult_vars &lt;-<span class="st"> </span><span class="kw"><a href="../reference/combine_variances.html">combine_variances</a></span>(<span class="dt">P0 =</span> Multi_Z_P0_results, <span class="dt">R =</span> sex_ratio_results, <span class="dt">S =</span> Spawn_results)
 <span class="co">#&gt; Joining, by = "Region"</span></code></pre></div>
@@ -563,7 +561,7 @@ Snapper_biomass<span class="op">$</span>Z &lt;-<span class="st"> </span><span cl
 <span class="st">  </span><span class="kw">facet_wrap</span>(<span class="op">~</span>Region, <span class="dt">ncol =</span><span class="dv">2</span>)<span class="op">+</span>
 <span class="st">  </span><span class="kw">scale_fill_viridis_d</span>()<span class="op">+</span>
 <span class="st">  </span><span class="kw">expand_limits</span>(<span class="dt">y =</span> <span class="dv">0</span>)<span class="op">+</span>
-<span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">"Biomass (kg)"</span>, <span class="dt">labels =</span> scales<span class="op">::</span>comma, <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/pretty_breaks.html">pretty_breaks</a></span>(<span class="dv">5</span>))<span class="op">+</span>
+<span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">"Biomass (kg)"</span>, <span class="dt">labels =</span> scales<span class="op">::</span>comma, <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/breaks_pretty.html">pretty_breaks</a></span>(<span class="dv">5</span>))<span class="op">+</span>
 <span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
 <p><img src="DEPMWt_Estimation_files/figure-html/unnamed-chunk-29-1.png" width="576"></p>
 </div>
