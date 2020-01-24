@@ -25,7 +25,7 @@ library(tidyverse)
 
 # Introduction
 
-The traditional Daily Egg Production Method (DEPM) has been used to determine spawning stock biomass of fish populations for over 40 years. While this package is primarily designed to facilitate the use of revised approaches to DEPM, including  (stage-based estimation of daily egg production (McGarvey et al. 2018) and female adult size-dependence of population numbers and batch fecundity (DEPMWt; McGarvey et al in review), many aspects of the approach (i.e. estimation of some key DEPM parameters) remain the same. Therefore, the traditional DEPM methods are also included in this package.  Here, an example of the DEPM approach is given using South Australian snapper (*Pagrus auratus*).
+The traditional Daily Egg Production Method (DEPM) has been used to determine spawning stock biomass of fish populations for over 40 years. While this package is primarily designed to facilitate the use of revised approaches to DEPM, including  (stage-based estimation of daily egg production (McGarvey et al. 2018) and female adult size-dependence of population numbers and batch fecundity (DEPMWt; McGarvey et al in review), many aspects of the approach (i.e. estimation of some key DEPM parameters) remain the same. Therefore, the traditional DEPM methods are also included in this package.  Here, an example of the DEPM approach is given using South Australian snapper (*Chrysophrys auratus*).
 
 # Necessary data
 Five datasets are required to use the DEPM approach:
