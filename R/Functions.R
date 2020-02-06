@@ -368,6 +368,8 @@ Estimate_Spawning_fraction <- function(data, Region = NULL, Time = NULL){
 #' Estimate batch fecundity
 #' @description Batch fecundity (number of eggs by female fish weight) is estimated with an allometric error structure allowing
 #'     greater variance with increasing weight. This is estimated as a 4 parameter model where specified parameters can be fixed.
+#'     If fixed parameters are specified, then the modeling becomes a two-step process where all four parameters are estimated and
+#'     the resulting parameters estimates are then assigned to the fixed variables in a second phase of the model.
 #' @param data A dataframe with 2 numeric variables: Fish weight and fecundity (number of eggs). Names and order are not important
 #'    as the larger of the two variables is assumed to be number of eggs and is automatically assigned as this.
 #' @param start_pars A list of 4 start_pars tha must include: "alpha", "beta", "Sigma0" and "Sigma1"
@@ -376,15 +378,16 @@ Estimate_Spawning_fraction <- function(data, Region = NULL, Time = NULL){
 #' @param verbose If TRUE, parameter estimates are printed to the screen
 #' @param return.parameters If TRUE, parameter estimates are returned instead of estimates
 #' @useDynLib DEPM
-#' @return  If a prediction interval is provided then predicted fecundity-at-weight is provided at those intervals.
-#'     with their standard error, standard deviation and 95% confidence intervals If no prediction interval is provided
-#'     then predictions for the raw data are returned with variance calculated as (Sigma0*Fecundity^Sigma1)^2, where 'Fecundity' is
-#'     the estimate fecundity-at-weight. If `return.parameters == TRUE`, parameter estimates are returned instead of estimated fecundity.
+#' @return  If a prediction interval is provided then predicted fecundity-at-weight is provided at those intervals
+#'     with their variance and standard error. If no prediction interval is provided then predictions for the raw data are
+#'     returned with standard error and 95% confidence intervals. If `return.parameters == TRUE`, parameter estimates and their standard errors
+#'     are returned.
 #' @import TMB
 #' @importFrom stats cov na.omit nlminb sd var
 #' @export
 #'
-Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL, return.parameters = FALSE,  fixed.pars= NULL, verbose = FALSE){
+Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL,
+                                     return.parameters = FALSE,  fixed.pars= NULL, verbose = FALSE){
 
   if(any(prediction.int < 1) ) stop("Prediction intervals must be in grams not kilos")
 
@@ -419,7 +422,7 @@ Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL, re
     data <- list(x=data[[2]], y=data[[1]])
   }
 
-  # alter TMB model if parameters need fixing.
+
   if(!is.null(fixed.pars)){
     # if there are parametes to be fixed.
     fixed_pars <- list(fixed.pars)
@@ -430,52 +433,90 @@ Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL, re
     for(i in 1:length(fixed_pars)){
       fixed_pars[[i]] <- factor(NA)
     }
-    model <- TMB::MakeADFun(data,start_pars,DLL="DEPM",
-                            silent = TRUE,
-                            # checkParameterOrder=FALSE,
-                            map = fixed_pars)
-    fit   <- nlminb(model$par, model$fn, model$gr)
-    rep   <- TMB::sdreport(model, getReportCovariance = T)
-    alpha <- ifelse(!is.na(as.numeric(fit$par["alpha"])),as.numeric(fit$par["alpha"]),start_pars$alpha)
-    beta <- ifelse(!is.na(as.numeric(fit$par["beta"])),as.numeric(fit$par["beta"]),start_pars$beta)
-    Sigma0 <- ifelse(!is.na(as.numeric(fit$par["Sigma0"])),as.numeric(fit$par["Sigma0"]),start_pars$Sigma0)
-    Sigma1 <- ifelse(!is.na(as.numeric(fit$par["Sigma1"])),as.numeric(fit$par["Sigma1"]),start_pars$Sigma1)
 
-    Derived_Quants <- create_TMB_sd_report_data.frame(summary(rep))
-    if(return.parameters == TRUE){
-      final_pars <- head(Derived_Quants, length(fixed.pars))
-      return(final_pars)
+    ## First model run with all parameters estimated-----------
+    first_model <- TMB::MakeADFun(data,start_pars,DLL="DEPM",
+                                  silent = TRUE)
+    first_fit   <- nlminb(first_model$par, first_model$fn, first_model$gr)
+
+    ## Run the fit several times in case a convergence isn't intially reached
+    for (i in 1:3){
+      first_fit <- nlminb(first_model$env$last.par.best, first_model$fn, first_model$gr)
     }
 
+    first_rep   <- TMB::sdreport(first_model, getReportCovariance = T)
+
+    first_Derived_Quants <- create_TMB_sd_report_data.frame(summary(first_rep))
+    ##-----------------------------------------------------
+
+    ## Second model run with fixed parameters----------------
+    # Get the unfixed parameters from first run and  use them as new starting pararmeters
+    # This time the fixed parameters (the ones which are estimated appropriately firsttime),
+    # Won't be estimated so the original Val and var remain the same.
+    new_start_pars <- filter(first_Derived_Quants, Parameter %in% names(unlist(start_pars)))
+    new_start_pars <- as.list(new_start_pars[,2])
+    names(new_start_pars) <- names(unlist(start_pars))
+
+    # Run second model with fixed parameters
+    second_model <- TMB::MakeADFun(data,new_start_pars,DLL="DEPM",
+                                   silent = TRUE,
+                                   map = fixed_pars)
+    second_fit   <- nlminb(second_model$par, second_model$fn, second_model$gr)
+    second_rep   <- TMB::sdreport(second_model, getReportCovariance = T)
+
+    # This time the derived quants are the final estimates
+    Derived_Quants <- create_TMB_sd_report_data.frame(summary(second_rep))
+
+    Final_parameters <- suppressWarnings(bind_rows(
+      filter(first_Derived_Quants,
+             Parameter %in% names(unlist(start_pars)),
+             Parameter  %in% names(unlist(fixed_pars))),
+      filter(Derived_Quants,
+             Parameter %in% names(unlist(start_pars)),
+             !Parameter  %in% names(unlist(fixed_pars)))
+    ))
+    Final_parameters <- arrange(Final_parameters, Parameter)
+
+
   }else{
+
     model <- TMB::MakeADFun(data,start_pars,DLL="DEPM",checkParameterOrder=FALSE,silent = TRUE)
+
+
+    #fit model
+    fit   <- nlminb(model$par, model$fn, model$gr)
+
+    # results and covariance matrix
+    rep   <- TMB::sdreport(model, getReportCovariance = T)
+
+
+
+    # get the predictions and parameters with standard errors from TMB
+    Derived_Quants <- create_TMB_sd_report_data.frame(summary(rep))
+
+    Final_parameters <- filter(Derived_Quants, Parameter %in% names(unlist(start_pars)))
   }
 
-  #fit model
-  fit   <- nlminb(model$par, model$fn, model$gr)
-
-  # results and covariance matrix
-  rep   <- TMB::sdreport(model, getReportCovariance = T)
 
 
+  alpha <- Final_parameters[Final_parameters$Parameter=="alpha", "Val"]
+  beta <- Final_parameters[Final_parameters$Parameter=="beta", "Val"]
+  Sigma0 <- Final_parameters[Final_parameters$Parameter=="Sigma0", "Val"]
+  Sigma1 <- Final_parameters[Final_parameters$Parameter=="Sigma1", "Val"]
 
-  # get the predictions and parameters with standard errors from TMB
-  Derived_Quants <- create_TMB_sd_report_data.frame(summary(rep))
-  if(return.parameters == TRUE){
-    final_pars <- head(Derived_Quants, 4)
-    return(final_pars)
-  }
-
-  alpha <- ifelse(!is.na(as.numeric(fit$par["alpha"])),as.numeric(fit$par["alpha"]),start_pars$alpha)
-  beta <- ifelse(!is.na(as.numeric(fit$par["beta"])),as.numeric(fit$par["beta"]),start_pars$beta)
-  Sigma0 <- ifelse(!is.na(as.numeric(fit$par["Sigma0"])),as.numeric(fit$par["Sigma0"]),start_pars$Sigma0)
-  Sigma1 <- ifelse(!is.na(as.numeric(fit$par["Sigma1"])),as.numeric(fit$par["Sigma1"]),start_pars$Sigma1)
-
-
+  alpha_var <- Final_parameters[Final_parameters$Parameter=="alpha", "var"]^2
+  beta_var <- Final_parameters[Final_parameters$Parameter=="beta", "var"]^2
+  Sigma0_var <- Final_parameters[Final_parameters$Parameter=="Sigma0", "var"]^2
+  Sigma1_var <- Final_parameters[Final_parameters$Parameter=="Sigma1", "var"]^2
 
   if(verbose == TRUE)
     cat("alpha = ",alpha,"\n beta =", beta, "\n Sigma0 =", Sigma0, "\n Sigma1 =", Sigma1,"\n" )
 
+
+  if(return.parameters == TRUE){
+    # final_pars <- head(Derived_Quants, length(fixed.pars))
+    return(Final_parameters)
+  }
 
   # If prediction data is provided then return that with the associated estimates
   if(!is.null(prediction.int)){
@@ -483,7 +524,8 @@ Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL, re
 
     results <- data.frame(Wt = prediction.int,
                           Fecundity = alpha * prediction.int^beta)
-    results <-  dplyr::mutate(results, Var = (Sigma0*Fecundity^Sigma1)^2)
+    results <-  dplyr::mutate(results, Var = (prediction.int^beta)^2*alpha_var+(alpha*log(prediction.int)*prediction.int^beta)^-2*beta_var,
+                              SE = sqrt(Var))
 
   } else{
 
@@ -492,15 +534,19 @@ Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL, re
     # the model
     results <- dplyr::filter(Derived_Quants,Parameter == "F_pred")
     results <- dplyr::bind_cols(Wt = data$x, Observed = data$y,results)
-    results <- dplyr::select(results, -Parameter)
-    results <- purrr::set_names(results, c("Wt", "Fecundity", "Predicted", "SE"))
+    results <- dplyr::select(results, -Parameter, -var)
+    results <- purrr::set_names(results, c("Wt", "Fecundity", "Predicted"))
     results <- dplyr::mutate(results,
-                             SD = (Sigma0*Predicted^Sigma1),
-                             upp = Predicted +((Sigma0*Predicted^Sigma1)*1.96),
-                             low = Predicted -((Sigma0*Predicted^Sigma1)*1.96))
+                             SE =  sqrt((Wt^beta)^2*alpha_var+(alpha*log(Wt)*Wt^beta)^-2*beta_var),
+                             upp = Predicted +(SE*1.96),
+                             low = Predicted -(SE*1.96))
   }
 
+
+
+
   return(results)
+
 }
 
 #' Estimate_proportion_female
