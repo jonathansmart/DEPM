@@ -3,7 +3,6 @@
 \docType{package}
 \name{DEPM}
 \alias{DEPM}
-\alias{DEPM-package}
 \title{DEPM}
 \description{
 Estimate spawning biomass for a fish population using the Daily Egg Production Method

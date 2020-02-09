@@ -4,8 +4,14 @@
 \alias{Estimate_proportion_female}
 \title{Estimate_proportion_female}
 \usage{
-Estimate_proportion_female(data, Weight, max.weight, bin.width, Time = NULL,
-  Region = NULL)
+Estimate_proportion_female(
+  data,
+  Weight,
+  max.weight,
+  bin.width,
+  Time = NULL,
+  Region = NULL
+)
 }
 \arguments{
 \item{data}{A dataframe that conatins female weight in grams. No males should be included and must be removed before use}

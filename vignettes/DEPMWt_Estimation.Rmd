@@ -259,6 +259,7 @@ As weight is no longer expressed as a mean and variance, fecundity must follow s
 The batch fecundity relationship estimator uses an allometric relationship which allows for wider variance with larger weights. Therefore, there are four parameters returned, alpha, beta and two sigma parameters that determine how variance changes with weight.
 A dataframe with two columns must be provided that includes **Total weight in grams** and the number of eggs for that fish. The function will determine which is which based on their scales (number of eggs > Wt in grams). A set of starting parameters are required and are provided to the `start_pars` argument as a list. The estimated parameters are printed to the screen if `verbose = TRUE`.
 
+
 ```{r fig.height=6, fig.width=6}
 
 head(fecundity_data_TotWT)
@@ -267,10 +268,15 @@ head(fecundity_data_TotWT)
 parameters <- list( alpha= 110, beta = 0.85 , Sigma0 = 10.5, Sigma1 = 0.7)
 
 # Return parameters
-Estimate_Batch_Fecundity(fecundity_data_TotWT, start_pars = parameters, return.parameters = TRUE)
+Estimate_Batch_Fecundity(fecundity_data_TotWT, 
+                         start_pars = parameters, 
+                         fixed.pars = c("Sigma1", "beta"),
+                         return.parameters = TRUE)
 
 # Return batch fecundity estimates
-Batch_fecundity_relationship <- Estimate_Batch_Fecundity(fecundity_data_TotWT, start_pars = parameters, verbose = FALSE)
+Batch_fecundity_relationship <- Estimate_Batch_Fecundity(fecundity_data_TotWT, 
+                                                         fixed.pars = c("Sigma1", "beta"),
+                                                         start_pars = parameters, verbose = FALSE)
 
 #plot of relationship
 ggplot(Batch_fecundity_relationship, aes(Wt, y = Predicted, ymin = low, ymax  = upp))+
@@ -282,7 +288,7 @@ ggplot(Batch_fecundity_relationship, aes(Wt, y = Predicted, ymin = low, ymax  = 
 
 ```
 
-In order to determine the fecundity for each weight bin, the mid-points of those bins are provided to the `predition.int` argument as a vector. A dataframe is then returned with the weight bin mid point, the estimate of fecundity at that weight and its variance.
+In order to determine the fecundity for each weight bin, the mid-points of those bins are provided to the `predition.int` argument as a vector. A dataframe is then returned with the weight bin mid point, the estimate of fecundity at that weight and its variance and SE.
 
 ```{r}
 # The mid points of each weight bin need to be used to estimate fecundity.
@@ -290,9 +296,34 @@ mid_points <- seq(250, 13500, 500)
 
 
 # Estimates for biomass calculation
-fecundity_at_Wtbins <- Estimate_Batch_Fecundity(fecundity_data_TotWT, start_pars = parameters, prediction.int = mid_points, verbose = FALSE)
+fecundity_at_Wtbins <- Estimate_Batch_Fecundity(fecundity_data_TotWT, 
+                                                start_pars = parameters,
+                                                fixed.pars = c("Sigma1", "beta"),
+                                                prediction.int = mid_points, 
+                                                verbose = FALSE)
 
 head(fecundity_at_Wtbins)
+
+```
+
+
+This function can also automatically estimate batch fecundity by allowing some of the parameters to be fixed. This is performed using the `fixed.pars` argument which requires a vector with the listed parameters to be fixed. Determining whether this is necessary is done by running the function and returning the parameters.
+
+```{r}
+Estimate_Batch_Fecundity(fecundity_data_TotWT, 
+                         start_pars = parameters, 
+                         return.parameters = TRUE)
+
+
+```
+For South Australian Snapper, the variances of the alpha and Sigma0 parameters are clearly overestimated. The function fixes this by running the model twice; once with all four parameters estimated and then again with the fixed parameters (ones which were estimated correctly the first time) held at their estimates from the first model. For example:
+
+```{r}
+Estimate_Batch_Fecundity(fecundity_data_TotWT, 
+                         start_pars = parameters, 
+                         fixed.pars = c("Sigma1", "beta"),
+                         return.parameters = TRUE)
+
 
 ```
 

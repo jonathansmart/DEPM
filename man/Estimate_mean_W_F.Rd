@@ -4,8 +4,14 @@
 \alias{Estimate_mean_W_F}
 \title{Estimate mean weight (W) and mean (F) for the standard DEPM approach.}
 \usage{
-Estimate_mean_W_F(weight.data, TotalWt, GonadFrWt = NULL, Time = NULL,
-  Region = NULL, parameters = NULL)
+Estimate_mean_W_F(
+  weight.data,
+  TotalWt,
+  GonadFrWt = NULL,
+  Time = NULL,
+  Region = NULL,
+  parameters = NULL
+)
 }
 \arguments{
 \item{weight.data}{Adult data used to calculate the mean total female weight (W). This data set should ONLY include

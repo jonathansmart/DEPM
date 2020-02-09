@@ -453,7 +453,7 @@ Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL,
     # Get the unfixed parameters from first run and  use them as new starting pararmeters
     # This time the fixed parameters (the ones which are estimated appropriately firsttime),
     # Won't be estimated so the original Val and var remain the same.
-    new_start_pars <- filter(first_Derived_Quants, Parameter %in% names(unlist(start_pars)))
+    new_start_pars <- dplyr::filter(first_Derived_Quants, Parameter %in% names(unlist(start_pars)))
     new_start_pars <- as.list(new_start_pars[,2])
     names(new_start_pars) <- names(unlist(start_pars))
 
@@ -467,15 +467,15 @@ Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL,
     # This time the derived quants are the final estimates
     Derived_Quants <- create_TMB_sd_report_data.frame(summary(second_rep))
 
-    Final_parameters <- suppressWarnings(bind_rows(
-      filter(first_Derived_Quants,
+    Final_parameters <- suppressWarnings(dplyr::bind_rows(
+      dplyr::filter(first_Derived_Quants,
              Parameter %in% names(unlist(start_pars)),
              Parameter  %in% names(unlist(fixed_pars))),
-      filter(Derived_Quants,
+      dplyr::filter(Derived_Quants,
              Parameter %in% names(unlist(start_pars)),
              !Parameter  %in% names(unlist(fixed_pars)))
     ))
-    Final_parameters <- arrange(Final_parameters, Parameter)
+    Final_parameters <- dplyr::arrange(Final_parameters, Parameter)
 
 
   }else{
@@ -494,7 +494,7 @@ Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL,
     # get the predictions and parameters with standard errors from TMB
     Derived_Quants <- create_TMB_sd_report_data.frame(summary(rep))
 
-    Final_parameters <- filter(Derived_Quants, Parameter %in% names(unlist(start_pars)))
+    Final_parameters <- dplyr::filter(Derived_Quants, Parameter %in% names(unlist(start_pars)))
   }
 
 

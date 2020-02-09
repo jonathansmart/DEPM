@@ -4,8 +4,14 @@
 \alias{Estimate_Batch_Fecundity}
 \title{Estimate batch fecundity}
 \usage{
-Estimate_Batch_Fecundity(data, start_pars, prediction.int = NULL,
-  return.parameters = FALSE, fixed.pars = NULL, verbose = FALSE)
+Estimate_Batch_Fecundity(
+  data,
+  start_pars,
+  prediction.int = NULL,
+  return.parameters = FALSE,
+  fixed.pars = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{data}{A dataframe with 2 numeric variables: Fish weight and fecundity (number of eggs). Names and order are not important
@@ -22,11 +28,14 @@ as the larger of the two variables is assumed to be number of eggs and is automa
 \item{verbose}{If TRUE, parameter estimates are printed to the screen}
 }
 \value{
-Parameter estimates are automatically printed to the screen. If a prediction interval is provided then predicted fecundity-at-weight
-    is provided at those intervals. If no prediction interval is provided than predictions for the raw data are returned. Variance (Var) is
-    returned for both options. if `return.parameters == TRUE`, parameter estimates are returned instead of estimates
+If a prediction interval is provided then predicted fecundity-at-weight is provided at those intervals
+    with their variance and standard error. If no prediction interval is provided then predictions for the raw data are
+    returned with standard error and 95% confidence intervals. If `return.parameters == TRUE`, parameter estimates and their standard errors
+    are returned.
 }
 \description{
 Batch fecundity (number of eggs by female fish weight) is estimated with an allometric error structure allowing
     greater variance with increasing weight. This is estimated as a 4 parameter model where specified parameters can be fixed.
+    If fixed parameters are specified, then the modeling becomes a two-step process where all four parameters are estimated and
+    the resulting parameters estimates are then assigned to the fixed variables in a second phase of the model.
 }
