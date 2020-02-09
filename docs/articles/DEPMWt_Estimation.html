@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">DEPM</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
       </span>
     </div>
 
@@ -85,7 +85,7 @@
       <h1>DEPMWt Estimation</h1>
                         <h4 class="author">Jonathan Smart</h4>
             
-            <h4 class="date">2020-01-24</h4>
+            <h4 class="date">2020-02-10</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/jonathansmart/DEPM/blob/master/vignettes/DEPMWt_Estimation.Rmd"><code>vignettes/DEPMWt_Estimation.Rmd</code></a></small>
       <div class="hidden name"><code>DEPMWt_Estimation.Rmd</code></div>
@@ -95,13 +95,13 @@
     
     
 <p>Load the DEPM and tidyverse libraries.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(DEPM)
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(tidyverse)</code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(DEPM)</a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(tidyverse)</a></code></pre></div>
 <div id="introduction" class="section level1">
 <h1 class="hasAnchor">
 <a href="#introduction" class="anchor"></a>Introduction</h1>
-<p>A recent advancement in Daily Egg Production Methods (DEPM) is the development of the DEPMWt approach (McGarvey et al. in review ). This extends the traditional DEPM of Parker (1980; Lasker et al. 1985) by making explicit the dependence on body size of population numbers and fecundity of female fish. In place of overall means for body weight and batch fecundity, these DEPM inputs are broken down into weight bins. Accounting for the size-dependence of population structure and fecundity gives a more accurate description, notably when the population weight distribution is not normal or fecundity varies non-linearly.</p>
-<p>A second modification of traditional DEPM incorporated into this package is a method to estimate the daily egg production, P0, using a stage-based approach (McGarvey et al. 2018). The simplifies the estimation of P0 with no lumping of egg stages into discrete daily cohorts, no assumption that all fish spawn at a fixed hour of each day, and no need to infer egg mortality by regression for each survey from the often very highly variable tow sample measures of egg density. But prior values of egg mortality rate are assumed. The DEPM package includes functions to estimate DEPM inputs using data from egg surveys and adult sampling, and their standard errors. Final estimates and their standard errors of spawning biomass and total number of female spawners are obtained under both the DEPMWt and traditional DEPM approaches, and of absolute female population numbers by weight class using DEPMWt. Here, an example application of the DEPMWt approach is given using data from South Australian snapper (<em>Chrysophrys auratus</em>).</p>
+<p>A recent advancement in Daily Egg Production Methods (DEPM) is the development of the DEPMWt approach (McGarvey et al. in review ). This extends the traditional DEPM of Parker (1980; Lasker et al. 1985) by making explicit the dependence on body size of population numbers and fecundity of female fish. In place of overall means for body weight and batch fecundity, these DEPM inputs are broken down into weight bins. Accounting for the size-dependence of population structure and fecundity gives a more accurate description, notably when the population weight distribution is not normal or fecundity varies non-linearly.</p>
+<p>A second modification of traditional DEPM incorporated into this package is a method to estimate the daily egg production, P0, using a stage-based approach (McGarvey et al. 2018). The simplifies the estimation of P0 with no lumping of egg stages into discrete daily cohorts, no assumption that all fish spawn at a fixed hour of each day, and no need to infer egg mortality by regression for each survey from the often very highly variable tow sample measures of egg density. But prior values of egg mortality rate are assumed. The DEPM package includes functions to estimate DEPM inputs using data from egg surveys and adult sampling, and their standard errors. Final estimates and their standard errors of spawning biomass and total number of female spawners are obtained under both the DEPMWt and traditional DEPM approaches, and of absolute female population numbers by weight class using DEPMWt. Here, an example application of the DEPMWt approach is given using data from South Australian snapper (<em>Chrysophrys auratus</em>).</p>
 </div>
 <div id="necessary-data" class="section level1">
 <h1 class="hasAnchor">
@@ -125,26 +125,26 @@
 <div id="daily-egg-production-p_0" class="section level2">
 <h2 class="hasAnchor">
 <a href="#daily-egg-production-p_0" class="anchor"></a>Daily egg production (<span class="math inline">\(P_{0}\)</span>)</h2>
-<p>Daily egg production is estimated using a stage-based estimator (McGarvey et al. 2018) via the function <code><a href="../reference/Estimate_P0.html">Estimate_P0()</a></code> which requires a dataset that has been formatted as such:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># egg density structure</span>
-<span class="kw"><a href="https://rdrr.io/r/utils/str.html">str</a></span>(egg_data)
-<span class="co">#&gt; 'data.frame':    2961 obs. of  6 variables:</span>
-<span class="co">#&gt;  $ Region   : Factor w/ 4 levels "NGSV","NSG","SGSV",..: 1 1 1 1 1 1 1 1 1 1 ...</span>
-<span class="co">#&gt;  $ Site     : Factor w/ 329 levels "GV18_005","GV18_006",..: 1 2 3 4 5 6 7 8 9 10 ...</span>
-<span class="co">#&gt;  $ Stage_num: num  1 1 1 1 1 1 1 1 1 1 ...</span>
-<span class="co">#&gt;  $ Density  : num  0 0 0 0 0 0 0 0 0 0 ...</span>
-<span class="co">#&gt;  $ Age      : num  0.178 0.173 0.17 0.173 0.188 ...</span>
-<span class="co">#&gt;  $ Hatch    : num  1.3 1.26 1.24 1.26 1.36 ...</span>
-
-<span class="co"># egg density head()</span>
-<span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(egg_data)
-<span class="co">#&gt;   Region     Site Stage_num Density       Age    Hatch</span>
-<span class="co">#&gt; 1   NGSV GV18_005         1       0 0.1782736 1.295414</span>
-<span class="co">#&gt; 2   NGSV GV18_006         1       0 0.1730048 1.257129</span>
-<span class="co">#&gt; 3   NGSV GV18_007         1       0 0.1701226 1.236185</span>
-<span class="co">#&gt; 4   NGSV GV18_008         1       0 0.1727973 1.255621</span>
-<span class="co">#&gt; 5   NGSV GV18_013         1       0 0.1877140 1.364012</span>
-<span class="co">#&gt; 6   NGSV GV18_014         1       0 0.1839234 1.336468</span></code></pre></div>
+<p>Daily egg production is estimated using a stage-based estimator (McGarvey et al. 2018) via the function <code><a href="../reference/Estimate_P0.html">Estimate_P0()</a></code> which requires a dataset that has been formatted as such:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="co"># egg density structure</span></a>
+<a class="sourceLine" id="cb2-2" title="2"><span class="kw"><a href="https://rdrr.io/r/utils/str.html">str</a></span>(egg_data)</a>
+<a class="sourceLine" id="cb2-3" title="3"><span class="co">#&gt; 'data.frame':    2961 obs. of  6 variables:</span></a>
+<a class="sourceLine" id="cb2-4" title="4"><span class="co">#&gt;  $ Region   : Factor w/ 4 levels "NGSV","NSG","SGSV",..: 1 1 1 1 1 1 1 1 1 1 ...</span></a>
+<a class="sourceLine" id="cb2-5" title="5"><span class="co">#&gt;  $ Site     : Factor w/ 329 levels "GV18_005","GV18_006",..: 1 2 3 4 5 6 7 8 9 10 ...</span></a>
+<a class="sourceLine" id="cb2-6" title="6"><span class="co">#&gt;  $ Stage_num: num  1 1 1 1 1 1 1 1 1 1 ...</span></a>
+<a class="sourceLine" id="cb2-7" title="7"><span class="co">#&gt;  $ Density  : num  0 0 0 0 0 0 0 0 0 0 ...</span></a>
+<a class="sourceLine" id="cb2-8" title="8"><span class="co">#&gt;  $ Age      : num  0.178 0.173 0.17 0.173 0.188 ...</span></a>
+<a class="sourceLine" id="cb2-9" title="9"><span class="co">#&gt;  $ Hatch    : num  1.3 1.26 1.24 1.26 1.36 ...</span></a>
+<a class="sourceLine" id="cb2-10" title="10"></a>
+<a class="sourceLine" id="cb2-11" title="11"><span class="co"># egg density head()</span></a>
+<a class="sourceLine" id="cb2-12" title="12"><span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(egg_data)</a>
+<a class="sourceLine" id="cb2-13" title="13"><span class="co">#&gt;   Region     Site Stage_num Density       Age    Hatch</span></a>
+<a class="sourceLine" id="cb2-14" title="14"><span class="co">#&gt; 1   NGSV GV18_005         1       0 0.1782736 1.295414</span></a>
+<a class="sourceLine" id="cb2-15" title="15"><span class="co">#&gt; 2   NGSV GV18_006         1       0 0.1730048 1.257129</span></a>
+<a class="sourceLine" id="cb2-16" title="16"><span class="co">#&gt; 3   NGSV GV18_007         1       0 0.1701226 1.236185</span></a>
+<a class="sourceLine" id="cb2-17" title="17"><span class="co">#&gt; 4   NGSV GV18_008         1       0 0.1727973 1.255621</span></a>
+<a class="sourceLine" id="cb2-18" title="18"><span class="co">#&gt; 5   NGSV GV18_013         1       0 0.1877140 1.364012</span></a>
+<a class="sourceLine" id="cb2-19" title="19"><span class="co">#&gt; 6   NGSV GV18_014         1       0 0.1839234 1.336468</span></a></code></pre></div>
 <p>This dataset is in a long format where every row is a density estimate of the eggs in each stage of each sample. This dataset contains several columns that must include:</p>
 <ul>
 <li>Site - which represents each sample in the data (i.e. one plankton tow a location). It’s variable name must be specified as an argument using <code>site =</code>
@@ -156,70 +156,70 @@
 </ul>
 <p>Additional columns can be included in the dataset, so the user does not need to remove variables that could be useful to them later on. For example, in the <code>egg_data</code> dataset, the <code>Stage_num</code> variable represents the development stage of each density estimate in each sample. However as each row of this dataset is a different observation, this variable is not needed by the function.</p>
 <p>The function also has the ability to break the data down spatially and temporaly. If the <code>Region</code> and <code>Time</code> arguments are not used then <span class="math inline">\(P_{0}\)</span> will be estimated using all of the data. If you provide either <code>Region</code> or <code>Time</code> then a <span class="math inline">\(P_{0}\)</span> will be returned for each Region/Time combination. Therefore, a time series of data can analysed in a single function call. Here is an example using 4 DEPM surveys conducted in different areas but in the same year. The results are returned as a dataframe where each row is a survey and the estimate, standard error and specified mortality are returned.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># run P0 function</span>
-P0_results &lt;-<span class="st"> </span><span class="kw"><a href="../reference/Estimate_P0.html">Estimate_P0</a></span>(<span class="dt">data =</span> egg_data,
-                          <span class="dt">site =</span> <span class="st">"Site"</span>, 
-                          <span class="dt">Region =</span> <span class="st">"Region"</span>, 
-                          <span class="dt">Z =</span> .<span class="dv">4</span>)
-
-P0_results
-<span class="co">#&gt; # A tibble: 4 x 4</span>
-<span class="co">#&gt;   Region    P0  P0_se     Z</span>
-<span class="co">#&gt;   &lt;fct&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 NGSV   2.03  0.391    0.4</span>
-<span class="co">#&gt; 2 NSG    0.947 0.218    0.4</span>
-<span class="co">#&gt; 3 SGSV   0.527 0.129    0.4</span>
-<span class="co">#&gt; 4 SSG    0.725 0.0849   0.4</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="co"># run P0 function</span></a>
+<a class="sourceLine" id="cb3-2" title="2">P0_results &lt;-<span class="st"> </span><span class="kw"><a href="../reference/Estimate_P0.html">Estimate_P0</a></span>(<span class="dt">data =</span> egg_data,</a>
+<a class="sourceLine" id="cb3-3" title="3">                          <span class="dt">site =</span> <span class="st">"Site"</span>, </a>
+<a class="sourceLine" id="cb3-4" title="4">                          <span class="dt">Region =</span> <span class="st">"Region"</span>, </a>
+<a class="sourceLine" id="cb3-5" title="5">                          <span class="dt">Z =</span> <span class="fl">.4</span>)</a>
+<a class="sourceLine" id="cb3-6" title="6"></a>
+<a class="sourceLine" id="cb3-7" title="7">P0_results</a>
+<a class="sourceLine" id="cb3-8" title="8"><span class="co">#&gt; # A tibble: 4 x 4</span></a>
+<a class="sourceLine" id="cb3-9" title="9"><span class="co">#&gt;   Region    P0  P0_se     Z</span></a>
+<a class="sourceLine" id="cb3-10" title="10"><span class="co">#&gt;   &lt;fct&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;</span></a>
+<a class="sourceLine" id="cb3-11" title="11"><span class="co">#&gt; 1 NGSV   2.03  0.391    0.4</span></a>
+<a class="sourceLine" id="cb3-12" title="12"><span class="co">#&gt; 2 NSG    0.947 0.218    0.4</span></a>
+<a class="sourceLine" id="cb3-13" title="13"><span class="co">#&gt; 3 SGSV   0.527 0.129    0.4</span></a>
+<a class="sourceLine" id="cb3-14" title="14"><span class="co">#&gt; 4 SSG    0.725 0.0849   0.4</span></a></code></pre></div>
 </div>
 <div id="spawning-fraction-s" class="section level2">
 <h2 class="hasAnchor">
 <a href="#spawning-fraction-s" class="anchor"></a>Spawning fraction (<em>S</em>)</h2>
 <p>Spawning fraction is estimated using the function <code><a href="../reference/Estimate_Spawning_fraction.html">Estimate_Spawning_fraction()</a></code> which requires a dataset that has been formatted as two columns: 1) the number of females in spawning condition and 2)the total number of females. Each row represents a sample and the spawning fraction is estimated using a ratio estimator.</p>
 <p>The correct columns in the dataset will be detected by the function. The column with the total number of females should be called “Total”, “Tot” or something similar. The column with the number of spawning females can include the term “spawn” or “yes” depending on how your dataset is setup. Ours is named “yes” as we had a “yes” or “no” designation for spawning fish.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
-<span class="kw"><a href="https://rdrr.io/r/utils/str.html">str</a></span>(S_data)
-<span class="co">#&gt; 'data.frame':    20 obs. of  3 variables:</span>
-<span class="co">#&gt;  $ yes  : int  1 16 9 5 3 2 1 2 4 5 ...</span>
-<span class="co">#&gt;  $ no   : int  6 2 1 4 2 1 2 4 2 1 ...</span>
-<span class="co">#&gt;  $ Total: int  7 18 10 9 5 3 3 6 6 6 ...</span>
-
-<span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(S_data)
-<span class="co">#&gt;   yes no Total</span>
-<span class="co">#&gt; 1   1  6     7</span>
-<span class="co">#&gt; 2  16  2    18</span>
-<span class="co">#&gt; 3   9  1    10</span>
-<span class="co">#&gt; 4   5  4     9</span>
-<span class="co">#&gt; 5   3  2     5</span>
-<span class="co">#&gt; 6   2  1     3</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"></a>
+<a class="sourceLine" id="cb4-2" title="2"><span class="kw"><a href="https://rdrr.io/r/utils/str.html">str</a></span>(S_data)</a>
+<a class="sourceLine" id="cb4-3" title="3"><span class="co">#&gt; 'data.frame':    20 obs. of  3 variables:</span></a>
+<a class="sourceLine" id="cb4-4" title="4"><span class="co">#&gt;  $ yes  : int  1 16 9 5 3 2 1 2 4 5 ...</span></a>
+<a class="sourceLine" id="cb4-5" title="5"><span class="co">#&gt;  $ no   : int  6 2 1 4 2 1 2 4 2 1 ...</span></a>
+<a class="sourceLine" id="cb4-6" title="6"><span class="co">#&gt;  $ Total: int  7 18 10 9 5 3 3 6 6 6 ...</span></a>
+<a class="sourceLine" id="cb4-7" title="7"></a>
+<a class="sourceLine" id="cb4-8" title="8"><span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(S_data)</a>
+<a class="sourceLine" id="cb4-9" title="9"><span class="co">#&gt;   yes no Total</span></a>
+<a class="sourceLine" id="cb4-10" title="10"><span class="co">#&gt; 1   1  6     7</span></a>
+<a class="sourceLine" id="cb4-11" title="11"><span class="co">#&gt; 2  16  2    18</span></a>
+<a class="sourceLine" id="cb4-12" title="12"><span class="co">#&gt; 3   9  1    10</span></a>
+<a class="sourceLine" id="cb4-13" title="13"><span class="co">#&gt; 4   5  4     9</span></a>
+<a class="sourceLine" id="cb4-14" title="14"><span class="co">#&gt; 5   3  2     5</span></a>
+<a class="sourceLine" id="cb4-15" title="15"><span class="co">#&gt; 6   2  1     3</span></a></code></pre></div>
 <p>Similar to other functions, specifying the <code>Region</code> or <code>Time</code> argument with relevant column names will group the estimates according to specific surveys. However, here an example is given without a region or time grouping. The results are returned as a dataframe with the estimate, its variance, the standard error and its CV. Each row represents a survey.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Spawn_results &lt;-<span class="st"> </span><span class="kw"><a href="../reference/Estimate_Spawning_fraction.html">Estimate_Spawning_fraction</a></span>(S_data)
-
-Spawn_results
-<span class="co">#&gt;   Ratio estimate    Variance         SE         CV</span>
-<span class="co">#&gt; 1       0.722488 0.002977749 0.05456875 0.07552894</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1">Spawn_results &lt;-<span class="st"> </span><span class="kw"><a href="../reference/Estimate_Spawning_fraction.html">Estimate_Spawning_fraction</a></span>(S_data)</a>
+<a class="sourceLine" id="cb5-2" title="2"></a>
+<a class="sourceLine" id="cb5-3" title="3">Spawn_results</a>
+<a class="sourceLine" id="cb5-4" title="4"><span class="co">#&gt;   Ratio estimate    Variance         SE         CV</span></a>
+<a class="sourceLine" id="cb5-5" title="5"><span class="co">#&gt; 1       0.722488 0.002977749 0.05456875 0.07552894</span></a></code></pre></div>
 </div>
 <div id="sex-ratio-r" class="section level2">
 <h2 class="hasAnchor">
 <a href="#sex-ratio-r" class="anchor"></a>Sex Ratio (R)</h2>
 <p>Sex ratio is estimated using the function <code><a href="../reference/Estimate_sex_ratio.html">Estimate_sex_ratio()</a></code> which requires a dataset that has been formatted to include the weight of males and females along with <code>Region</code>/<code>Time</code> variables. Each row represents a sample and the sex ratio is estimated using a ratio estimator in the same manner as spawning fraction. The same Region/Time break down can be applied and Region is available in this dataset. The results returned are the same format as <code><a href="../reference/Estimate_Spawning_fraction.html">Estimate_Spawning_fraction()</a></code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
-<span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(R_data)
-<span class="co">#&gt;           Sample.code Year Region        F        M    Total</span>
-<span class="co">#&gt; 1 ST12/1801B18-Dec-18 2018   NGSV  2.45000  6.42500  8.87500</span>
-<span class="co">#&gt; 2 ZA12/1801B19-Dec-18 2018   NGSV 11.54800 10.83200 22.38000</span>
-<span class="co">#&gt; 3 DC12/1801B11-Dec-18 2018    NSG  8.95600 16.22400 25.18000</span>
-<span class="co">#&gt; 4 SA12/1801B12-Dec-18 2018    NSG  2.94000  7.18500 10.12500</span>
-<span class="co">#&gt; 5     GLLOYD16-Dec-18 2018   SGSV 43.33143 51.11838 94.44980</span>
-<span class="co">#&gt; 6     GLLOYD17-Dec-18 2018   SGSV 20.28760 16.20903 36.49663</span>
-
-sex_ratio_results &lt;-<span class="st"> </span><span class="kw"><a href="../reference/Estimate_sex_ratio.html">Estimate_sex_ratio</a></span>(R_data, <span class="dt">Region =</span> <span class="st">"Region"</span>)
-
-sex_ratio_results
-<span class="co">#&gt;   Region Ratio estimate     Variance         SE         CV</span>
-<span class="co">#&gt; 1   NGSV      0.4478643 0.0095201654 0.09757133 0.21785913</span>
-<span class="co">#&gt; 2    NSG      0.3369494 0.0007137716 0.02671650 0.07928936</span>
-<span class="co">#&gt; 3   SGSV      0.3939694 0.0011661437 0.03414885 0.08667892</span>
-<span class="co">#&gt; 4    SSG      0.5741385 0.0018484630 0.04299376 0.07488394</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"></a>
+<a class="sourceLine" id="cb6-2" title="2"><span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(R_data)</a>
+<a class="sourceLine" id="cb6-3" title="3"><span class="co">#&gt;           Sample.code Year Region        F        M    Total</span></a>
+<a class="sourceLine" id="cb6-4" title="4"><span class="co">#&gt; 1 ST12/1801B18-Dec-18 2018   NGSV  2.45000  6.42500  8.87500</span></a>
+<a class="sourceLine" id="cb6-5" title="5"><span class="co">#&gt; 2 ZA12/1801B19-Dec-18 2018   NGSV 11.54800 10.83200 22.38000</span></a>
+<a class="sourceLine" id="cb6-6" title="6"><span class="co">#&gt; 3 DC12/1801B11-Dec-18 2018    NSG  8.95600 16.22400 25.18000</span></a>
+<a class="sourceLine" id="cb6-7" title="7"><span class="co">#&gt; 4 SA12/1801B12-Dec-18 2018    NSG  2.94000  7.18500 10.12500</span></a>
+<a class="sourceLine" id="cb6-8" title="8"><span class="co">#&gt; 5     GLLOYD16-Dec-18 2018   SGSV 43.33143 51.11838 94.44980</span></a>
+<a class="sourceLine" id="cb6-9" title="9"><span class="co">#&gt; 6     GLLOYD17-Dec-18 2018   SGSV 20.28760 16.20903 36.49663</span></a>
+<a class="sourceLine" id="cb6-10" title="10"></a>
+<a class="sourceLine" id="cb6-11" title="11">sex_ratio_results &lt;-<span class="st"> </span><span class="kw"><a href="../reference/Estimate_sex_ratio.html">Estimate_sex_ratio</a></span>(R_data, <span class="dt">Region =</span> <span class="st">"Region"</span>)</a>
+<a class="sourceLine" id="cb6-12" title="12"></a>
+<a class="sourceLine" id="cb6-13" title="13">sex_ratio_results</a>
+<a class="sourceLine" id="cb6-14" title="14"><span class="co">#&gt;   Region Ratio estimate     Variance         SE         CV</span></a>
+<a class="sourceLine" id="cb6-15" title="15"><span class="co">#&gt; 1   NGSV      0.4478643 0.0095201654 0.09757133 0.21785913</span></a>
+<a class="sourceLine" id="cb6-16" title="16"><span class="co">#&gt; 2    NSG      0.3369494 0.0007137716 0.02671650 0.07928936</span></a>
+<a class="sourceLine" id="cb6-17" title="17"><span class="co">#&gt; 3   SGSV      0.3939694 0.0011661437 0.03414885 0.08667892</span></a>
+<a class="sourceLine" id="cb6-18" title="18"><span class="co">#&gt; 4    SSG      0.5741385 0.0018484630 0.04299376 0.07488394</span></a></code></pre></div>
 </div>
 <div id="female-weight-data" class="section level2">
 <h2 class="hasAnchor">
@@ -227,41 +227,41 @@ sex_ratio_results
 <p>The key difference between the DEPMWt approach and the traditional DEPM is how female weight and fecundity are handled. In the DEPMWt approach, female weight is broken into discrete weight bins and their variance is described using a multinomial distribution. This is handled by the <code><a href="../reference/Estimate_proportion_female.html">Estimate_proportion_female()</a></code> function which requires a dataframe of total female weight. This dataframe only needs one column but this does not need to be subset from a larger dataset as the column is specified by the <code>Weight</code> argument. Other columns are ignored unless (like other parameter functions), a <code>Region</code> or <code>Time</code> argument is specified.</p>
 <p>To break the female weights into bins, an upper bound and a bin width is required. In this example, 27 weight bins are applied for Snapper beginning at zero and ending at 13500g in 500g bins.</p>
 <p><strong>NOTE: Weight data must be Total Weight in grams</strong></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(Wt_data)
-<span class="co">#&gt;   Region CFL  Tot.Wt</span>
-<span class="co">#&gt; 1    NSG 627 4002.11</span>
-<span class="co">#&gt; 2    NSG 657 4551.52</span>
-<span class="co">#&gt; 3    NSG 610 3710.49</span>
-<span class="co">#&gt; 4    NSG 693 5271.38</span>
-<span class="co">#&gt; 5    NSG 593 3432.78</span>
-<span class="co">#&gt; 6    NSG 557 2889.23</span>
-
-Prop_fem_results &lt;-<span class="st"> </span><span class="kw"><a href="../reference/Estimate_proportion_female.html">Estimate_proportion_female</a></span>(Wt_data, 
-                                               <span class="dt">Weight =</span>  <span class="st">"Tot.Wt"</span>,
-                                               <span class="dt">max.weight =</span> <span class="dv">13500</span>,
-                                               <span class="dt">bin.width =</span> <span class="dv">500</span>,
-                                               <span class="dt">Region =</span> <span class="st">"Region"</span>)</code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(Wt_data)</a>
+<a class="sourceLine" id="cb7-2" title="2"><span class="co">#&gt;   Region CFL  Tot.Wt</span></a>
+<a class="sourceLine" id="cb7-3" title="3"><span class="co">#&gt; 1    NSG 627 4002.11</span></a>
+<a class="sourceLine" id="cb7-4" title="4"><span class="co">#&gt; 2    NSG 657 4551.52</span></a>
+<a class="sourceLine" id="cb7-5" title="5"><span class="co">#&gt; 3    NSG 610 3710.49</span></a>
+<a class="sourceLine" id="cb7-6" title="6"><span class="co">#&gt; 4    NSG 693 5271.38</span></a>
+<a class="sourceLine" id="cb7-7" title="7"><span class="co">#&gt; 5    NSG 593 3432.78</span></a>
+<a class="sourceLine" id="cb7-8" title="8"><span class="co">#&gt; 6    NSG 557 2889.23</span></a>
+<a class="sourceLine" id="cb7-9" title="9"></a>
+<a class="sourceLine" id="cb7-10" title="10">Prop_fem_results &lt;-<span class="st"> </span><span class="kw"><a href="../reference/Estimate_proportion_female.html">Estimate_proportion_female</a></span>(Wt_data, </a>
+<a class="sourceLine" id="cb7-11" title="11">                                               <span class="dt">Weight =</span>  <span class="st">"Tot.Wt"</span>,</a>
+<a class="sourceLine" id="cb7-12" title="12">                                               <span class="dt">max.weight =</span> <span class="dv">13500</span>,</a>
+<a class="sourceLine" id="cb7-13" title="13">                                               <span class="dt">bin.width =</span> <span class="dv">500</span>,</a>
+<a class="sourceLine" id="cb7-14" title="14">                                               <span class="dt">Region =</span> <span class="st">"Region"</span>)</a></code></pre></div>
 <p>The returned results are the weight bin number (not the weight of the bin), sample size, proportion of females in each bin and the multinomial variance of the bins. Here <code>Region</code> is specified so these values are grouped according.</p>
 <p>The proportions of females in each weight bin and their standard deviations (calculated from the variances) demonstrate how this data is not normally distributed. Therefore, this is now explicitly included in the biomass estimates along with much more precise estimates of variance.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
-<span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(Prop_fem_results)
-<span class="co">#&gt; # A tibble: 6 x 5</span>
-<span class="co">#&gt; # Groups:   Region [4]</span>
-<span class="co">#&gt;   Region Wt_bin     n   Prop Prop_var</span>
-<span class="co">#&gt;   &lt;fct&gt;   &lt;int&gt; &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 NGSV        1     8 0.0392 0.000185</span>
-<span class="co">#&gt; 2 NSG         1     6 0.0392 0.000246</span>
-<span class="co">#&gt; 3 SGSV        1     3 0.024  0.000187</span>
-<span class="co">#&gt; 4 SSG         1    14 0.194  0.00218 </span>
-<span class="co">#&gt; 5 NGSV        2    25 0.123  0.000527</span>
-<span class="co">#&gt; 6 NSG         2    44 0.288  0.00134</span>
-
-<span class="kw">ggplot</span>(Prop_fem_results, 
-       <span class="kw">aes</span>(Wt_bin, Prop, <span class="dt">ymin =</span> Prop<span class="op">-</span><span class="kw"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span>(Prop_var), <span class="dt">ymax =</span> Prop <span class="op">+</span><span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span>(Prop_var)))<span class="op">+</span>
-<span class="st">  </span><span class="kw">geom_col</span>()<span class="op">+</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">geom_errorbar</span>()<span class="op">+</span>
-<span class="st">  </span><span class="kw">facet_wrap</span>(<span class="op">~</span>Region)<span class="op">+</span>
-<span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"></a>
+<a class="sourceLine" id="cb8-2" title="2"><span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(Prop_fem_results)</a>
+<a class="sourceLine" id="cb8-3" title="3"><span class="co">#&gt; # A tibble: 6 x 5</span></a>
+<a class="sourceLine" id="cb8-4" title="4"><span class="co">#&gt; # Groups:   Region [4]</span></a>
+<a class="sourceLine" id="cb8-5" title="5"><span class="co">#&gt;   Region Wt_bin     n   Prop Prop_var</span></a>
+<a class="sourceLine" id="cb8-6" title="6"><span class="co">#&gt;   &lt;fct&gt;   &lt;int&gt; &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;</span></a>
+<a class="sourceLine" id="cb8-7" title="7"><span class="co">#&gt; 1 NGSV        1     8 0.0392 0.000185</span></a>
+<a class="sourceLine" id="cb8-8" title="8"><span class="co">#&gt; 2 NSG         1     6 0.0392 0.000246</span></a>
+<a class="sourceLine" id="cb8-9" title="9"><span class="co">#&gt; 3 SGSV        1     3 0.024  0.000187</span></a>
+<a class="sourceLine" id="cb8-10" title="10"><span class="co">#&gt; 4 SSG         1    14 0.194  0.00218 </span></a>
+<a class="sourceLine" id="cb8-11" title="11"><span class="co">#&gt; 5 NGSV        2    25 0.123  0.000527</span></a>
+<a class="sourceLine" id="cb8-12" title="12"><span class="co">#&gt; 6 NSG         2    44 0.288  0.00134</span></a>
+<a class="sourceLine" id="cb8-13" title="13"></a>
+<a class="sourceLine" id="cb8-14" title="14"><span class="kw">ggplot</span>(Prop_fem_results, </a>
+<a class="sourceLine" id="cb8-15" title="15">       <span class="kw">aes</span>(Wt_bin, Prop, <span class="dt">ymin =</span> Prop<span class="op">-</span><span class="kw"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span>(Prop_var), <span class="dt">ymax =</span> Prop <span class="op">+</span><span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span>(Prop_var)))<span class="op">+</span></a>
+<a class="sourceLine" id="cb8-16" title="16"><span class="st">  </span><span class="kw">geom_col</span>()<span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb8-17" title="17"><span class="st">  </span><span class="kw">geom_errorbar</span>()<span class="op">+</span></a>
+<a class="sourceLine" id="cb8-18" title="18"><span class="st">  </span><span class="kw">facet_wrap</span>(<span class="op">~</span>Region)<span class="op">+</span></a>
+<a class="sourceLine" id="cb8-19" title="19"><span class="st">  </span><span class="kw">theme_bw</span>()</a></code></pre></div>
 <p><img src="DEPMWt_Estimation_files/figure-html/unnamed-chunk-9-1.png" width="576"></p>
 </div>
 <div id="fecundity-at-weight" class="section level2">
@@ -274,75 +274,103 @@ Prop_fem_results &lt;-<span class="st"> </span><span class="kw"><a href="../refe
 <li>A dataframe with the predicted fecundity at specified weights and their variance. By providing the mid-points of weight bins, this will return the fecundity-at-weight for each bin and becomes the new inputs for estimating biomass.</li>
 </ul>
 <p>The batch fecundity relationship estimator uses an allometric relationship which allows for wider variance with larger weights. Therefore, there are four parameters returned, alpha, beta and two sigma parameters that determine how variance changes with weight. A dataframe with two columns must be provided that includes <strong>Total weight in grams</strong> and the number of eggs for that fish. The function will determine which is which based on their scales (number of eggs &gt; Wt in grams). A set of starting parameters are required and are provided to the <code>start_pars</code> argument as a list. The estimated parameters are printed to the screen if <code>verbose = TRUE</code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
-<span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(fecundity_data_TotWT)
-<span class="co">#&gt;   Total_Wt batch_fecund</span>
-<span class="co">#&gt; 1     5725     394035.7</span>
-<span class="co">#&gt; 2     7080     309483.9</span>
-<span class="co">#&gt; 3     7870     494000.0</span>
-<span class="co">#&gt; 4     5635     371710.5</span>
-<span class="co">#&gt; 5     8000     626406.2</span>
-<span class="co">#&gt; 6     8975     570789.5</span>
-
-<span class="co"># List of starting parameters for the batch fecundity estimator</span>
-parameters &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/list.html">list</a></span>( <span class="dt">alpha=</span> <span class="dv">110</span>, <span class="dt">beta =</span> <span class="fl">0.85</span> , <span class="dt">Sigma0 =</span> <span class="fl">10.5</span>, <span class="dt">Sigma1 =</span> <span class="fl">0.7</span>)
-
-<span class="co"># Return parameters</span>
-<span class="kw"><a href="../reference/Estimate_Batch_Fecundity.html">Estimate_Batch_Fecundity</a></span>(fecundity_data_TotWT, <span class="dt">start_pars =</span> parameters, <span class="dt">return.parameters =</span> <span class="ot">TRUE</span>)
-<span class="co">#&gt;   Parameter         Val         var</span>
-<span class="co">#&gt; 1     alpha 118.1105923 57.97564448</span>
-<span class="co">#&gt; 2      beta   0.9215988  0.05831767</span>
-<span class="co">#&gt; 3    Sigma0  11.0284006 12.06341963</span>
-<span class="co">#&gt; 4    Sigma1   0.7440693  0.08895222</span>
-
-<span class="co"># Return batch fecundity estimates</span>
-Batch_fecundity_relationship &lt;-<span class="st"> </span><span class="kw"><a href="../reference/Estimate_Batch_Fecundity.html">Estimate_Batch_Fecundity</a></span>(fecundity_data_TotWT, <span class="dt">start_pars =</span> parameters, <span class="dt">verbose =</span> <span class="ot">FALSE</span>)
-
-<span class="co">#plot of relationship</span>
-<span class="kw">ggplot</span>(Batch_fecundity_relationship, <span class="kw">aes</span>(Wt, <span class="dt">y =</span> Predicted, <span class="dt">ymin =</span> low, <span class="dt">ymax  =</span> upp))<span class="op">+</span>
-<span class="st">  </span><span class="kw">geom_ribbon</span>( <span class="dt">alpha =</span> .<span class="dv">3</span>)<span class="op">+</span>
-<span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> scales<span class="op">::</span>comma)<span class="op">+</span>
-<span class="st">  </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(<span class="dt">y =</span> Fecundity), <span class="dt">alpha =</span> .<span class="dv">3</span>)<span class="op">+</span>
-<span class="st">  </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">y =</span> Predicted), <span class="dt">col =</span> <span class="st">"royalblue"</span>, <span class="dt">size =</span> <span class="dv">1</span>) <span class="op">+</span>
-<span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"></a>
+<a class="sourceLine" id="cb9-2" title="2"><span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(fecundity_data_TotWT)</a>
+<a class="sourceLine" id="cb9-3" title="3"><span class="co">#&gt;   Total_Wt batch_fecund</span></a>
+<a class="sourceLine" id="cb9-4" title="4"><span class="co">#&gt; 1     5725     394035.7</span></a>
+<a class="sourceLine" id="cb9-5" title="5"><span class="co">#&gt; 2     7080     309483.9</span></a>
+<a class="sourceLine" id="cb9-6" title="6"><span class="co">#&gt; 3     7870     494000.0</span></a>
+<a class="sourceLine" id="cb9-7" title="7"><span class="co">#&gt; 4     5635     371710.5</span></a>
+<a class="sourceLine" id="cb9-8" title="8"><span class="co">#&gt; 5     8000     626406.2</span></a>
+<a class="sourceLine" id="cb9-9" title="9"><span class="co">#&gt; 6     8975     570789.5</span></a>
+<a class="sourceLine" id="cb9-10" title="10"></a>
+<a class="sourceLine" id="cb9-11" title="11"><span class="co"># List of starting parameters for the batch fecundity estimator</span></a>
+<a class="sourceLine" id="cb9-12" title="12">parameters &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/list.html">list</a></span>( <span class="dt">alpha=</span> <span class="dv">110</span>, <span class="dt">beta =</span> <span class="fl">0.85</span> , <span class="dt">Sigma0 =</span> <span class="fl">10.5</span>, <span class="dt">Sigma1 =</span> <span class="fl">0.7</span>)</a>
+<a class="sourceLine" id="cb9-13" title="13"></a>
+<a class="sourceLine" id="cb9-14" title="14"><span class="co"># Return parameters</span></a>
+<a class="sourceLine" id="cb9-15" title="15"><span class="kw"><a href="../reference/Estimate_Batch_Fecundity.html">Estimate_Batch_Fecundity</a></span>(fecundity_data_TotWT, </a>
+<a class="sourceLine" id="cb9-16" title="16">                         <span class="dt">start_pars =</span> parameters, </a>
+<a class="sourceLine" id="cb9-17" title="17">                         <span class="dt">fixed.pars =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"Sigma1"</span>, <span class="st">"beta"</span>),</a>
+<a class="sourceLine" id="cb9-18" title="18">                         <span class="dt">return.parameters =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb9-19" title="19"><span class="co">#&gt;   Parameter         Val        var</span></a>
+<a class="sourceLine" id="cb9-20" title="20"><span class="co">#&gt; 1     alpha 118.1105923 5.27749586</span></a>
+<a class="sourceLine" id="cb9-21" title="21"><span class="co">#&gt; 2      beta   0.9215988 0.05831527</span></a>
+<a class="sourceLine" id="cb9-22" title="22"><span class="co">#&gt; 3    Sigma0  11.0283990 0.82902584</span></a>
+<a class="sourceLine" id="cb9-23" title="23"><span class="co">#&gt; 4    Sigma1   0.7440693 0.08894361</span></a>
+<a class="sourceLine" id="cb9-24" title="24"></a>
+<a class="sourceLine" id="cb9-25" title="25"><span class="co"># Return batch fecundity estimates</span></a>
+<a class="sourceLine" id="cb9-26" title="26">Batch_fecundity_relationship &lt;-<span class="st"> </span><span class="kw"><a href="../reference/Estimate_Batch_Fecundity.html">Estimate_Batch_Fecundity</a></span>(fecundity_data_TotWT, </a>
+<a class="sourceLine" id="cb9-27" title="27">                                                         <span class="dt">fixed.pars =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"Sigma1"</span>, <span class="st">"beta"</span>),</a>
+<a class="sourceLine" id="cb9-28" title="28">                                                         <span class="dt">start_pars =</span> parameters, <span class="dt">verbose =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb9-29" title="29"></a>
+<a class="sourceLine" id="cb9-30" title="30"><span class="co">#plot of relationship</span></a>
+<a class="sourceLine" id="cb9-31" title="31"><span class="kw">ggplot</span>(Batch_fecundity_relationship, <span class="kw">aes</span>(Wt, <span class="dt">y =</span> Predicted, <span class="dt">ymin =</span> low, <span class="dt">ymax  =</span> upp))<span class="op">+</span></a>
+<a class="sourceLine" id="cb9-32" title="32"><span class="st">  </span><span class="kw">geom_ribbon</span>( <span class="dt">alpha =</span> <span class="fl">.3</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb9-33" title="33"><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> scales<span class="op">::</span>comma)<span class="op">+</span></a>
+<a class="sourceLine" id="cb9-34" title="34"><span class="st">  </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(<span class="dt">y =</span> Fecundity), <span class="dt">alpha =</span> <span class="fl">.3</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb9-35" title="35"><span class="st">  </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">y =</span> Predicted), <span class="dt">col =</span> <span class="st">"royalblue"</span>, <span class="dt">size =</span> <span class="dv">1</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb9-36" title="36"><span class="st">  </span><span class="kw">theme_bw</span>()</a></code></pre></div>
 <p><img src="DEPMWt_Estimation_files/figure-html/unnamed-chunk-10-1.png" width="576"></p>
-<p>In order to determine the fecundity for each weight bin, the mid-points of those bins are provided to the <code>predition.int</code> argument as a vector. A dataframe is then returned with the weight bin mid point, the estimate of fecundity at that weight and its variance.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># The mid points of each weight bin need to be used to estimate fecundity.</span>
-mid_points &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/seq.html">seq</a></span>(<span class="dv">250</span>, <span class="dv">13500</span>, <span class="dv">500</span>)
-
-
-<span class="co"># Estimates for biomass calculation</span>
-fecundity_at_Wtbins &lt;-<span class="st"> </span><span class="kw"><a href="../reference/Estimate_Batch_Fecundity.html">Estimate_Batch_Fecundity</a></span>(fecundity_data_TotWT, <span class="dt">start_pars =</span> parameters, <span class="dt">prediction.int =</span> mid_points, <span class="dt">verbose =</span> <span class="ot">FALSE</span>)
-
-<span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(fecundity_at_Wtbins)
-<span class="co">#&gt;     Wt Fecundity        Var</span>
-<span class="co">#&gt; 1  250  19152.59  286796137</span>
-<span class="co">#&gt; 2  750  52715.92 1293985026</span>
-<span class="co">#&gt; 3 1250  84410.67 2607278612</span>
-<span class="co">#&gt; 4 1750 115098.27 4136158659</span>
-<span class="co">#&gt; 5 2250 145096.25 5838283824</span>
-<span class="co">#&gt; 6 2750 174571.64 7687918584</span></code></pre></div>
+<p>In order to determine the fecundity for each weight bin, the mid-points of those bins are provided to the <code>predition.int</code> argument as a vector. A dataframe is then returned with the weight bin mid point, the estimate of fecundity at that weight and its variance and SE.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="co"># The mid points of each weight bin need to be used to estimate fecundity.</span></a>
+<a class="sourceLine" id="cb10-2" title="2">mid_points &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/seq.html">seq</a></span>(<span class="dv">250</span>, <span class="dv">13500</span>, <span class="dv">500</span>)</a>
+<a class="sourceLine" id="cb10-3" title="3"></a>
+<a class="sourceLine" id="cb10-4" title="4"></a>
+<a class="sourceLine" id="cb10-5" title="5"><span class="co"># Estimates for biomass calculation</span></a>
+<a class="sourceLine" id="cb10-6" title="6">fecundity_at_Wtbins &lt;-<span class="st"> </span><span class="kw"><a href="../reference/Estimate_Batch_Fecundity.html">Estimate_Batch_Fecundity</a></span>(fecundity_data_TotWT, </a>
+<a class="sourceLine" id="cb10-7" title="7">                                                <span class="dt">start_pars =</span> parameters,</a>
+<a class="sourceLine" id="cb10-8" title="8">                                                <span class="dt">fixed.pars =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"Sigma1"</span>, <span class="st">"beta"</span>),</a>
+<a class="sourceLine" id="cb10-9" title="9">                                                <span class="dt">prediction.int =</span> mid_points, </a>
+<a class="sourceLine" id="cb10-10" title="10">                                                <span class="dt">verbose =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb10-11" title="11"></a>
+<a class="sourceLine" id="cb10-12" title="12"><span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(fecundity_at_Wtbins)</a>
+<a class="sourceLine" id="cb10-13" title="13"><span class="co">#&gt;     Wt Fecundity        Var        SE</span></a>
+<a class="sourceLine" id="cb10-14" title="14"><span class="co">#&gt; 1  250  19152.59   732374.3  855.7887</span></a>
+<a class="sourceLine" id="cb10-15" title="15"><span class="co">#&gt; 2  750  52715.93  5548324.2 2355.4881</span></a>
+<a class="sourceLine" id="cb10-16" title="16"><span class="co">#&gt; 3 1250  84410.68 14225675.9 3771.6940</span></a>
+<a class="sourceLine" id="cb10-17" title="17"><span class="co">#&gt; 4 1750 115098.28 26449395.8 5142.8976</span></a>
+<a class="sourceLine" id="cb10-18" title="18"><span class="co">#&gt; 5 2250 145096.27 42033018.6 6483.2876</span></a>
+<a class="sourceLine" id="cb10-19" title="19"><span class="co">#&gt; 6 2750 174571.66 60845095.1 7800.3266</span></a></code></pre></div>
+<p>This function can also automatically estimate batch fecundity by allowing some of the parameters to be fixed. This is performed using the <code>fixed.pars</code> argument which requires a vector with the listed parameters to be fixed. Determining whether this is necessary is done by running the function and returning the parameters.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="kw"><a href="../reference/Estimate_Batch_Fecundity.html">Estimate_Batch_Fecundity</a></span>(fecundity_data_TotWT, </a>
+<a class="sourceLine" id="cb11-2" title="2">                         <span class="dt">start_pars =</span> parameters, </a>
+<a class="sourceLine" id="cb11-3" title="3">                         <span class="dt">return.parameters =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb11-4" title="4"><span class="co">#&gt;   Parameter         Val         var</span></a>
+<a class="sourceLine" id="cb11-5" title="5"><span class="co">#&gt; 1     alpha 118.1105923 57.97564446</span></a>
+<a class="sourceLine" id="cb11-6" title="6"><span class="co">#&gt; 2      beta   0.9215988  0.05831767</span></a>
+<a class="sourceLine" id="cb11-7" title="7"><span class="co">#&gt; 3    Sigma0  11.0284006 12.06341963</span></a>
+<a class="sourceLine" id="cb11-8" title="8"><span class="co">#&gt; 4    Sigma1   0.7440693  0.08895222</span></a></code></pre></div>
+<p>For South Australian Snapper, the variances of the alpha and Sigma0 parameters are clearly overestimated. The function fixes this by running the model twice; once with all four parameters estimated and then again with the fixed parameters (ones which were estimated correctly the first time) held at their estimates from the first model. For example:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1"><span class="kw"><a href="../reference/Estimate_Batch_Fecundity.html">Estimate_Batch_Fecundity</a></span>(fecundity_data_TotWT, </a>
+<a class="sourceLine" id="cb12-2" title="2">                         <span class="dt">start_pars =</span> parameters, </a>
+<a class="sourceLine" id="cb12-3" title="3">                         <span class="dt">fixed.pars =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"Sigma1"</span>, <span class="st">"beta"</span>),</a>
+<a class="sourceLine" id="cb12-4" title="4">                         <span class="dt">return.parameters =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb12-5" title="5"><span class="co">#&gt;   Parameter         Val        var</span></a>
+<a class="sourceLine" id="cb12-6" title="6"><span class="co">#&gt; 1     alpha 118.1105923 5.27749586</span></a>
+<a class="sourceLine" id="cb12-7" title="7"><span class="co">#&gt; 2      beta   0.9215988 0.05831527</span></a>
+<a class="sourceLine" id="cb12-8" title="8"><span class="co">#&gt; 3    Sigma0  11.0283990 0.82902584</span></a>
+<a class="sourceLine" id="cb12-9" title="9"><span class="co">#&gt; 4    Sigma1   0.7440693 0.08894361</span></a></code></pre></div>
 </div>
 <div id="spawning-area-a" class="section level2">
 <h2 class="hasAnchor">
 <a href="#spawning-area-a" class="anchor"></a>Spawning Area (<em>A</em>)</h2>
 <p>Spawning area is the only DEPM parameter that is not estimated in this package as this is typically done using GIS methods. However, the Spawning area object can be created manually by taking another parameter object (<em>P0, S</em> or <em>R</em> are good choices) and using its <code>Time</code>/<code>Region</code> groupings to create new object. As this example has one survey from 4 regions in a single year, only the <code>Region</code> variable needs to be carried across. A new variable can then be added with the location in the correct order in that column. Spawning Area is a precise quantity and therefore does not require a variance. Note that spawning area must be in metres squared.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Get Time/region combos from the P0 object</span>
-Area &lt;-<span class="st"> </span><span class="kw">select</span>(P0_results, Region)
-
-Area<span class="op">$</span>A &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">2822201039</span>, <span class="co">#NGSV</span>
-            <span class="dv">1884895030</span>, <span class="co"># NSG</span>
-            <span class="dv">2285649237</span>, <span class="co"># SGSV</span>
-            <span class="dv">3239913469</span>) <span class="co"># SSG</span>
-
-<span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(Area)
-<span class="co">#&gt; # A tibble: 4 x 2</span>
-<span class="co">#&gt;   Region          A</span>
-<span class="co">#&gt;   &lt;fct&gt;       &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 NGSV   2822201039</span>
-<span class="co">#&gt; 2 NSG    1884895030</span>
-<span class="co">#&gt; 3 SGSV   2285649237</span>
-<span class="co">#&gt; 4 SSG    3239913469</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="co"># Get Time/region combos from the P0 object</span></a>
+<a class="sourceLine" id="cb13-2" title="2">Area &lt;-<span class="st"> </span><span class="kw">select</span>(P0_results, Region)</a>
+<a class="sourceLine" id="cb13-3" title="3"></a>
+<a class="sourceLine" id="cb13-4" title="4">Area<span class="op">$</span>A &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">2822201039</span>, <span class="co">#NGSV</span></a>
+<a class="sourceLine" id="cb13-5" title="5">            <span class="dv">1884895030</span>, <span class="co"># NSG</span></a>
+<a class="sourceLine" id="cb13-6" title="6">            <span class="dv">2285649237</span>, <span class="co"># SGSV</span></a>
+<a class="sourceLine" id="cb13-7" title="7">            <span class="dv">3239913469</span>) <span class="co"># SSG</span></a>
+<a class="sourceLine" id="cb13-8" title="8"></a>
+<a class="sourceLine" id="cb13-9" title="9"><span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(Area)</a>
+<a class="sourceLine" id="cb13-10" title="10"><span class="co">#&gt; # A tibble: 4 x 2</span></a>
+<a class="sourceLine" id="cb13-11" title="11"><span class="co">#&gt;   Region          A</span></a>
+<a class="sourceLine" id="cb13-12" title="12"><span class="co">#&gt;   &lt;fct&gt;       &lt;dbl&gt;</span></a>
+<a class="sourceLine" id="cb13-13" title="13"><span class="co">#&gt; 1 NGSV   2822201039</span></a>
+<a class="sourceLine" id="cb13-14" title="14"><span class="co">#&gt; 2 NSG    1884895030</span></a>
+<a class="sourceLine" id="cb13-15" title="15"><span class="co">#&gt; 3 SGSV   2285649237</span></a>
+<a class="sourceLine" id="cb13-16" title="16"><span class="co">#&gt; 4 SSG    3239913469</span></a></code></pre></div>
 </div>
 </div>
 <div id="combining-parameters-as-inputs-for-biomass-estimation" class="section level1">
@@ -353,225 +381,225 @@ Area<span class="op">$</span>A &lt;-<span class="st"> </span><span class="kw"><a
 <h2 class="hasAnchor">
 <a href="#combining-non-weight-bin-parameter-estimates" class="anchor"></a>Combining non-weight bin parameter estimates</h2>
 <p>A dataframe of all of the parameter estimates can be assembled using <code><a href="../reference/combine_estimates.html">combine_estimates()</a></code> where each of the parameter objects are provided as arguments.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Adults_pars &lt;-<span class="st"> </span><span class="kw"><a href="../reference/combine_estimates.html">combine_estimates</a></span>(<span class="dt">P0 =</span> P0_results, <span class="dt">R =</span> sex_ratio_results, <span class="dt">S =</span> Spawn_results, <span class="dt">A =</span> Area)
-<span class="co">#&gt; Joining, by = "Region"Joining, by = "Region"</span>
-Adults_pars
-<span class="co">#&gt; # A tibble: 4 x 6</span>
-<span class="co">#&gt;   Region    P0     Z     R          A     S</span>
-<span class="co">#&gt;   &lt;fct&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 NGSV   2.03    0.4 0.448 2822201039 0.722</span>
-<span class="co">#&gt; 2 NSG    0.947   0.4 0.337 1884895030 0.722</span>
-<span class="co">#&gt; 3 SGSV   0.527   0.4 0.394 2285649237 0.722</span>
-<span class="co">#&gt; 4 SSG    0.725   0.4 0.574 3239913469 0.722</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1">Adults_pars &lt;-<span class="st"> </span><span class="kw"><a href="../reference/combine_estimates.html">combine_estimates</a></span>(<span class="dt">P0 =</span> P0_results, <span class="dt">R =</span> sex_ratio_results, <span class="dt">S =</span> Spawn_results, <span class="dt">A =</span> Area)</a>
+<a class="sourceLine" id="cb14-2" title="2"><span class="co">#&gt; Joining, by = "Region"Joining, by = "Region"</span></a>
+<a class="sourceLine" id="cb14-3" title="3">Adults_pars</a>
+<a class="sourceLine" id="cb14-4" title="4"><span class="co">#&gt; # A tibble: 4 x 6</span></a>
+<a class="sourceLine" id="cb14-5" title="5"><span class="co">#&gt;   Region    P0     Z     R          A     S</span></a>
+<a class="sourceLine" id="cb14-6" title="6"><span class="co">#&gt;   &lt;fct&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt;</span></a>
+<a class="sourceLine" id="cb14-7" title="7"><span class="co">#&gt; 1 NGSV   2.03    0.4 0.448 2822201039 0.722</span></a>
+<a class="sourceLine" id="cb14-8" title="8"><span class="co">#&gt; 2 NSG    0.947   0.4 0.337 1884895030 0.722</span></a>
+<a class="sourceLine" id="cb14-9" title="9"><span class="co">#&gt; 3 SGSV   0.527   0.4 0.394 2285649237 0.722</span></a>
+<a class="sourceLine" id="cb14-10" title="10"><span class="co">#&gt; 4 SSG    0.725   0.4 0.574 3239913469 0.722</span></a></code></pre></div>
 <p>Where a parameter is estimated as time invariant, it will be automatically allocated to all of the <code>Region</code> or <code>Time</code> groupings applied for the other parameters. Here this occurs for <em>S</em>. However, if a particular parameter is missing in one instance but is not time invariant, it will not be carried over and <code>NA</code> will be returned. In this situation, it will need to be inserted manually. For example, lets pretend that <em>R</em> is missing for “SSG”:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Adults_pars[Adults_pars<span class="op">$</span>Region <span class="op">==</span><span class="st"> "SSG"</span>, <span class="st">"R"</span>] &lt;-<span class="st"> </span><span class="fl">0.5741385</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1">Adults_pars[Adults_pars<span class="op">$</span>Region <span class="op">==</span><span class="st"> "SSG"</span>, <span class="st">"R"</span>] &lt;-<span class="st"> </span><span class="fl">0.5741385</span></a></code></pre></div>
 </div>
 <div id="combining-non-weight-bin-parameter-variances" class="section level2">
 <h2 class="hasAnchor">
 <a href="#combining-non-weight-bin-parameter-variances" class="anchor"></a>Combining non-weight bin parameter variances</h2>
 <p>Variance estimates are needed by <code><a href="../reference/Estimate_DEPMWt_biomass.html">Estimate_DEPMWt_biomass()</a></code> in order to determine the precision of the biomass estimates. These are provided in the same fashion as the parameter estimates using <code><a href="../reference/combine_variances.html">combine_variances()</a></code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Adults_vars &lt;-<span class="st"> </span><span class="kw"><a href="../reference/combine_variances.html">combine_variances</a></span>(P0_results, <span class="dt">R =</span> sex_ratio_results, <span class="dt">S =</span> Spawn_results)
-<span class="co">#&gt; Joining, by = "Region"</span>
-Adults_vars
-<span class="co">#&gt; # A tibble: 4 x 5</span>
-<span class="co">#&gt;   Region     P0     Z        R       S</span>
-<span class="co">#&gt;   &lt;fct&gt;   &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 NGSV   0.391    0.4 0.00952  0.00298</span>
-<span class="co">#&gt; 2 NSG    0.218    0.4 0.000714 0.00298</span>
-<span class="co">#&gt; 3 SGSV   0.129    0.4 0.00117  0.00298</span>
-<span class="co">#&gt; 4 SSG    0.0849   0.4 0.00185  0.00298</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1">Adults_vars &lt;-<span class="st"> </span><span class="kw"><a href="../reference/combine_variances.html">combine_variances</a></span>(P0_results, <span class="dt">R =</span> sex_ratio_results, <span class="dt">S =</span> Spawn_results)</a>
+<a class="sourceLine" id="cb16-2" title="2"><span class="co">#&gt; Joining, by = "Region"</span></a>
+<a class="sourceLine" id="cb16-3" title="3">Adults_vars</a>
+<a class="sourceLine" id="cb16-4" title="4"><span class="co">#&gt; # A tibble: 4 x 5</span></a>
+<a class="sourceLine" id="cb16-5" title="5"><span class="co">#&gt;   Region     P0     Z        R       S</span></a>
+<a class="sourceLine" id="cb16-6" title="6"><span class="co">#&gt;   &lt;fct&gt;   &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;</span></a>
+<a class="sourceLine" id="cb16-7" title="7"><span class="co">#&gt; 1 NGSV   0.391    0.4 0.00952  0.00298</span></a>
+<a class="sourceLine" id="cb16-8" title="8"><span class="co">#&gt; 2 NSG    0.218    0.4 0.000714 0.00298</span></a>
+<a class="sourceLine" id="cb16-9" title="9"><span class="co">#&gt; 3 SGSV   0.129    0.4 0.00117  0.00298</span></a>
+<a class="sourceLine" id="cb16-10" title="10"><span class="co">#&gt; 4 SSG    0.0849   0.4 0.00185  0.00298</span></a></code></pre></div>
 <p>The same manual insertions can be performed on this object:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Adults_vars[Adults_vars<span class="op">$</span>Region <span class="op">==</span><span class="st"> "SSG"</span>, <span class="st">"R"</span>] &lt;-<span class="st"> </span><span class="fl">0.0018484630</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1">Adults_vars[Adults_vars<span class="op">$</span>Region <span class="op">==</span><span class="st"> "SSG"</span>, <span class="st">"R"</span>] &lt;-<span class="st"> </span><span class="fl">0.0018484630</span></a></code></pre></div>
 </div>
 <div id="combining-proportion-female-and-fecundity-parameters" class="section level2">
 <h2 class="hasAnchor">
 <a href="#combining-proportion-female-and-fecundity-parameters" class="anchor"></a>Combining proportion female and fecundity parameters</h2>
 <p>As the proportions of females and the fecundity at each weight bin have a different structure, they have their own function to combine them into a single object. Much like <code><a href="../reference/combine_estimates.html">combine_estimates()</a></code> and <code><a href="../reference/combine_variances.html">combine_variances()</a></code>, this function is called <code><a href="../reference/combine_wt_class_estimates.html">combine_wt_class_estimates()</a></code> and only requires these two dataframes which will be combined according to <code>Region</code>/<code>Time</code> groupings. Manually adjusting these results is not recomended.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">weight_class_pars &lt;-<span class="st"> </span><span class="kw"><a href="../reference/combine_wt_class_estimates.html">combine_wt_class_estimates</a></span>(<span class="dt">prop.fem.data =</span> Prop_fem_results,
-                                                <span class="dt">fecundity.data =</span> fecundity_at_Wtbins)
-<span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(weight_class_pars)
-<span class="co">#&gt; # A tibble: 6 x 8</span>
-<span class="co">#&gt; # Groups:   Region [4]</span>
-<span class="co">#&gt;   Region Wt_bin     n   Prop Prop_var    Wt Fecundity     Fec_var</span>
-<span class="co">#&gt;   &lt;fct&gt;   &lt;int&gt; &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 NGSV        1     8 0.0392 0.000185   250    19153.  286796137.</span>
-<span class="co">#&gt; 2 NSG         1     6 0.0392 0.000246   250    19153.  286796137.</span>
-<span class="co">#&gt; 3 SGSV        1     3 0.024  0.000187   250    19153.  286796137.</span>
-<span class="co">#&gt; 4 SSG         1    14 0.194  0.00218    250    19153.  286796137.</span>
-<span class="co">#&gt; 5 NGSV        2    25 0.123  0.000527   750    52716. 1293985026.</span>
-<span class="co">#&gt; 6 NSG         2    44 0.288  0.00134    750    52716. 1293985026.</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" title="1">weight_class_pars &lt;-<span class="st"> </span><span class="kw"><a href="../reference/combine_wt_class_estimates.html">combine_wt_class_estimates</a></span>(<span class="dt">prop.fem.data =</span> Prop_fem_results,</a>
+<a class="sourceLine" id="cb18-2" title="2">                                                <span class="dt">fecundity.data =</span> fecundity_at_Wtbins)</a>
+<a class="sourceLine" id="cb18-3" title="3"><span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(weight_class_pars)</a>
+<a class="sourceLine" id="cb18-4" title="4"><span class="co">#&gt; # A tibble: 6 x 9</span></a>
+<a class="sourceLine" id="cb18-5" title="5"><span class="co">#&gt; # Groups:   Region [4]</span></a>
+<a class="sourceLine" id="cb18-6" title="6"><span class="co">#&gt;   Region Wt_bin     n   Prop Prop_var    Wt Fecundity  Fec_var    SE</span></a>
+<a class="sourceLine" id="cb18-7" title="7"><span class="co">#&gt;   &lt;fct&gt;   &lt;int&gt; &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;</span></a>
+<a class="sourceLine" id="cb18-8" title="8"><span class="co">#&gt; 1 NGSV        1     8 0.0392 0.000185   250    19153.  732374.  856.</span></a>
+<a class="sourceLine" id="cb18-9" title="9"><span class="co">#&gt; 2 NSG         1     6 0.0392 0.000246   250    19153.  732374.  856.</span></a>
+<a class="sourceLine" id="cb18-10" title="10"><span class="co">#&gt; 3 SGSV        1     3 0.024  0.000187   250    19153.  732374.  856.</span></a>
+<a class="sourceLine" id="cb18-11" title="11"><span class="co">#&gt; 4 SSG         1    14 0.194  0.00218    250    19153.  732374.  856.</span></a>
+<a class="sourceLine" id="cb18-12" title="12"><span class="co">#&gt; 5 NGSV        2    25 0.123  0.000527   750    52716. 5548324. 2355.</span></a>
+<a class="sourceLine" id="cb18-13" title="13"><span class="co">#&gt; 6 NSG         2    44 0.288  0.00134    750    52716. 5548324. 2355.</span></a></code></pre></div>
 </div>
 </div>
 <div id="spawning-stock-biomass-estimation" class="section level1">
 <h1 class="hasAnchor">
 <a href="#spawning-stock-biomass-estimation" class="anchor"></a>Spawning Stock Biomass Estimation</h1>
 <p>All of the hard work is done once all of the parameters and their variances have been estimated and organised. The final step is to combine them using <code><a href="../reference/Estimate_DEPMWt_biomass.html">Estimate_DEPMWt_biomass()</a></code>. This function requires each of these objects and will return a list of results which include the spawning stock biomass, total number of females and the number of females in each weight bin.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Estimate Biomass</span>
-Snapper_biomass_results &lt;-<span class="st"> </span><span class="kw"><a href="../reference/Estimate_DEPMWt_biomass.html">Estimate_DEPMWt_biomass</a></span>(<span class="dt">adult.pars =</span> Adults_pars,
-                                          <span class="dt">adult.vars =</span> Adults_vars,
-                                          <span class="dt">weight.pars.vars =</span> weight_class_pars)
-<span class="co"># a list of three outputs is returned</span>
-Snapper_biomass_results<span class="op">$</span>Biomass <span class="co"># biomass in kgs  </span>
-<span class="co">#&gt;   Region   Z   Biomass       SD</span>
-<span class="co">#&gt; 1   NGSV 0.4 289973.37 93410.85</span>
-<span class="co">#&gt; 2    NSG 0.4 113168.58 36749.77</span>
-<span class="co">#&gt; 3   SGSV 0.4  69327.79 20539.80</span>
-<span class="co">#&gt; 4    SSG 0.4  89575.41 19295.47</span>
-Snapper_biomass_results<span class="op">$</span>Nfem <span class="co"># number of females</span>
-<span class="co">#&gt;   Region   Z      Nfem       SD</span>
-<span class="co">#&gt; 1   NGSV 0.4 36517.189 9146.748</span>
-<span class="co">#&gt; 2    NSG 0.4 22204.413 7290.200</span>
-<span class="co">#&gt; 3   SGSV 0.4  7322.528 2202.955</span>
-<span class="co">#&gt; 4    SSG 0.4 25537.006 6454.136</span>
-<span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(Snapper_biomass_results<span class="op">$</span>NfemWt) <span class="co"># number of females in each weight bin</span>
-<span class="co">#&gt;   Region   Z Nwt    NfemWt        SD</span>
-<span class="co">#&gt; 1   NGSV 0.4   1 1432.0466  610.9450</span>
-<span class="co">#&gt; 2    NSG 0.4   1  870.7613  448.8982</span>
-<span class="co">#&gt; 3   SGSV 0.4   1  175.7407  113.1486</span>
-<span class="co">#&gt; 4    SSG 0.4   1 4965.5289 1706.0851</span>
-<span class="co">#&gt; 5   NGSV 0.4   2 4475.1458 1384.7827</span>
-<span class="co">#&gt; 6    NSG 0.4   2 6385.5828 2208.1164</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" title="1"><span class="co"># Estimate Biomass</span></a>
+<a class="sourceLine" id="cb19-2" title="2">Snapper_biomass_results &lt;-<span class="st"> </span><span class="kw"><a href="../reference/Estimate_DEPMWt_biomass.html">Estimate_DEPMWt_biomass</a></span>(<span class="dt">adult.pars =</span> Adults_pars,</a>
+<a class="sourceLine" id="cb19-3" title="3">                                          <span class="dt">adult.vars =</span> Adults_vars,</a>
+<a class="sourceLine" id="cb19-4" title="4">                                          <span class="dt">weight.pars.vars =</span> weight_class_pars)</a>
+<a class="sourceLine" id="cb19-5" title="5"><span class="co"># a list of three outputs is returned</span></a>
+<a class="sourceLine" id="cb19-6" title="6">Snapper_biomass_results<span class="op">$</span>Biomass <span class="co"># biomass in kgs  </span></a>
+<a class="sourceLine" id="cb19-7" title="7"><span class="co">#&gt;   Region   Z   Biomass       SD</span></a>
+<a class="sourceLine" id="cb19-8" title="8"><span class="co">#&gt; 1   NGSV 0.4 289973.33 87093.88</span></a>
+<a class="sourceLine" id="cb19-9" title="9"><span class="co">#&gt; 2    NSG 0.4 113168.56 28878.45</span></a>
+<a class="sourceLine" id="cb19-10" title="10"><span class="co">#&gt; 3   SGSV 0.4  69327.78 18819.85</span></a>
+<a class="sourceLine" id="cb19-11" title="11"><span class="co">#&gt; 4    SSG 0.4  89575.40 14230.36</span></a>
+<a class="sourceLine" id="cb19-12" title="12">Snapper_biomass_results<span class="op">$</span>Nfem <span class="co"># number of females</span></a>
+<a class="sourceLine" id="cb19-13" title="13"><span class="co">#&gt;   Region   Z      Nfem       SD</span></a>
+<a class="sourceLine" id="cb19-14" title="14"><span class="co">#&gt; 1   NGSV 0.4 36517.185 8098.135</span></a>
+<a class="sourceLine" id="cb19-15" title="15"><span class="co">#&gt; 2    NSG 0.4 22204.411 5767.166</span></a>
+<a class="sourceLine" id="cb19-16" title="16"><span class="co">#&gt; 3   SGSV 0.4  7322.527 2024.300</span></a>
+<a class="sourceLine" id="cb19-17" title="17"><span class="co">#&gt; 4    SSG 0.4 25537.003 5277.711</span></a>
+<a class="sourceLine" id="cb19-18" title="18"><span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(Snapper_biomass_results<span class="op">$</span>NfemWt) <span class="co"># number of females in each weight bin</span></a>
+<a class="sourceLine" id="cb19-19" title="19"><span class="co">#&gt;   Region   Z Nwt    NfemWt        SD</span></a>
+<a class="sourceLine" id="cb19-20" title="20"><span class="co">#&gt; 1   NGSV 0.4   1 1432.0465  587.7449</span></a>
+<a class="sourceLine" id="cb19-21" title="21"><span class="co">#&gt; 2    NSG 0.4   1  870.7612  413.4323</span></a>
+<a class="sourceLine" id="cb19-22" title="22"><span class="co">#&gt; 3   SGSV 0.4   1  175.7406  111.2097</span></a>
+<a class="sourceLine" id="cb19-23" title="23"><span class="co">#&gt; 4    SSG 0.4   1 4965.5283 1545.6083</span></a>
+<a class="sourceLine" id="cb19-24" title="24"><span class="co">#&gt; 5   NGSV 0.4   2 4475.1452 1282.9827</span></a>
+<a class="sourceLine" id="cb19-25" title="25"><span class="co">#&gt; 6    NSG 0.4   2 6385.5821 1797.5190</span></a></code></pre></div>
 <p>The list of dataframes returned from the function can then be saved and used for plotting</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
-<span class="co"># Create new objects</span>
-Snapper_biomass &lt;-<span class="st"> </span>Snapper_biomass_results<span class="op">$</span>Biomass
-Snapper_Nfem &lt;-<span class="st"> </span>Snapper_biomass_results<span class="op">$</span>Nfem
-Snapper_NfemWt &lt;-<span class="st"> </span>Snapper_biomass_results<span class="op">$</span>NfemWt</code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" title="1"></a>
+<a class="sourceLine" id="cb20-2" title="2"><span class="co"># Create new objects</span></a>
+<a class="sourceLine" id="cb20-3" title="3">Snapper_biomass &lt;-<span class="st"> </span>Snapper_biomass_results<span class="op">$</span>Biomass</a>
+<a class="sourceLine" id="cb20-4" title="4">Snapper_Nfem &lt;-<span class="st"> </span>Snapper_biomass_results<span class="op">$</span>Nfem</a>
+<a class="sourceLine" id="cb20-5" title="5">Snapper_NfemWt &lt;-<span class="st"> </span>Snapper_biomass_results<span class="op">$</span>NfemWt</a></code></pre></div>
 <p><strong>Plot biomass with 95% CIs</strong></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
-<span class="kw">ggplot</span>(Snapper_biomass, <span class="kw">aes</span>(Region,Biomass, 
-                            <span class="dt">ymin =</span> Biomass <span class="op">-</span><span class="st"> </span>SD,
-                            <span class="dt">ymax =</span> Biomass <span class="op">+</span><span class="st"> </span>SD))<span class="op">+</span>
-<span class="st">  </span><span class="kw">geom_crossbar</span>(<span class="dt">fill =</span> <span class="st">"royalblue"</span>, <span class="dt">alpha =</span> .<span class="dv">8</span>)<span class="op">+</span>
-<span class="st">  </span><span class="kw">expand_limits</span>(<span class="dt">y =</span> <span class="dv">0</span>)<span class="op">+</span>
-<span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">"Biomass (kg)"</span>, <span class="dt">labels =</span> scales<span class="op">::</span>comma, <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/breaks_pretty.html">pretty_breaks</a></span>(<span class="dv">5</span>))<span class="op">+</span>
-<span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
-<p><img src="DEPMWt_Estimation_files/figure-html/unnamed-chunk-20-1.png" width="576"></p>
-<p><strong>Plot total number of females</strong></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
-<span class="kw">ggplot</span>(Snapper_Nfem, <span class="kw">aes</span>(Region,Nfem, 
-                            <span class="dt">ymin =</span> Nfem <span class="op">-</span><span class="st"> </span>SD,
-                            <span class="dt">ymax =</span> Nfem <span class="op">+</span><span class="st"> </span>SD))<span class="op">+</span>
-<span class="st">  </span><span class="kw">geom_crossbar</span>(<span class="dt">fill =</span> <span class="st">"purple"</span>, <span class="dt">alpha =</span> .<span class="dv">8</span>)<span class="op">+</span>
-<span class="st">  </span><span class="kw">expand_limits</span>(<span class="dt">y =</span> <span class="dv">0</span>)<span class="op">+</span>
-<span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">"Number of females"</span>, <span class="dt">labels =</span> scales<span class="op">::</span>comma, <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/breaks_pretty.html">pretty_breaks</a></span>(<span class="dv">5</span>))<span class="op">+</span>
-<span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
-<p><img src="DEPMWt_Estimation_files/figure-html/unnamed-chunk-21-1.png" width="576"></p>
-<p><strong>Plot number of females in each weight bin</strong></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
-<span class="co">#plot female weights</span>
-<span class="kw">ggplot</span>(Snapper_NfemWt,
-       <span class="kw">aes</span>(Nwt,NfemWt, <span class="dt">ymin =</span> NfemWt <span class="op">-</span><span class="st"> </span>SD,
-                                                      <span class="dt">ymax =</span> NfemWt <span class="op">+</span><span class="st"> </span>SD))<span class="op">+</span>
-<span class="st">  </span><span class="kw">facet_wrap</span>(<span class="op">~</span>Region, <span class="dt">ncol =</span> <span class="dv">2</span>)<span class="op">+</span>
-<span class="st">  </span><span class="kw">geom_col</span>()<span class="op">+</span>
-<span class="st">  </span><span class="kw">geom_errorbar</span>()<span class="op">+</span>
-<span class="st">  </span><span class="kw">expand_limits</span>(<span class="dt">y =</span> <span class="dv">0</span>)<span class="op">+</span>
-<span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">"Number of females"</span>, <span class="dt">labels =</span> scales<span class="op">::</span>comma)<span class="op">+</span>
-<span class="st">  </span><span class="kw">scale_x_continuous</span>(<span class="dt">name =</span> <span class="st">"Weight class (g)"</span>, 
-                     <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/breaks_pretty.html">pretty_breaks</a></span>(<span class="dv">6</span>), 
-                     <span class="dt">labels =</span> <span class="cf">function</span>(x){x <span class="op">*</span><span class="st"> </span><span class="dv">500</span>})<span class="op">+</span>
-<span class="st">  </span><span class="kw">theme_bw</span>()<span class="op">+</span>
-<span class="st">  </span><span class="kw">theme</span>(<span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">angle =</span> <span class="dv">90</span>))</code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1"></a>
+<a class="sourceLine" id="cb21-2" title="2"><span class="kw">ggplot</span>(Snapper_biomass, <span class="kw">aes</span>(Region,Biomass, </a>
+<a class="sourceLine" id="cb21-3" title="3">                            <span class="dt">ymin =</span> Biomass <span class="op">-</span><span class="st"> </span>SD,</a>
+<a class="sourceLine" id="cb21-4" title="4">                            <span class="dt">ymax =</span> Biomass <span class="op">+</span><span class="st"> </span>SD))<span class="op">+</span></a>
+<a class="sourceLine" id="cb21-5" title="5"><span class="st">  </span><span class="kw">geom_crossbar</span>(<span class="dt">fill =</span> <span class="st">"royalblue"</span>, <span class="dt">alpha =</span> <span class="fl">.8</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb21-6" title="6"><span class="st">  </span><span class="kw">expand_limits</span>(<span class="dt">y =</span> <span class="dv">0</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb21-7" title="7"><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">"Biomass (kg)"</span>, <span class="dt">labels =</span> scales<span class="op">::</span>comma, <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/breaks_pretty.html">pretty_breaks</a></span>(<span class="dv">5</span>))<span class="op">+</span></a>
+<a class="sourceLine" id="cb21-8" title="8"><span class="st">  </span><span class="kw">theme_bw</span>()</a></code></pre></div>
 <p><img src="DEPMWt_Estimation_files/figure-html/unnamed-chunk-22-1.png" width="576"></p>
+<p><strong>Plot total number of females</strong></p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" title="1"></a>
+<a class="sourceLine" id="cb22-2" title="2"><span class="kw">ggplot</span>(Snapper_Nfem, <span class="kw">aes</span>(Region,Nfem, </a>
+<a class="sourceLine" id="cb22-3" title="3">                            <span class="dt">ymin =</span> Nfem <span class="op">-</span><span class="st"> </span>SD,</a>
+<a class="sourceLine" id="cb22-4" title="4">                            <span class="dt">ymax =</span> Nfem <span class="op">+</span><span class="st"> </span>SD))<span class="op">+</span></a>
+<a class="sourceLine" id="cb22-5" title="5"><span class="st">  </span><span class="kw">geom_crossbar</span>(<span class="dt">fill =</span> <span class="st">"purple"</span>, <span class="dt">alpha =</span> <span class="fl">.8</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb22-6" title="6"><span class="st">  </span><span class="kw">expand_limits</span>(<span class="dt">y =</span> <span class="dv">0</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb22-7" title="7"><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">"Number of females"</span>, <span class="dt">labels =</span> scales<span class="op">::</span>comma, <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/breaks_pretty.html">pretty_breaks</a></span>(<span class="dv">5</span>))<span class="op">+</span></a>
+<a class="sourceLine" id="cb22-8" title="8"><span class="st">  </span><span class="kw">theme_bw</span>()</a></code></pre></div>
+<p><img src="DEPMWt_Estimation_files/figure-html/unnamed-chunk-23-1.png" width="576"></p>
+<p><strong>Plot number of females in each weight bin</strong></p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" title="1"></a>
+<a class="sourceLine" id="cb23-2" title="2"><span class="co">#plot female weights</span></a>
+<a class="sourceLine" id="cb23-3" title="3"><span class="kw">ggplot</span>(Snapper_NfemWt,</a>
+<a class="sourceLine" id="cb23-4" title="4">       <span class="kw">aes</span>(Nwt,NfemWt, <span class="dt">ymin =</span> NfemWt <span class="op">-</span><span class="st"> </span>SD,</a>
+<a class="sourceLine" id="cb23-5" title="5">                                                      <span class="dt">ymax =</span> NfemWt <span class="op">+</span><span class="st"> </span>SD))<span class="op">+</span></a>
+<a class="sourceLine" id="cb23-6" title="6"><span class="st">  </span><span class="kw">facet_wrap</span>(<span class="op">~</span>Region, <span class="dt">ncol =</span> <span class="dv">2</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb23-7" title="7"><span class="st">  </span><span class="kw">geom_col</span>()<span class="op">+</span></a>
+<a class="sourceLine" id="cb23-8" title="8"><span class="st">  </span><span class="kw">geom_errorbar</span>()<span class="op">+</span></a>
+<a class="sourceLine" id="cb23-9" title="9"><span class="st">  </span><span class="kw">expand_limits</span>(<span class="dt">y =</span> <span class="dv">0</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb23-10" title="10"><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">"Number of females"</span>, <span class="dt">labels =</span> scales<span class="op">::</span>comma)<span class="op">+</span></a>
+<a class="sourceLine" id="cb23-11" title="11"><span class="st">  </span><span class="kw">scale_x_continuous</span>(<span class="dt">name =</span> <span class="st">"Weight class (g)"</span>, </a>
+<a class="sourceLine" id="cb23-12" title="12">                     <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/breaks_pretty.html">pretty_breaks</a></span>(<span class="dv">6</span>), </a>
+<a class="sourceLine" id="cb23-13" title="13">                     <span class="dt">labels =</span> <span class="cf">function</span>(x){x <span class="op">*</span><span class="st"> </span><span class="dv">500</span>})<span class="op">+</span></a>
+<a class="sourceLine" id="cb23-14" title="14"><span class="st">  </span><span class="kw">theme_bw</span>()<span class="op">+</span></a>
+<a class="sourceLine" id="cb23-15" title="15"><span class="st">  </span><span class="kw">theme</span>(<span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">angle =</span> <span class="dv">90</span>))</a></code></pre></div>
+<p><img src="DEPMWt_Estimation_files/figure-html/unnamed-chunk-24-1.png" width="576"></p>
 </div>
 <div id="testing-assumptions-for-pre-specified-egg-mortality-z" class="section level1">
 <h1 class="hasAnchor">
 <a href="#testing-assumptions-for-pre-specified-egg-mortality-z" class="anchor"></a>Testing assumptions for pre-specified egg mortality (<em>Z</em>)</h1>
 <p>As the <span class="math inline">\(P_{0}\)</span> estimation methods in this package require a specified level of egg mortality (<em>Z</em>) as piror input, it is sensible to test the sensitivities of the <span class="math inline">\(P_{0}\)</span> estimates, as well as the DEPMWt results to different <em>Z</em> values. Testing different values of <em>Z</em> can be done by passing a vector of values to the <code>z</code> argument of <code><a href="../reference/Estimate_P0.html">Estimate_P0()</a></code>:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Multi_Z_P0_results &lt;-<span class="st"> </span><span class="kw"><a href="../reference/Estimate_P0.html">Estimate_P0</a></span>(<span class="dt">data =</span> egg_data,
-                          <span class="dt">site =</span> <span class="st">"Site"</span>, 
-                          <span class="dt">Region =</span> <span class="st">"Region"</span>, 
-                          <span class="dt">Z =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(.<span class="dv">2</span>, .<span class="dv">4</span>, .<span class="dv">6</span>))</code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" title="1">Multi_Z_P0_results &lt;-<span class="st"> </span><span class="kw"><a href="../reference/Estimate_P0.html">Estimate_P0</a></span>(<span class="dt">data =</span> egg_data,</a>
+<a class="sourceLine" id="cb24-2" title="2">                          <span class="dt">site =</span> <span class="st">"Site"</span>, </a>
+<a class="sourceLine" id="cb24-3" title="3">                          <span class="dt">Region =</span> <span class="st">"Region"</span>, </a>
+<a class="sourceLine" id="cb24-4" title="4">                          <span class="dt">Z =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(.<span class="dv">2</span>, <span class="fl">.4</span>, <span class="fl">.6</span>))</a></code></pre></div>
 <p>This will return a different <span class="math inline">\(P_{0}\)</span> estimate for each value of <em>Z</em> for each <code>Time</code>/<code>Region</code> grouping:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Multi_Z_P0_results
-<span class="co">#&gt;    Region        P0      P0_se   Z</span>
-<span class="co">#&gt; 1    NGSV 1.7972317 0.35215150 0.2</span>
-<span class="co">#&gt; 2     NSG 0.8400430 0.19454626 0.2</span>
-<span class="co">#&gt; 3    SGSV 0.4600852 0.11248190 0.2</span>
-<span class="co">#&gt; 4     SSG 0.6294788 0.07419926 0.2</span>
-<span class="co">#&gt; 5    NGSV 2.0333120 0.39057148 0.4</span>
-<span class="co">#&gt; 6     NSG 0.9472290 0.21775974 0.4</span>
-<span class="co">#&gt; 7    SGSV 0.5268231 0.12938292 0.4</span>
-<span class="co">#&gt; 8     SSG 0.7254297 0.08486910 0.4</span>
-<span class="co">#&gt; 9    NGSV 2.3084189 0.43464390 0.6</span>
-<span class="co">#&gt; 10    NSG 1.0709549 0.24423117 0.6</span>
-<span class="co">#&gt; 11   SGSV 0.6061931 0.15043110 0.6</span>
-<span class="co">#&gt; 12    SSG 0.8390163 0.09755602 0.6</span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" title="1">Multi_Z_P0_results</a>
+<a class="sourceLine" id="cb25-2" title="2"><span class="co">#&gt;    Region        P0      P0_se   Z</span></a>
+<a class="sourceLine" id="cb25-3" title="3"><span class="co">#&gt; 1    NGSV 1.7972317 0.35215150 0.2</span></a>
+<a class="sourceLine" id="cb25-4" title="4"><span class="co">#&gt; 2     NSG 0.8400430 0.19454626 0.2</span></a>
+<a class="sourceLine" id="cb25-5" title="5"><span class="co">#&gt; 3    SGSV 0.4600852 0.11248190 0.2</span></a>
+<a class="sourceLine" id="cb25-6" title="6"><span class="co">#&gt; 4     SSG 0.6294788 0.07419926 0.2</span></a>
+<a class="sourceLine" id="cb25-7" title="7"><span class="co">#&gt; 5    NGSV 2.0333120 0.39057148 0.4</span></a>
+<a class="sourceLine" id="cb25-8" title="8"><span class="co">#&gt; 6     NSG 0.9472290 0.21775974 0.4</span></a>
+<a class="sourceLine" id="cb25-9" title="9"><span class="co">#&gt; 7    SGSV 0.5268231 0.12938292 0.4</span></a>
+<a class="sourceLine" id="cb25-10" title="10"><span class="co">#&gt; 8     SSG 0.7254297 0.08486910 0.4</span></a>
+<a class="sourceLine" id="cb25-11" title="11"><span class="co">#&gt; 9    NGSV 2.3084189 0.43464390 0.6</span></a>
+<a class="sourceLine" id="cb25-12" title="12"><span class="co">#&gt; 10    NSG 1.0709549 0.24423117 0.6</span></a>
+<a class="sourceLine" id="cb25-13" title="13"><span class="co">#&gt; 11   SGSV 0.6061931 0.15043110 0.6</span></a>
+<a class="sourceLine" id="cb25-14" title="14"><span class="co">#&gt; 12    SSG 0.8390163 0.09755602 0.6</span></a></code></pre></div>
 <p>For South Australian Snapper, the resulting <span class="math inline">\(P_{0}\)</span> estimates vary percentage-wise less than <em>Z</em> itself. McGarvey and Kinloch (2001) analytically demonstrated relatively low sensitivity of <span class="math inline">\(P_{0}\)</span> and estimated spawning biomass to assumed <em>Z</em>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
-Multi_Z_P0_results<span class="op">$</span>Z &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span>(Multi_Z_P0_results<span class="op">$</span>Z) <span class="co"># convert Z to a factor for easy plotting</span>
-
-<span class="kw">ggplot</span>(Multi_Z_P0_results, <span class="kw">aes</span>(Z, P0, <span class="dt">ymin =</span> P0 <span class="op">-</span><span class="st"> </span>P0_se, <span class="dt">ymax =</span> P0 <span class="op">+</span><span class="st"> </span>P0_se, <span class="dt">fill =</span> Z))<span class="op">+</span>
-<span class="st">  </span><span class="kw">geom_crossbar</span>()<span class="op">+</span>
-<span class="st">  </span><span class="kw">facet_wrap</span>(<span class="op">~</span>Region, <span class="dt">ncol =</span> <span class="dv">2</span>, <span class="dt">scales =</span> <span class="st">"free"</span>)<span class="op">+</span>
-<span class="st">  </span><span class="kw">scale_fill_viridis_d</span>()<span class="op">+</span>
-<span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
-<p><img src="DEPMWt_Estimation_files/figure-html/unnamed-chunk-25-1.png" width="576"></p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" title="1"></a>
+<a class="sourceLine" id="cb26-2" title="2">Multi_Z_P0_results<span class="op">$</span>Z &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span>(Multi_Z_P0_results<span class="op">$</span>Z) <span class="co"># convert Z to a factor for easy plotting</span></a>
+<a class="sourceLine" id="cb26-3" title="3"></a>
+<a class="sourceLine" id="cb26-4" title="4"><span class="kw">ggplot</span>(Multi_Z_P0_results, <span class="kw">aes</span>(Z, P0, <span class="dt">ymin =</span> P0 <span class="op">-</span><span class="st"> </span>P0_se, <span class="dt">ymax =</span> P0 <span class="op">+</span><span class="st"> </span>P0_se, <span class="dt">fill =</span> Z))<span class="op">+</span></a>
+<a class="sourceLine" id="cb26-5" title="5"><span class="st">  </span><span class="kw">geom_crossbar</span>()<span class="op">+</span></a>
+<a class="sourceLine" id="cb26-6" title="6"><span class="st">  </span><span class="kw">facet_wrap</span>(<span class="op">~</span>Region, <span class="dt">ncol =</span> <span class="dv">2</span>, <span class="dt">scales =</span> <span class="st">"free"</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb26-7" title="7"><span class="st">  </span><span class="kw">scale_fill_viridis_d</span>()<span class="op">+</span></a>
+<a class="sourceLine" id="cb26-8" title="8"><span class="st">  </span><span class="kw">theme_bw</span>()</a></code></pre></div>
+<p><img src="DEPMWt_Estimation_files/figure-html/unnamed-chunk-27-1.png" width="576"></p>
 <p>An object from <code><a href="../reference/Estimate_P0.html">Estimate_P0()</a></code> with multiple <em>Z</em>s can be included in the biomass estimation procedure in the same manner as before. When multiple <em>Z</em>s are provided to <code><a href="../reference/combine_estimates.html">combine_estimates()</a></code> and <code><a href="../reference/combine_variances.html">combine_variances()</a></code> they are treated as groupings and all other parameters will be aligned with them. When creating an object for spawning area <em>A</em>, care must be taken to only have unique <code>Time</code>/<code>Region</code> groupings. Using an object from <code><a href="../reference/Estimate_P0.html">Estimate_P0()</a></code> with multiple <em>Z</em>s can erroneously add duplicates if you’re not careful. This will cause error messages.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Make sure that Area has unique Time/Region breakdowns (Only Region used in this example)</span>
-Area &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span>(<span class="dt">Region =</span> <span class="kw"><a href="https://rdrr.io/r/base/unique.html">unique</a></span>(Multi_Z_P0_results<span class="op">$</span>Region))
-
-Area<span class="op">$</span>A &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">2822201039</span>, <span class="co">#NGSV</span>
-            <span class="dv">1884895030</span>, <span class="co"># NSG</span>
-            <span class="dv">2285649237</span>, <span class="co"># SGSV</span>
-            <span class="dv">3239913469</span>) <span class="co"># SSG</span>
-
-
-Multi_Z_adult_pars &lt;-<span class="st"> </span><span class="kw"><a href="../reference/combine_estimates.html">combine_estimates</a></span>(<span class="dt">P0 =</span> Multi_Z_P0_results, <span class="dt">R =</span> sex_ratio_results, <span class="dt">S =</span> Spawn_results, <span class="dt">A =</span> Area)
-<span class="co">#&gt; Joining, by = "Region"Joining, by = "Region"</span>
-
-Multi_Z_adult_vars &lt;-<span class="st"> </span><span class="kw"><a href="../reference/combine_variances.html">combine_variances</a></span>(<span class="dt">P0 =</span> Multi_Z_P0_results, <span class="dt">R =</span> sex_ratio_results, <span class="dt">S =</span> Spawn_results)
-<span class="co">#&gt; Joining, by = "Region"</span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" title="1"><span class="co"># Make sure that Area has unique Time/Region breakdowns (Only Region used in this example)</span></a>
+<a class="sourceLine" id="cb27-2" title="2">Area &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span>(<span class="dt">Region =</span> <span class="kw"><a href="https://rdrr.io/r/base/unique.html">unique</a></span>(Multi_Z_P0_results<span class="op">$</span>Region))</a>
+<a class="sourceLine" id="cb27-3" title="3"></a>
+<a class="sourceLine" id="cb27-4" title="4">Area<span class="op">$</span>A &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">2822201039</span>, <span class="co">#NGSV</span></a>
+<a class="sourceLine" id="cb27-5" title="5">            <span class="dv">1884895030</span>, <span class="co"># NSG</span></a>
+<a class="sourceLine" id="cb27-6" title="6">            <span class="dv">2285649237</span>, <span class="co"># SGSV</span></a>
+<a class="sourceLine" id="cb27-7" title="7">            <span class="dv">3239913469</span>) <span class="co"># SSG</span></a>
+<a class="sourceLine" id="cb27-8" title="8"></a>
+<a class="sourceLine" id="cb27-9" title="9"></a>
+<a class="sourceLine" id="cb27-10" title="10">Multi_Z_adult_pars &lt;-<span class="st"> </span><span class="kw"><a href="../reference/combine_estimates.html">combine_estimates</a></span>(<span class="dt">P0 =</span> Multi_Z_P0_results, <span class="dt">R =</span> sex_ratio_results, <span class="dt">S =</span> Spawn_results, <span class="dt">A =</span> Area)</a>
+<a class="sourceLine" id="cb27-11" title="11"><span class="co">#&gt; Joining, by = "Region"Joining, by = "Region"</span></a>
+<a class="sourceLine" id="cb27-12" title="12"></a>
+<a class="sourceLine" id="cb27-13" title="13">Multi_Z_adult_vars &lt;-<span class="st"> </span><span class="kw"><a href="../reference/combine_variances.html">combine_variances</a></span>(<span class="dt">P0 =</span> Multi_Z_P0_results, <span class="dt">R =</span> sex_ratio_results, <span class="dt">S =</span> Spawn_results)</a>
+<a class="sourceLine" id="cb27-14" title="14"><span class="co">#&gt; Joining, by = "Region"</span></a></code></pre></div>
 <p>A new object with <em>Z</em> as a grouping will now be produced which can be passed to the biomass estimation function.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Multi_Z_adult_pars
-<span class="co">#&gt;    Region        P0   Z         R          A        S</span>
-<span class="co">#&gt; 1    NGSV 1.7972317 0.2 0.4478643 2822201039 0.722488</span>
-<span class="co">#&gt; 2     NSG 0.8400430 0.2 0.3369494 1884895030 0.722488</span>
-<span class="co">#&gt; 3    SGSV 0.4600852 0.2 0.3939694 2285649237 0.722488</span>
-<span class="co">#&gt; 4     SSG 0.6294788 0.2 0.5741385 3239913469 0.722488</span>
-<span class="co">#&gt; 5    NGSV 2.0333120 0.4 0.4478643 2822201039 0.722488</span>
-<span class="co">#&gt; 6     NSG 0.9472290 0.4 0.3369494 1884895030 0.722488</span>
-<span class="co">#&gt; 7    SGSV 0.5268231 0.4 0.3939694 2285649237 0.722488</span>
-<span class="co">#&gt; 8     SSG 0.7254297 0.4 0.5741385 3239913469 0.722488</span>
-<span class="co">#&gt; 9    NGSV 2.3084189 0.6 0.4478643 2822201039 0.722488</span>
-<span class="co">#&gt; 10    NSG 1.0709549 0.6 0.3369494 1884895030 0.722488</span>
-<span class="co">#&gt; 11   SGSV 0.6061931 0.6 0.3939694 2285649237 0.722488</span>
-<span class="co">#&gt; 12    SSG 0.8390163 0.6 0.5741385 3239913469 0.722488</span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" title="1">Multi_Z_adult_pars</a>
+<a class="sourceLine" id="cb28-2" title="2"><span class="co">#&gt;    Region        P0   Z         R          A        S</span></a>
+<a class="sourceLine" id="cb28-3" title="3"><span class="co">#&gt; 1    NGSV 1.7972317 0.2 0.4478643 2822201039 0.722488</span></a>
+<a class="sourceLine" id="cb28-4" title="4"><span class="co">#&gt; 2     NSG 0.8400430 0.2 0.3369494 1884895030 0.722488</span></a>
+<a class="sourceLine" id="cb28-5" title="5"><span class="co">#&gt; 3    SGSV 0.4600852 0.2 0.3939694 2285649237 0.722488</span></a>
+<a class="sourceLine" id="cb28-6" title="6"><span class="co">#&gt; 4     SSG 0.6294788 0.2 0.5741385 3239913469 0.722488</span></a>
+<a class="sourceLine" id="cb28-7" title="7"><span class="co">#&gt; 5    NGSV 2.0333120 0.4 0.4478643 2822201039 0.722488</span></a>
+<a class="sourceLine" id="cb28-8" title="8"><span class="co">#&gt; 6     NSG 0.9472290 0.4 0.3369494 1884895030 0.722488</span></a>
+<a class="sourceLine" id="cb28-9" title="9"><span class="co">#&gt; 7    SGSV 0.5268231 0.4 0.3939694 2285649237 0.722488</span></a>
+<a class="sourceLine" id="cb28-10" title="10"><span class="co">#&gt; 8     SSG 0.7254297 0.4 0.5741385 3239913469 0.722488</span></a>
+<a class="sourceLine" id="cb28-11" title="11"><span class="co">#&gt; 9    NGSV 2.3084189 0.6 0.4478643 2822201039 0.722488</span></a>
+<a class="sourceLine" id="cb28-12" title="12"><span class="co">#&gt; 10    NSG 1.0709549 0.6 0.3369494 1884895030 0.722488</span></a>
+<a class="sourceLine" id="cb28-13" title="13"><span class="co">#&gt; 11   SGSV 0.6061931 0.6 0.3939694 2285649237 0.722488</span></a>
+<a class="sourceLine" id="cb28-14" title="14"><span class="co">#&gt; 12    SSG 0.8390163 0.6 0.5741385 3239913469 0.722488</span></a></code></pre></div>
 <p>The <code>weight_class_pars</code> object created earlier does not need to incorporate the new <em>Z</em>s and can be provided straight to the function.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Estimate Biomass</span>
-Snapper_biomass_results &lt;-<span class="st"> </span><span class="kw"><a href="../reference/Estimate_DEPMWt_biomass.html">Estimate_DEPMWt_biomass</a></span>(<span class="dt">adult.pars =</span> Multi_Z_adult_pars,
-                                          <span class="dt">adult.vars =</span> Multi_Z_adult_vars,
-                                          <span class="dt">weight.pars.vars =</span> weight_class_pars)
-
-
-<span class="co"># Create new objects</span>
-Snapper_biomass &lt;-<span class="st"> </span>Snapper_biomass_results<span class="op">$</span>Biomass
-Snapper_Nfem &lt;-<span class="st"> </span>Snapper_biomass_results<span class="op">$</span>Nfem
-Snapper_NfemWt &lt;-<span class="st"> </span>Snapper_biomass_results<span class="op">$</span>NfemWt</code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb29-1" title="1"><span class="co"># Estimate Biomass</span></a>
+<a class="sourceLine" id="cb29-2" title="2">Snapper_biomass_results &lt;-<span class="st"> </span><span class="kw"><a href="../reference/Estimate_DEPMWt_biomass.html">Estimate_DEPMWt_biomass</a></span>(<span class="dt">adult.pars =</span> Multi_Z_adult_pars,</a>
+<a class="sourceLine" id="cb29-3" title="3">                                          <span class="dt">adult.vars =</span> Multi_Z_adult_vars,</a>
+<a class="sourceLine" id="cb29-4" title="4">                                          <span class="dt">weight.pars.vars =</span> weight_class_pars)</a>
+<a class="sourceLine" id="cb29-5" title="5"></a>
+<a class="sourceLine" id="cb29-6" title="6"></a>
+<a class="sourceLine" id="cb29-7" title="7"><span class="co"># Create new objects</span></a>
+<a class="sourceLine" id="cb29-8" title="8">Snapper_biomass &lt;-<span class="st"> </span>Snapper_biomass_results<span class="op">$</span>Biomass</a>
+<a class="sourceLine" id="cb29-9" title="9">Snapper_Nfem &lt;-<span class="st"> </span>Snapper_biomass_results<span class="op">$</span>Nfem</a>
+<a class="sourceLine" id="cb29-10" title="10">Snapper_NfemWt &lt;-<span class="st"> </span>Snapper_biomass_results<span class="op">$</span>NfemWt</a></code></pre></div>
 <p>These results can then be examined to determine how biomass is influenced by the specification of <em>Z</em>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
-
-Snapper_biomass<span class="op">$</span>Z &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span>(Snapper_biomass<span class="op">$</span>Z) <span class="co"># convert Z to a factor for easy plotting</span>
-
-<span class="kw">ggplot</span>(Snapper_biomass, <span class="kw">aes</span>(Z,Biomass, <span class="dt">fill =</span> Z,
-                            <span class="dt">ymin =</span> Biomass <span class="op">-</span><span class="st"> </span>SD,
-                            <span class="dt">ymax =</span> Biomass <span class="op">+</span><span class="st"> </span>SD))<span class="op">+</span>
-<span class="st">  </span><span class="kw">geom_crossbar</span>( <span class="dt">alpha =</span> .<span class="dv">8</span>)<span class="op">+</span>
-<span class="st">  </span><span class="kw">facet_wrap</span>(<span class="op">~</span>Region, <span class="dt">ncol =</span><span class="dv">2</span>)<span class="op">+</span>
-<span class="st">  </span><span class="kw">scale_fill_viridis_d</span>()<span class="op">+</span>
-<span class="st">  </span><span class="kw">expand_limits</span>(<span class="dt">y =</span> <span class="dv">0</span>)<span class="op">+</span>
-<span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">"Biomass (kg)"</span>, <span class="dt">labels =</span> scales<span class="op">::</span>comma, <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/breaks_pretty.html">pretty_breaks</a></span>(<span class="dv">5</span>))<span class="op">+</span>
-<span class="st">  </span><span class="kw">theme_bw</span>()</code></pre></div>
-<p><img src="DEPMWt_Estimation_files/figure-html/unnamed-chunk-29-1.png" width="576"></p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" title="1"></a>
+<a class="sourceLine" id="cb30-2" title="2"></a>
+<a class="sourceLine" id="cb30-3" title="3">Snapper_biomass<span class="op">$</span>Z &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span>(Snapper_biomass<span class="op">$</span>Z) <span class="co"># convert Z to a factor for easy plotting</span></a>
+<a class="sourceLine" id="cb30-4" title="4"></a>
+<a class="sourceLine" id="cb30-5" title="5"><span class="kw">ggplot</span>(Snapper_biomass, <span class="kw">aes</span>(Z,Biomass, <span class="dt">fill =</span> Z,</a>
+<a class="sourceLine" id="cb30-6" title="6">                            <span class="dt">ymin =</span> Biomass <span class="op">-</span><span class="st"> </span>SD,</a>
+<a class="sourceLine" id="cb30-7" title="7">                            <span class="dt">ymax =</span> Biomass <span class="op">+</span><span class="st"> </span>SD))<span class="op">+</span></a>
+<a class="sourceLine" id="cb30-8" title="8"><span class="st">  </span><span class="kw">geom_crossbar</span>( <span class="dt">alpha =</span> <span class="fl">.8</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb30-9" title="9"><span class="st">  </span><span class="kw">facet_wrap</span>(<span class="op">~</span>Region, <span class="dt">ncol =</span><span class="dv">2</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb30-10" title="10"><span class="st">  </span><span class="kw">scale_fill_viridis_d</span>()<span class="op">+</span></a>
+<a class="sourceLine" id="cb30-11" title="11"><span class="st">  </span><span class="kw">expand_limits</span>(<span class="dt">y =</span> <span class="dv">0</span>)<span class="op">+</span></a>
+<a class="sourceLine" id="cb30-12" title="12"><span class="st">  </span><span class="kw">scale_y_continuous</span>(<span class="dt">name =</span> <span class="st">"Biomass (kg)"</span>, <span class="dt">labels =</span> scales<span class="op">::</span>comma, <span class="dt">breaks =</span> scales<span class="op">::</span><span class="kw"><a href="https://scales.r-lib.org//reference/breaks_pretty.html">pretty_breaks</a></span>(<span class="dv">5</span>))<span class="op">+</span></a>
+<a class="sourceLine" id="cb30-13" title="13"><span class="st">  </span><span class="kw">theme_bw</span>()</a></code></pre></div>
+<p><img src="DEPMWt_Estimation_files/figure-html/unnamed-chunk-31-1.png" width="576"></p>
 </div>
 <div id="references" class="section level1">
 <h1 class="hasAnchor">
 <a href="#references" class="anchor"></a>References</h1>
-<p>Lasker, R. (Ed). 1985. An egg production method for estimating spawning biomass of pelagic fish: application to the northern anchovy, Engraulis mordax. NOAA Technical Report, Natl. Mar. Fish. Serv., 36. 99 pp.</p>
+<p>Lasker, R. (Ed). 1985. An egg production method for estimating spawning biomass of pelagic fish: application to the northern anchovy, Engraulis mordax. NOAA Technical Report, Natl. Mar. Fish. Serv., 36. 99 pp.</p>
 <p>McGarvey, R., and Kinloch, M. A. 2001. An analysis of the sensitivity of stock biomass estimates derived from the daily egg production method (DEPM) to uncertainty in egg mortality rates. Fisheries Research, 49(3): 303-307.</p>
 <p>McGarvey, R., Steer, M. A., Smart, J. J., Matthews, D. J. and Matthews, J. M.(in review). Generalizing the Parker model equation of DEPM: incorporating size dependence of population numbers and batch fecundity</p>
-<p>McGarvey, R., Steer, M.A., Matthews, J.M., Ward, T.M. (2018). A stage-based estimator of daily egg production. ICES J. Mar. Sci. 75(5), 1638-1646.</p>
+<p>McGarvey, R., Steer, M.A., Matthews, J.M., Ward, T.M. (2018). A stage-based estimator of daily egg production. ICES J. Mar. Sci. 75(5), 1638-1646.</p>
 <p>Parker, K. 1980. A direct method for estimating northern anchovy, Engraulis mordax, spawning biomass. . FIsheries Bulletin 78:541-544.</p>
 </div>
   </div>

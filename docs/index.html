@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">DEPM</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
       </span>
     </div>
 
@@ -91,12 +91,12 @@
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
 <p>You can install the released version of DEPM from <a href="https://github.com/jonathansmart/DEPM">Github</a> with:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># install.packages("devtools")</span>
-devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/devtools/man/install_github.html">install_github</a></span>(<span class="st">"jonathansmart/DEPM"</span>, <span class="dt">build_vignettes =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="co"># install.packages("devtools")</span></a>
+<a class="sourceLine" id="cb1-2" title="2">devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/devtools/man/remote-reexports.html">install_github</a></span>(<span class="st">"jonathansmart/DEPM"</span>, <span class="dt">build_vignettes =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
 <p>The DEPM package is a tool to estimate spawning stock biomass for fish populations using Daily Egg Production Methods (DEPM). Two methods are available in this package:</p>
 <ol>
 <li>DEPM - the traditional DEPM which uses mean weight and mean fecundity to scale the number of females to total biomass</li>
-<li>DEPMWt - a new approach to DEPM presented in McGarvey et al. (in review), where female weight and fecundity are grouped in weight bins. This approach is useful for demersal finfish whose weight distributions are often not unimodal and therefore shouldn’t be described using a normal distribution.</li>
+<li>DEPMWt - a new approach to DEPM presented in McGarvey et al. (in review), where female weight and fecundity are grouped in weight bins. This approach is useful for demersal finfish whose weight distributions are often not unimodal and therefore shouldn’t be described using a normal distribution.</li>
 </ol>
 <p>The package contains functions that estimate the individual DEPM parameters: daily egg production (<em>P</em><sub>0</sub>), sex ratio (<em>R</em>), spawning fraction (<em>S</em>), fecundity (both mean and weight specific) and weight (both mean and in weight bins). The only parameter that is not estimated in this package is spawning area (<em>A</em>), which is typically estimated using GIS methods and must be provided to the analysis.</p>
 </div>
@@ -105,11 +105,11 @@ devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/
 <h1 class="hasAnchor">
 <a href="#how-to-guides" class="anchor"></a>How-to guides</h1>
 <p>Two vignettes are available that can guide users through both approaches and can be accessed using:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://rdrr.io/r/utils/browseVignettes.html">browseVignettes</a></span>(<span class="st">"DEPM"</span>) <span class="co"># access all package vignettes</span>
-
-<span class="kw"><a href="https://rdrr.io/r/utils/vignette.html">vignette</a></span>(<span class="st">"DEPMWt_Estimation"</span>) <span class="co"># How-to guide for the DEPMWt approach</span>
-
-<span class="kw"><a href="https://rdrr.io/r/utils/vignette.html">vignette</a></span>(<span class="st">"DEPM_Estimation"</span>) <span class="co"># How-to guide for the Traditional DEPM approach</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw"><a href="https://rdrr.io/r/utils/browseVignettes.html">browseVignettes</a></span>(<span class="st">"DEPM"</span>) <span class="co"># access all package vignettes</span></a>
+<a class="sourceLine" id="cb2-2" title="2"></a>
+<a class="sourceLine" id="cb2-3" title="3"><span class="kw"><a href="https://rdrr.io/r/utils/vignette.html">vignette</a></span>(<span class="st">"DEPMWt_Estimation"</span>) <span class="co"># How-to guide for the DEPMWt approach</span></a>
+<a class="sourceLine" id="cb2-4" title="4"></a>
+<a class="sourceLine" id="cb2-5" title="5"><span class="kw"><a href="https://rdrr.io/r/utils/vignette.html">vignette</a></span>(<span class="st">"DEPM_Estimation"</span>) <span class="co"># How-to guide for the Traditional DEPM approach</span></a></code></pre></div>
 </div>
 
   </div>

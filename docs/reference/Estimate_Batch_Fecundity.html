@@ -35,7 +35,9 @@
 <meta property="og:title" content="Estimate batch fecundity — Estimate_Batch_Fecundity" />
 
 <meta property="og:description" content="Batch fecundity (number of eggs by female fish weight) is estimated with an allometric error structure allowing
-    greater variance with increasing weight. This is estimated as a 4 parameter model where specified parameters can be fixed." />
+    greater variance with increasing weight. This is estimated as a 4 parameter model where specified parameters can be fixed.
+    If fixed parameters are specified, then the modeling becomes a two-step process where all four parameters are estimated and
+    the resulting parameters estimates are then assigned to the fixed variables in a second phase of the model." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -67,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">DEPM</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
       </span>
     </div>
 
@@ -127,12 +129,20 @@
     <div class="ref-description">
     
     <p>Batch fecundity (number of eggs by female fish weight) is estimated with an allometric error structure allowing
-    greater variance with increasing weight. This is estimated as a 4 parameter model where specified parameters can be fixed.</p>
+    greater variance with increasing weight. This is estimated as a 4 parameter model where specified parameters can be fixed.
+    If fixed parameters are specified, then the modeling becomes a two-step process where all four parameters are estimated and
+    the resulting parameters estimates are then assigned to the fixed variables in a second phase of the model.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>Estimate_Batch_Fecundity</span>(<span class='no'>data</span>, <span class='no'>start_pars</span>, <span class='kw'>prediction.int</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>return.parameters</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>fixed.pars</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+    <pre class="usage"><span class='fu'>Estimate_Batch_Fecundity</span>(
+  <span class='no'>data</span>,
+  <span class='no'>start_pars</span>,
+  <span class='kw'>prediction.int</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>return.parameters</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>fixed.pars</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -166,9 +176,10 @@ as the larger of the two variables is assumed to be number of eggs and is automa
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Parameter estimates are automatically printed to the screen. If a prediction interval is provided then predicted fecundity-at-weight
-    is provided at those intervals. If no prediction interval is provided than predictions for the raw data are returned. Variance (Var) is
-    returned for both options. if `return.parameters == TRUE`, parameter estimates are returned instead of estimates</p>
+    <p>If a prediction interval is provided then predicted fecundity-at-weight is provided at those intervals
+    with their variance and standard error. If no prediction interval is provided then predictions for the raw data are
+    returned with standard error and 95<!-- % confidence intervals. If `return.parameters == TRUE`, parameter estimates and their standard errors -->
+    are returned.</p>
     
 
   </div>
