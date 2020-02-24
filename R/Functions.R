@@ -389,7 +389,7 @@ Estimate_Spawning_fraction <- function(data, Region = NULL, Time = NULL){
 Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL,
                                      return.parameters = FALSE,  fixed.pars= NULL, verbose = FALSE){
 
-  if(any(prediction.int < 1) ) stop("Prediction intervals must be in grams not kilos")
+  if(any(prediction.int < 1) ) warning("weight should be in grams not kilos for DEPM analyses")
 
   # suppressWarnings(dyn.load(dynlib('C:/UserData/Documents/SARDI/Modelling and programming/R/Packages/DEPM package/allometric_FvsW')))
 
@@ -422,6 +422,7 @@ Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL,
     data <- list(x=data[[2]], y=data[[1]])
   }
 
+  if(any(data[["x"]] < 1) ) warning("weight should be in grams not kilos for DEPM analyses")
 
   if(!is.null(fixed.pars)){
     # if there are parametes to be fixed.
@@ -453,7 +454,7 @@ Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL,
     # Get the unfixed parameters from first run and  use them as new starting pararmeters
     # This time the fixed parameters (the ones which are estimated appropriately firsttime),
     # Won't be estimated so the original Val and var remain the same.
-    new_start_pars <- dplyr::filter(first_Derived_Quants, Parameter %in% names(unlist(start_pars)))
+    new_start_pars <- filter(first_Derived_Quants, Parameter %in% names(unlist(start_pars)))
     new_start_pars <- as.list(new_start_pars[,2])
     names(new_start_pars) <- names(unlist(start_pars))
 
@@ -467,15 +468,15 @@ Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL,
     # This time the derived quants are the final estimates
     Derived_Quants <- create_TMB_sd_report_data.frame(summary(second_rep))
 
-    Final_parameters <- suppressWarnings(dplyr::bind_rows(
-      dplyr::filter(first_Derived_Quants,
+    Final_parameters <- suppressWarnings(bind_rows(
+      filter(first_Derived_Quants,
              Parameter %in% names(unlist(start_pars)),
              Parameter  %in% names(unlist(fixed_pars))),
-      dplyr::filter(Derived_Quants,
+      filter(Derived_Quants,
              Parameter %in% names(unlist(start_pars)),
              !Parameter  %in% names(unlist(fixed_pars)))
     ))
-    Final_parameters <- dplyr::arrange(Final_parameters, Parameter)
+    Final_parameters <- arrange(Final_parameters, Parameter)
 
 
   }else{
@@ -494,7 +495,7 @@ Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL,
     # get the predictions and parameters with standard errors from TMB
     Derived_Quants <- create_TMB_sd_report_data.frame(summary(rep))
 
-    Final_parameters <- dplyr::filter(Derived_Quants, Parameter %in% names(unlist(start_pars)))
+    Final_parameters <- filter(Derived_Quants, Parameter %in% names(unlist(start_pars)))
   }
 
 
@@ -534,6 +535,9 @@ Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL,
     # the model
     results <- dplyr::filter(Derived_Quants,Parameter == "F_pred")
     results <- dplyr::bind_cols(Wt = data$x, Observed = data$y,results)
+    # A weight of exactly 1 returns an Inf when logged in the SE equation so add a small offset
+    results <- dplyr::mutate(results,
+                             Wt = ifelse(Wt == 1, Wt + 0.0001, Wt))
     results <- dplyr::select(results, -Parameter, -var)
     results <- purrr::set_names(results, c("Wt", "Fecundity", "Predicted"))
     results <- dplyr::mutate(results,
@@ -548,6 +552,7 @@ Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL,
   return(results)
 
 }
+
 
 #' Estimate_proportion_female
 #' @description Determine the proportion of of the population in each weight bin. This is performed for females
