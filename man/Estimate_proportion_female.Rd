@@ -7,8 +7,7 @@
 Estimate_proportion_female(
   data,
   Weight,
-  max.weight,
-  bin.width,
+  Weight.bins = NULL,
   Time = NULL,
   Region = NULL
 )
@@ -18,16 +17,15 @@ Estimate_proportion_female(
 
 \item{Weight}{A character string of the variable in `data` that specifies weight in grams}
 
-\item{max.weight}{An integer of the upper weight bin boundary in grams}
-
-\item{bin.width}{An integer for the bin width in grams}
+\item{Weight.bins}{A numeric vector of weights to to create bins. Must be the lower bound for each bin. Midpoints and
+upper bounds are automatically determined.}
 
 \item{Time}{A string containing the column name for a timestep if desired as a grouping variable}
 
 \item{Region}{A string containing the column name for a region if desired as a grouping variable}
 }
 \value{
-A dataframe with the columns Wt_bin, n, Prop and Prop_var. Timestep and region columns are returned if used
+A dataframe with the columns Wt_bin, n, Prop, Prop_var, Lower_Wt, Upper_Wt, Bin_Width and Mid_point. Timestep and region columns are returned if used
 }
 \description{
 Determine the proportion of of the population in each weight bin. This is performed for females

@@ -373,7 +373,8 @@ Estimate_Spawning_fraction <- function(data, Region = NULL, Time = NULL){
 #' @param data A dataframe with 2 numeric variables: Fish weight and fecundity (number of eggs). Names and order are not important
 #'    as the larger of the two variables is assumed to be number of eggs and is automatically assigned as this.
 #' @param start_pars A list of 4 start_pars tha must include: "alpha", "beta", "Sigma0" and "Sigma1"
-#' @param prediction.int A numeric vector of weights to predict batch fecundity over. Must be on the same scale as the data
+#' @param prediction.int A numeric vector of weights to predict batch fecundity over. If being used in conjunction with
+#'     `Estimate_proportion_female`, then the prediction intervals should be the midpoints of the weight bins returned from that function
 #' @param fixed.pars A character vector of any start_pars that require fixing.
 #' @param verbose If TRUE, parameter estimates are printed to the screen
 #' @param return.parameters If TRUE, parameter estimates are returned instead of estimates
@@ -559,21 +560,22 @@ Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL,
 #'     only and is an input parameter for the DEPMwt model.
 #' @param data A dataframe that conatins female weight in grams. No males should be included and must be removed before use
 #' @param Weight A character string of the variable in `data` that specifies weight in grams
-#' @param max.weight An integer of the upper weight bin boundary in grams
-#' @param bin.width An integer for the bin width in grams
+#' @param Weight.bins A numeric vector of weights to to create bins. Must be the lower bound for each bin. Midpoints and
+#'     upper bounds are automatically determined.
 #' @param Time A string containing the column name for a timestep if desired as a grouping variable
 #' @param Region A string containing the column name for a region if desired as a grouping variable
 #'
-#' @return A dataframe with the columns Wt_bin, n, Prop and Prop_var. Timestep and region columns are returned if used
+#' @return A dataframe with the columns Wt_bin, n, Prop, Prop_var, Lower_Wt, Upper_Wt, Bin_Width and Mid_point. Timestep and region columns are returned if used
 #' @export
 #'
-Estimate_proportion_female <- function(data, Weight, max.weight, bin.width, Time = NULL, Region = NULL){
+Estimate_proportion_female <- function(data, Weight, Weight.bins = NULL, Time = NULL, Region = NULL){
   if(!is.null(Region) & !any(names(data) %in% Region)) stop("Region column could not be determined")
   if(!is.null(Time) & !any(names(data) %in% Time)) stop("Time column could not be determined")
-  if(bin.width > max.weight) stop("Bin widths are larger than maximum weight")
+  if(is.null(Weight.bins)) stop("The lower bounds of weight bins must be specified")
 
-  # Create weight bins based on the max weight for largest bin and their width
-  wt_bins <- seq(0,max.weight, bin.width)
+  # Order weight bins from lowest to highest if they are not already
+  Weight.bins <- sort(Weight.bins)
+  if(Weight.bins[1] != 0)stop("Weight.bins should begin at zero")
 
   # Group the data and perform analyses by Time, Region, Neither or both depending on
   # whether the variables were provided
@@ -584,7 +586,7 @@ Estimate_proportion_female <- function(data, Weight, max.weight, bin.width, Time
                                     Region = paste(Region))
     # create weight bin integers
     processed_data <-  dplyr::mutate(processed_data,
-                                     Wt_bin = cut(Weight,wt_bins,labels = FALSE))
+                                     Wt_bin = cut(Weight,Weight.bins,labels = FALSE))
     # Assign grouping variables
     processed_data <- dplyr::group_by(processed_data, Region, Wt_bin)
     # Get total number of females for each weight bin within each group
@@ -599,9 +601,15 @@ Estimate_proportion_female <- function(data, Weight, max.weight, bin.width, Time
     processed_data <- suppressWarnings(
       suppressMessages(dplyr::right_join(processed_data,
                                          expand.grid(Region = unique(processed_data$Region),
-                                                     Wt_bin = seq_along(wt_bins)))
+                                                     Wt_bin = seq_along(Weight.bins)))
       )
     )
+
+    processed_data <- mutate(processed_data,
+                             Lower_Wt = Weight.bins[Wt_bin],
+                             Upper_Wt = Weight.bins[Wt_bin+1],
+                             Bin_Width = Upper_Wt - Lower_Wt,
+                             Mid_point = Bin_Width/2+Lower_Wt)
 
   } else if(!is.null(Time) & is.null(Region)) {
     processed_data <- dplyr::select(data,
@@ -609,7 +617,7 @@ Estimate_proportion_female <- function(data, Weight, max.weight, bin.width, Time
                                     Time = paste(Time))
 
     processed_data <-  dplyr::mutate(processed_data,
-                                     Wt_bin = cut(Weight,wt_bins,labels = FALSE))
+                                     Wt_bin = cut(Weight,Weight.bins,labels = FALSE))
 
     processed_data <- dplyr::group_by(processed_data, Time, Wt_bin)
 
@@ -622,7 +630,13 @@ Estimate_proportion_female <- function(data, Weight, max.weight, bin.width, Time
       suppressMessages(
         dplyr::right_join(processed_data,
                           expand.grid(Time = unique(processed_data$Time),
-                                      Wt_bin = seq_along(wt_bins)))))
+                                      Wt_bin = seq_along(Weight.bins)))))
+
+    processed_data <- mutate(processed_data,
+                             Lower_Wt = Weight.bins[Wt_bin],
+                             Upper_Wt = Weight.bins[Wt_bin+1],
+                             Bin_Width = Upper_Wt - Lower_Wt,
+                             Mid_point = Bin_Width/2+Lower_Wt)
 
 
   }else if(!is.null(Time) & !is.null(Region)) {
@@ -632,7 +646,7 @@ Estimate_proportion_female <- function(data, Weight, max.weight, bin.width, Time
                                     Time = paste(Time))
 
     processed_data <-  dplyr::mutate(processed_data,
-                                     Wt_bin = cut(Weight,wt_bins,labels = FALSE))
+                                     Wt_bin = cut(Weight,Weight.bins,labels = FALSE))
 
     processed_data <- dplyr::group_by(processed_data,Time, Region, Wt_bin)
 
@@ -641,7 +655,7 @@ Estimate_proportion_female <- function(data, Weight, max.weight, bin.width, Time
     processed_data <- dplyr::mutate(processed_data, Prop = n /sum(n),
                                     Prop_var = (Prop*(1-Prop))/sum(n))
 
-    Bins <-  tidyr::expand(processed_data, tidyr::nesting(Time = Time, Region = Region), Wt_bin = seq_along(wt_bins))
+    Bins <-  tidyr::expand(processed_data, tidyr::nesting(Time = Time, Region = Region), Wt_bin = seq_along(Weight.bins))
 
     processed_data <-  suppressWarnings(
       suppressMessages(
@@ -649,12 +663,18 @@ Estimate_proportion_female <- function(data, Weight, max.weight, bin.width, Time
       )
     )
 
+    processed_data <- mutate(processed_data,
+                             Lower_Wt = Weight.bins[Wt_bin],
+                             Upper_Wt = Weight.bins[Wt_bin+1],
+                             Bin_Width = Upper_Wt - Lower_Wt,
+                             Mid_point = Bin_Width/2+Lower_Wt)
+
   } else {
     processed_data <- dplyr::select(data,
                                     Weight = paste(Weight))
 
     processed_data <-  dplyr::mutate(processed_data,
-                                     Wt_bin = cut(Weight,wt_bins,labels = FALSE))
+                                     Wt_bin = cut(Weight,Weight.bins,labels = FALSE))
 
     processed_data <- dplyr::group_by(processed_data, Wt_bin)
 
@@ -666,9 +686,14 @@ Estimate_proportion_female <- function(data, Weight, max.weight, bin.width, Time
     processed_data <-  suppressWarnings(
       suppressMessages(
         dplyr::right_join(processed_data,
-                          expand.grid( Wt_bin = seq_along(wt_bins)))
+                          expand.grid( Wt_bin = seq_along(Weight.bins)))
       )
     )
+    processed_data <- mutate(processed_data,
+                             Lower_Wt = Weight.bins[Wt_bin],
+                             Upper_Wt = Weight.bins[Wt_bin+1],
+                             Bin_Width = Upper_Wt - Lower_Wt,
+                             Mid_point = Bin_Width/2+Lower_Wt)
 
 
   }
@@ -677,6 +702,10 @@ Estimate_proportion_female <- function(data, Weight, max.weight, bin.width, Time
 
   # Convert NA's to zeroes
   processed_data <-  dplyr::mutate_at(processed_data,vars(-group_cols()), funs(ifelse(is.na(.), 0, .)))
+
+  # Remove the final weight bin which does not have a proper upper lim and therefore has a midpoint of zero
+  processed_data <- filter(processed_data, Mid_point != 0)
+
 
   return(processed_data)
 }
@@ -849,7 +878,7 @@ combine_wt_class_estimates <- function(prop.fem.data, fecundity.data){
   process_fec_data <-  dplyr:: mutate(process_fec_data, Wt_bin = row_number())
 
   # There should be one more weight bin in the female prop data than the fecundity data
-  if(max(process_fec_data$Wt_bin) != max(prop.fem.data$Wt_bin)-1) stop("Weight bins in data sets do not align")
+  if(max(process_fec_data$Wt_bin) != max(prop.fem.data$Wt_bin)) stop("Weight bins in data sets do not align")
 
   # create a vector of joining variables depending on whether Time or Region were specified
   if(all((any(names(prop.fem.data) %in% "Region") &  any(names(process_fec_data) %in% "Region")),
@@ -868,8 +897,11 @@ combine_wt_class_estimates <- function(prop.fem.data, fecundity.data){
   # NA's are produced when weight bins don't correspond. get rid of these
   combined_data <- dplyr::filter(combined_data, !is.na(Wt))
 
+  combined_data <- dplyr::select(combined_data, Wt_bin, n, Prop, Prop_var, Wt, Fecundity, Fec_var)
+
   return(combined_data)
 }
+
 
 #' Combined DEPM parameters to calculate spawning biomass, total number of females and the number of females per weight class using the DEPMwt approach
 #'

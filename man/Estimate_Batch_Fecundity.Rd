@@ -19,7 +19,8 @@ as the larger of the two variables is assumed to be number of eggs and is automa
 
 \item{start_pars}{A list of 4 start_pars tha must include: "alpha", "beta", "Sigma0" and "Sigma1"}
 
-\item{prediction.int}{A numeric vector of weights to predict batch fecundity over. Must be on the same scale as the data}
+\item{prediction.int}{A numeric vector of weights to predict batch fecundity over. If being used in conjunction with
+`Estimate_proportion_female`, then the prediction intervals should be the midpoints of the weight bins returned from that function}
 
 \item{return.parameters}{If TRUE, parameter estimates are returned instead of estimates}
 
