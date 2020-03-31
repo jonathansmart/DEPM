@@ -233,12 +233,18 @@ Estimate_sex_ratio <- function(data, Region = NULL, Time = NULL){
                                     Time = paste(Time),
                                     Top = paste(F_col),
                                     Bottom = paste(Tot_col))
-    results <- expand.grid(Time = unique(processed_data$Time),
-                           Region = unique(processed_data$Region),
-                           `Ratio estimate` = NA,
-                           Variance = NA,
-                           SE= NA,
-                           CV= NA)
+    results <-tidyr::expand(processed_data, tidyr::nesting(Time = Time, Region = Region),
+                            `Ratio estimate` = NA,
+                            Variance = NA,
+                            SE= NA,
+                            CV= NA)
+
+    # results <- expand.grid(Time = unique(processed_data$Time),
+    #                        Region = unique(processed_data$Region),
+    #                        `Ratio estimate` = NA,
+    #                        Variance = NA,
+    #                        SE= NA,
+    #                        CV= NA)
 
     for(i in unique(processed_data$Time)){
       for(j in unique(processed_data$Region)){
@@ -335,12 +341,19 @@ Estimate_Spawning_fraction <- function(data, Region = NULL, Time = NULL){
                                     Time = paste(Time),
                                     Top = paste(Y_col),
                                     Bottom = paste(Tot_col))
-    results <- expand.grid(Time = unique(processed_data$Time),
-                           Region = unique(processed_data$Region),
-                           `Ratio estimate` = NA,
-                           Variance = NA,
-                           SE= NA,
-                           CV= NA)
+
+    results <-tidyr::expand(processed_data, tidyr::nesting(Time = Time, Region = Region),
+                            `Ratio estimate` = NA,
+                            Variance = NA,
+                            SE= NA,
+                            CV= NA)
+
+    # results <- expand.grid(Time = unique(processed_data$Time),
+    #                        Region = unique(processed_data$Region),
+    #                        `Ratio estimate` = NA,
+    #                        Variance = NA,
+    #                        SE= NA,
+    #                        CV= NA)
 
     for(i in unique(processed_data$Time)){
       for(j in unique(processed_data$Region)){
@@ -896,8 +909,6 @@ combine_wt_class_estimates <- function(prop.fem.data, fecundity.data){
   combined_data <-  dplyr::left_join(prop.fem.data, process_fec_data, by = join)
   # NA's are produced when weight bins don't correspond. get rid of these
   combined_data <- dplyr::filter(combined_data, !is.na(Wt))
-
-  combined_data <- dplyr::select(combined_data, Wt_bin, n, Prop, Prop_var, Wt, Fecundity, Fec_var)
 
   return(combined_data)
 }
