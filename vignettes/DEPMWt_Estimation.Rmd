@@ -223,10 +223,15 @@ To break the female weights into bins, an upper bound and a bin width is require
 ```{r}
 head(Wt_data)
 
-Prop_fem_results <- Estimate_proportion_female(Wt_data, 
-                                               Weight =  "Tot.Wt",
-                                               max.weight = 13500,
-                                               bin.width = 500,
+# Prop_fem_results <- Estimate_proportion_female(Wt_data, 
+#                                                Weight =  "Tot.Wt",
+#                                                max.weight = 13500,
+#                                                bin.width = 500,
+#                                                Region = "Region")
+Wt_bins <- seq(0,13500,500)
+
+Prop_fem_results <- Estimate_proportion_female(Wt_data, Weight =  "Tot.Wt",
+                                               Weight.bins = Wt_bins,
                                                Region = "Region")
 
 ```
@@ -292,7 +297,7 @@ In order to determine the fecundity for each weight bin, the mid-points of those
 
 ```{r}
 # The mid points of each weight bin need to be used to estimate fecundity.
-mid_points <- seq(250, 13500, 500)
+mid_points <- sort(unique(Prop_fem_results$Mid_point))
 
 
 # Estimates for biomass calculation
