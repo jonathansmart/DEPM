@@ -67,7 +67,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">DEPM</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.2</span>
       </span>
     </div>
 
@@ -134,8 +134,7 @@
     <pre class="usage"><span class='fu'>Estimate_proportion_female</span>(
   <span class='no'>data</span>,
   <span class='no'>Weight</span>,
-  <span class='no'>max.weight</span>,
-  <span class='no'>bin.width</span>,
+  <span class='kw'>Weight.bins</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>Time</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>Region</span> <span class='kw'>=</span> <span class='kw'>NULL</span>
 )</pre>
@@ -152,12 +151,9 @@
       <td><p>A character string of the variable in `data` that specifies weight in grams</p></td>
     </tr>
     <tr>
-      <th>max.weight</th>
-      <td><p>An integer of the upper weight bin boundary in grams</p></td>
-    </tr>
-    <tr>
-      <th>bin.width</th>
-      <td><p>An integer for the bin width in grams</p></td>
+      <th>Weight.bins</th>
+      <td><p>A numeric vector of weights to to create bins. Must be the lower bound for each bin. Midpoints and
+upper bounds are automatically determined.</p></td>
     </tr>
     <tr>
       <th>Time</th>
@@ -171,7 +167,7 @@
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A dataframe with the columns Wt_bin, n, Prop and Prop_var. Timestep and region columns are returned if used</p>
+    <p>A dataframe with the columns Wt_bin, n, Prop, Prop_var, Lower_Wt, Upper_Wt, Bin_Width and Mid_point. Timestep and region columns are returned if used</p>
     
 
   </div>

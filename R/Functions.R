@@ -1081,9 +1081,9 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
   if(any(names(adult.pars) %in% "Region" ) & any(names(adult.pars) %in% "Time")){
     # List of results to be filled: Number of females, Biomass and number of females at weight class
     resultlist <- list(
-      Nfem =  tidyr::expand(adult.pars, tidyr::nesting(Time = Time, Region = Region, Z = Z),  Nfem = NA, SD = NA ),
-      Biomass = tidyr::expand(adult.pars, tidyr::nesting(Time = Time, Region = Region, Z = Z),  Biomass = NA, SD = NA ),
-      NfemWt = tidyr::expand(weight.pars.vars, tidyr::nesting(Time = Time, Region = Region, Nwt = Wt_bin), Z = unique(adult.pars$Z), NfemWt = NA , SD = NA)
+      Nfem =  tidyr::expand(adult.pars, tidyr::nesting(Time = Time, Region = Region, Z = Z),  Nfem = NA_real_, SD = NA_real_ ),
+      Biomass = tidyr::expand(adult.pars, tidyr::nesting(Time = Time, Region = Region, Z = Z),  Biomass = NA_real_, SD = NA_real_ ),
+      NfemWt = tidyr::expand(weight.pars.vars, tidyr::nesting(Time = Time, Region = Region, Nwt = Wt_bin), Z = unique(adult.pars$Z), NfemWt = NA_real_ , SD = NA_real_)
     )
 
     # Loop over Time and Region and save estimates and variances to correct position in resultlist
@@ -1150,10 +1150,10 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
 
   } else if(any(names(adult.pars) %in% "Time")){
     resultlist <- list(
-      Nfem = expand.grid(Time = unique(adult.pars$Time), Z = unique(adult.pars$Z), Nfem = NA, SD = NA ),
-      Biomass = expand.grid(Time = unique(adult.pars$Time),Z = unique(adult.pars$Z),  Biomass = NA , SD = NA),
+      Nfem = expand.grid(Time = unique(adult.pars$Time), Z = unique(adult.pars$Z), Nfem = NA_real_, SD = NA_real_ ),
+      Biomass = expand.grid(Time = unique(adult.pars$Time),Z = unique(adult.pars$Z),  Biomass = NA_real_ , SD = NA_real_),
       NfemWt = expand.grid(Time = unique(adult.pars$Time),Z = unique(adult.pars$Z),
-                           Nwt = seq(1, length(unique(weight.pars.vars$Wt_bin)),1), NfemWt = NA , SD = NA)
+                           Nwt = seq(1, length(unique(weight.pars.vars$Wt_bin)),1), NfemWt = NA_real_ , SD = NA_real_)
     )
 
     for(i in unique(adult.pars$Time)){
@@ -1214,10 +1214,10 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
 
   } else if(any(names(adult.pars) %in% "Region")){
     resultlist <- list(
-      Nfem = expand.grid(Region = unique(adult.pars$Region),Z = unique(adult.pars$Z), Nfem = NA, SD = NA ),
-      Biomass = expand.grid(Region = unique(adult.pars$Region),Z = unique(adult.pars$Z),  Biomass = NA , SD = NA),
+      Nfem = expand.grid(Region = unique(adult.pars$Region),Z = unique(adult.pars$Z), Nfem = NA_real_, SD = NA_real_ ),
+      Biomass = expand.grid(Region = unique(adult.pars$Region),Z = unique(adult.pars$Z),  Biomass = NA_real_ , SD = NA_real_),
       NfemWt = expand.grid(Region = unique(adult.pars$Region),Z = unique(adult.pars$Z),
-                           Nwt = seq(1, length(unique(weight.pars.vars$Wt_bin)),1), NfemWt = NA , SD = NA)
+                           Nwt = seq(1, length(unique(weight.pars.vars$Wt_bin)),1), NfemWt = NA_real_ , SD = NA_real_)
     )
 
 
@@ -1278,10 +1278,10 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
   } else {
 
     resultlist <- list(
-      Nfem = expand.grid(Z = unique(adult.pars$Z), Nfem = NA, SD = NA ),
-      Biomass = expand.grid(Z = unique(adult.pars$Z),  Biomass = NA , SD = NA),
+      Nfem = expand.grid(Z = unique(adult.pars$Z), Nfem = NA_real_, SD = NA_real_ ),
+      Biomass = expand.grid(Z = unique(adult.pars$Z),  Biomass = NA_real_ , SD = NA_real_),
       NfemWt = expand.grid(Z = unique(adult.pars$Z),
-                           Nwt = seq(1, length(unique(weight.pars.vars$Wt_bin)),1), NfemWt = NA , SD = NA)
+                           Nwt = seq(1, length(unique(weight.pars.vars$Wt_bin)),1), NfemWt = NA_real_ , SD = NA_real_)
     )
     for(k in unique(adult.pars$Z)){
 
@@ -1404,8 +1404,8 @@ Estimate_DEPM_Biomass <- function(adult.pars, adult.vars){
   if(any(names(adult.pars) %in% "Region" ) & any(names(adult.pars) %in% "Time")){
     # List of results to be filled: Number of females, Biomass and number of females at weight class
     resultlist <- list(
-      Nfem =  tidyr::expand(adult.pars, tidyr::nesting(Time = Time, Region = Region, Z = Z),  Nfem = NA, SD = NA ),
-      Biomass = tidyr::expand(adult.pars, tidyr::nesting(Time = Time, Region = Region, Z = Z),  Biomass = NA, SD = NA )
+      Nfem =  tidyr::expand(adult.pars, tidyr::nesting(Time = Time, Region = Region, Z = Z),  Nfem = NA_real_, SD = NA_real_ ),
+      Biomass = tidyr::expand(adult.pars, tidyr::nesting(Time = Time, Region = Region, Z = Z),  Biomass = NA_real_, SD = NA_real_ )
     )
 
 
@@ -1506,8 +1506,8 @@ Estimate_DEPM_Biomass <- function(adult.pars, adult.vars){
 
   } else if(any(names(adult.pars) %in% "Region")){
     resultlist <- list(
-      Nfem = expand.grid(Region = unique(adult.pars$Region),Z = unique(adult.pars$Z), Nfem = NA, SD = NA ),
-      Biomass = expand.grid(Region = unique(adult.pars$Region),Z = unique(adult.pars$Z),  Biomass = NA , SD = NA)
+      Nfem = expand.grid(Region = unique(adult.pars$Region),Z = unique(adult.pars$Z), Nfem = NA_real_, SD = NA_real_ ),
+      Biomass = expand.grid(Region = unique(adult.pars$Region),Z = unique(adult.pars$Z),  Biomass = NA_real_ , SD = NA_real_)
     )
 
 
@@ -1551,8 +1551,8 @@ Estimate_DEPM_Biomass <- function(adult.pars, adult.vars){
 
   } else {
     resultlist <- list(
-      Nfem = expand.grid(Z = unique(adult.pars$Z), Nfem = NA, SD = NA ),
-      Biomass = expand.grid(Z = unique(adult.pars$Z),  Biomass = NA , SD = NA))
+      Nfem = expand.grid(Z = unique(adult.pars$Z), Nfem = NA_real_, SD = NA_real_ ),
+      Biomass = expand.grid(Z = unique(adult.pars$Z),  Biomass = NA_real_ , SD = NA_real_))
 
       for(k in unique(adult.pars$Z)){
 
@@ -1647,10 +1647,10 @@ Estimate_mean_W_F <- function(weight.data, TotalWt, GonadFrWt= NULL, Time = NULL
     processed_data <- na.omit(processed_data)
 
     results <- expand.grid(Region = unique(processed_data$Region),
-                           Mean_W = NA,
-                           var_W = NA,
-                           Mean_F= NA,
-                           var_F= NA)
+                           Mean_W = NA_real_,
+                           var_W = NA_real_,
+                           Mean_F= NA_real_,
+                           var_F= NA_real_)
 
     for(i in unique(processed_data$Region)){
       tmp <- dplyr::filter(processed_data, Region == i)
@@ -1689,10 +1689,10 @@ Estimate_mean_W_F <- function(weight.data, TotalWt, GonadFrWt= NULL, Time = NULL
     processed_data <- na.omit(processed_data)
 
     results <- expand.grid(Time = unique(processed_data$Time),
-                           Mean_W = NA,
-                           var_W = NA,
-                           Mean_F= NA,
-                           var_F= NA)
+                           Mean_W = NA_real_,
+                           var_W = NA_real_,
+                           Mean_F= NA_real_,
+                           var_F= NA_real_)
 
     for(i in unique(processed_data$Time)){
       tmp <- dplyr::filter(processed_data, Time == i)
@@ -1728,10 +1728,10 @@ Estimate_mean_W_F <- function(weight.data, TotalWt, GonadFrWt= NULL, Time = NULL
     processed_data <- na.omit(processed_data)
 
     results <-  tidyr::expand(processed_data, tidyr::nesting(Time = Time, Region = Region),
-                              Mean_W = NA,
-                              var_W = NA,
-                              Mean_F= NA,
-                              var_F= NA)
+                              Mean_W = NA_real_,
+                              var_W = NA_real_,
+                              Mean_F= NA_real_,
+                              var_F= NA_real_)
 
     for(i in unique(processed_data$Time)){
       for(j in unique(processed_data$Region)){
