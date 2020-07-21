@@ -77,34 +77,34 @@ Estimate_P0 <- function(data, site, Z =  NULL, Region = NULL, Time = NULL){
       # if 'Region' is specified, group_by Region as well as site
       Density_estimates <- dplyr::group_by(Density_estimates, Region, site)
       # sum over egg densitities
-      Density_estimates <- dplyr::summarise(Density_estimates, Pt = sum(P, na.rm = TRUE))
+      Density_estimates <- dplyr::summarise(Density_estimates, Pt = sum(P, na.rm = TRUE),.groups = "drop_last")
       Density_estimates <- dplyr::group_by(Density_estimates, Region)
 
     } else if(!is.null(Time) & is.null(Region)) {
       # if 'Time' is specified, group_by Time as well as site
       # rename the grouping variable for 'Time' so that it is recognised by dplyr::group_by
       Density_estimates <- dplyr::group_by(Density_estimates, Time, site)
-      Density_estimates <- dplyr::summarise(Density_estimates, Pt = sum(P, na.rm = TRUE))
+      Density_estimates <- dplyr::summarise(Density_estimates, Pt = sum(P, na.rm = TRUE),.groups = "drop_last")
       Density_estimates <- dplyr::group_by(Density_estimates, Time)
 
     }else if(!is.null(Time) & !is.null(Region)) {
       # if 'Region' and 'Time are specified, group_by both as well as site
       Density_estimates <- dplyr::group_by(Density_estimates, Time, Region,  site)
       # sum over egg densitities
-      Density_estimates <- dplyr::summarise(Density_estimates, Pt = sum(P, na.rm = TRUE))
+      Density_estimates <- dplyr::summarise(Density_estimates, Pt = sum(P, na.rm = TRUE),.groups = "drop_last")
       Density_estimates <- dplyr::group_by(Density_estimates, Time, Region)
 
     } else {
       # if neither 'Region' or 'Time are specified, only group by site
       Density_estimates <- dplyr::group_by(Density_estimates, site)
       # sum over egg densitities
-      Density_estimates <- dplyr::summarise(Density_estimates, Pt = sum(P, na.rm = TRUE))
+      Density_estimates <- dplyr::summarise(Density_estimates, Pt = sum(P, na.rm = TRUE),.groups = "drop_last")
     }
 
     # Calculate the mean and se for P0 based on grouping variables.
     Density_estimates <- dplyr::summarise(Density_estimates, P0 = mean(Pt, na.rm = TRUE),
                                           P0_se = sqrt(var(Pt,na.rm = TRUE)/length(Pt)),
-                                          Z = Z)
+                                          Z = Z,.groups = "drop_last")
     return(Density_estimates)
   }
 
@@ -603,7 +603,7 @@ Estimate_proportion_female <- function(data, Weight, Weight.bins = NULL, Time = 
     # Assign grouping variables
     processed_data <- dplyr::group_by(processed_data, Region, Wt_bin)
     # Get total number of females for each weight bin within each group
-    processed_data <-  dplyr::summarise(processed_data, n = n())
+    processed_data <-  dplyr::summarise(processed_data, n = n(),.groups = "drop_last")
     # calculate proportion females and the multionomial variance in each weigth bin
     processed_data <- dplyr::mutate(processed_data, Prop = n /sum(n),
                                     Prop_var = (Prop*(1-Prop))/sum(n))
@@ -634,7 +634,7 @@ Estimate_proportion_female <- function(data, Weight, Weight.bins = NULL, Time = 
 
     processed_data <- dplyr::group_by(processed_data, Time, Wt_bin)
 
-    processed_data <-  dplyr::summarise(processed_data, n = n())
+    processed_data <-  dplyr::summarise(processed_data, n = n(),.groups = "drop_last")
 
     processed_data <- dplyr::mutate(processed_data, Prop = n /sum(n),
                                     Prop_var = (Prop*(1-Prop))/sum(n))
@@ -663,7 +663,7 @@ Estimate_proportion_female <- function(data, Weight, Weight.bins = NULL, Time = 
 
     processed_data <- dplyr::group_by(processed_data,Time, Region, Wt_bin)
 
-    processed_data <-  dplyr::summarise(processed_data, n = n())
+    processed_data <-  dplyr::summarise(processed_data, n = n(),.groups = "drop_last")
 
     processed_data <- dplyr::mutate(processed_data, Prop = n /sum(n),
                                     Prop_var = (Prop*(1-Prop))/sum(n))
@@ -691,7 +691,7 @@ Estimate_proportion_female <- function(data, Weight, Weight.bins = NULL, Time = 
 
     processed_data <- dplyr::group_by(processed_data, Wt_bin)
 
-    processed_data <-  dplyr::summarise(processed_data, n = n())
+    processed_data <-  dplyr::summarise(processed_data, n = n(),.groups = "drop_last")
 
     processed_data <- dplyr::mutate(processed_data, Prop = n /sum(n),
                                     Prop_var = (Prop*(1-Prop))/sum(n))
