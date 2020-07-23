@@ -1,32 +1,49 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-DEPM
-====
+
+# DEPM
 
 <!-- badges: start -->
-[![Travis build status](https://travis-ci.org/jonathansmart/DEPM.svg?branch=master)](https://travis-ci.org/jonathansmart/DEPM) <!-- badges: end -->
 
-Installation
-------------
+[![Travis build
+status](https://travis-ci.org/jonathansmart/DEPM.svg?branch=master)](https://travis-ci.org/jonathansmart/DEPM)
+[![DOI](https://zenodo.org/badge/234228177.svg)](https://zenodo.org/badge/latestdoi/234228177)
 
-You can install the released version of DEPM from [Github](https://github.com/jonathansmart/DEPM) with:
+<!-- badges: end -->
+
+## Installation
+
+You can install the released version of DEPM from
+[Github](https://github.com/jonathansmart/DEPM) with:
 
 ``` r
 # install.packages("devtools")
 devtools::install_github("jonathansmart/DEPM", build_vignettes = TRUE)
 ```
 
-The DEPM package is a tool to estimate spawning stock biomass for fish populations using Daily Egg Production Methods (DEPM). Two methods are available in this package:
+The DEPM package is a tool to estimate spawning stock biomass for fish
+populations using Daily Egg Production Methods (DEPM). Two methods are
+available in this package:
 
-1.  DEPM - the traditional DEPM which uses mean weight and mean fecundity to scale the number of females to total biomass
-2.  DEPMWt - a new approach to DEPM presented in McGarvey et al. (in review), where female weight and fecundity are grouped in weight bins. This approach is useful for demersal finfish whose weight distributions are often not unimodal and therefore shouldn't be described using a normal distribution.
+1.  DEPM - the traditional DEPM which uses mean weight and mean
+    fecundity to scale the number of females to total biomass
+2.  DEPMWt - a new approach to DEPM presented in McGarvey et al. (in
+    review), where female weight and fecundity are grouped in weight
+    bins. This approach is useful for demersal finfish whose weight
+    distributions are often not unimodal and therefore shouldn’t be
+    described using a normal distribution.
 
-The package contains functions that estimate the individual DEPM parameters: daily egg production (*P*<sub>0</sub>), sex ratio (*R*), spawning fraction (*S*), fecundity (both mean and weight specific) and weight (both mean and in weight bins). The only parameter that is not estimated in this package is spawning area (*A*), which is typically estimated using GIS methods and must be provided to the analysis.
+The package contains functions that estimate the individual DEPM
+parameters: daily egg production (\(P_{0}\)), sex ratio (*R*), spawning
+fraction (*S*), fecundity (both mean and weight specific) and weight
+(both mean and in weight bins). The only parameter that is not estimated
+in this package is spawning area (*A*), which is typically estimated
+using GIS methods and must be provided to the analysis.
 
-How-to guides
-=============
+# How-to guides
 
-Two vignettes are available that can guide users through both approaches and can be accessed using:
+Two vignettes are available that can guide users through both approaches
+and can be accessed using:
 
 ``` r
 browseVignettes("DEPM") # access all package vignettes
