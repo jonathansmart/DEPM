@@ -198,10 +198,10 @@ Estimate_sex_ratio <- function(data, Region = NULL, Time = NULL){
                                     Bottom = paste(Tot_col))
 
     results <- expand.grid(Region = unique(processed_data$Region),
-                           `Ratio estimate` = NA,
-                           Variance = NA,
-                           SE= NA,
-                           CV= NA)
+                           `Ratio estimate` = NA_real_,
+                           Variance = NA_real_,
+                           SE= NA_real_,
+                           CV= NA_real_)
 
     for(i in unique(processed_data$Region)){
       tmp <- dplyr::filter(processed_data, Region == i)
@@ -215,10 +215,10 @@ Estimate_sex_ratio <- function(data, Region = NULL, Time = NULL){
                                     Top = paste(F_col),
                                     Bottom = paste(Tot_col))
     results <- expand.grid(Time = unique(processed_data$Time),
-                           `Ratio estimate` = NA,
-                           Variance = NA,
-                           SE= NA,
-                           CV= NA)
+                           `Ratio estimate` = NA_real_,
+                           Variance = NA_real_,
+                           SE= NA_real_,
+                           CV= NA_real_)
 
     for(i in unique(processed_data$Time)){
       tmp <- dplyr::filter(processed_data, Time == i)
@@ -234,10 +234,10 @@ Estimate_sex_ratio <- function(data, Region = NULL, Time = NULL){
                                     Top = paste(F_col),
                                     Bottom = paste(Tot_col))
     results <-tidyr::expand(processed_data, tidyr::nesting(Time = Time, Region = Region),
-                            `Ratio estimate` = NA,
-                            Variance = NA,
-                            SE= NA,
-                            CV= NA)
+                            `Ratio estimate` = NA_real_,
+                            Variance = NA_real_,
+                            SE= NA_real_,
+                            CV= NA_real_)
 
     # results <- expand.grid(Time = unique(processed_data$Time),
     #                        Region = unique(processed_data$Region),
@@ -305,10 +305,10 @@ Estimate_Spawning_fraction <- function(data, Region = NULL, Time = NULL){
                                     Bottom = paste(Tot_col))
 
     results <- expand.grid(Region = unique(processed_data$Region),
-                           `Ratio estimate` = NA,
-                           Variance = NA,
-                           SE= NA,
-                           CV= NA)
+                           `Ratio estimate` = NA_real_,
+                           Variance = NA_real_,
+                           SE= NA_real_,
+                           CV= NA_real_)
 
     for(i in unique(processed_data$Region)){
       tmp <- dplyr::filter(processed_data, Region == i)
@@ -323,10 +323,10 @@ Estimate_Spawning_fraction <- function(data, Region = NULL, Time = NULL){
                                     Top = paste(Y_col),
                                     Bottom = paste(Tot_col))
     results <- expand.grid(Time = unique(processed_data$Time),
-                           `Ratio estimate` = NA,
-                           Variance = NA,
-                           SE= NA,
-                           CV= NA)
+                           `Ratio estimate` = NA_real_,
+                           Variance = NA_real_,
+                           SE= NA_real_,
+                           CV= NA_real_)
 
     for(i in unique(processed_data$Time)){
       tmp <- dplyr::filter(processed_data, Time == i)
@@ -343,10 +343,10 @@ Estimate_Spawning_fraction <- function(data, Region = NULL, Time = NULL){
                                     Bottom = paste(Tot_col))
 
     results <-tidyr::expand(processed_data, tidyr::nesting(Time = Time, Region = Region),
-                            `Ratio estimate` = NA,
-                            Variance = NA,
-                            SE= NA,
-                            CV= NA)
+                            `Ratio estimate` = NA_real_,
+                            Variance = NA_real_,
+                            SE= NA_real_,
+                            CV= NA_real_)
 
     # results <- expand.grid(Time = unique(processed_data$Time),
     #                        Region = unique(processed_data$Region),
