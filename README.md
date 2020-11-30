@@ -18,7 +18,7 @@ You can install the released version of DEPM from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("jonathansmart/DEPM", build_vignettes = TRUE)
+devtools::install_github("jonathansmart/DEPM")
 ```
 
 The DEPM package is a tool to estimate spawning stock biomass for fish

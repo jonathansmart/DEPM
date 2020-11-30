@@ -46,7 +46,7 @@ Spawning area (*A*) is not calculated as part of this package but its estimates 
 library(scales)
 library(lubridate)
 # Data for P0
-egg_data_raw <- read.csv("G:\\ModelGrp\\Snapper\\DEPM 2019 method comparison\\Data\\raw_egg_density_Snapper_18.csv")
+egg_data_raw <- read.csv("G:/ModelGrp/Snapper/DEPM 2019 method comparison/Data/raw_egg_density_Snapper_18.csv")
 
 
 ## Ricks functions to determine Age~Stage based on transforming Mikes 9 stages to McGlennons 16 stages
