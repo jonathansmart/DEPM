@@ -539,7 +539,13 @@ Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL,
 
     results <- data.frame(Wt = prediction.int,
                           Fecundity = alpha * prediction.int^beta)
-    results <-  dplyr::mutate(results, Var = (prediction.int^beta)^2*alpha_var+(alpha*log(prediction.int)*prediction.int^beta)^-2*beta_var,
+
+    # formula without beta_var fixed at zero
+    # results <-  dplyr::mutate(results, Var = (prediction.int^beta)^2*alpha_var+(alpha*log(prediction.int)*prediction.int^beta)^2*beta_var,
+    #                           SE = sqrt(Var))
+
+    #formula with beta_var fixed at zero
+    results <-  dplyr::mutate(results, Var = (prediction.int^beta)^2*alpha_var+(alpha*log(prediction.int)*prediction.int^beta)^2*0,
                               SE = sqrt(Var))
 
   } else{
@@ -554,10 +560,19 @@ Estimate_Batch_Fecundity <- function(data, start_pars, prediction.int = NULL,
                              Wt = ifelse(Wt == 1, Wt + 0.0001, Wt))
     results <- dplyr::select(results, -Parameter, -var)
     results <- purrr::set_names(results, c("Wt", "Fecundity", "Predicted"))
+
+    # formula without beta_var fixed at zero
+    # results <- dplyr::mutate(results,
+    #                          SE =  sqrt((Wt^beta)^2*alpha_var+(alpha*log(Wt)*Wt^beta)^2*beta_var),
+    #                          upp = Predicted +(SE*1.96),
+    #                          low = Predicted -(SE*1.96))
+
+    #formula with beta_var fixed at zero
     results <- dplyr::mutate(results,
-                             SE =  sqrt((Wt^beta)^2*alpha_var+(alpha*log(Wt)*Wt^beta)^-2*beta_var),
+                             SE =  sqrt((Wt^beta)^2*alpha_var+(alpha*log(Wt)*Wt^beta)^2*0),
                              upp = Predicted +(SE*1.96),
                              low = Predicted -(SE*1.96))
+
   }
 
 
