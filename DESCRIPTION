@@ -1,7 +1,7 @@
 Package: DEPM
 Type: Package
 Title: Estimate spawning biomass of fish stocks using the Daily Egg Production Method (DEPM)
-Version: 0.2.2
+Version: 0.2.3
 Authors@R: c(person("Jonathan", "Smart", 
     email = "jonathan.smart@sa.gov.au", 
     role = c("aut", "cre", "ctb"),

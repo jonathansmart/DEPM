@@ -1116,7 +1116,7 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
           res <- BspNfemNfemWt(P0 = tmp$P0, A = tmp$A, R = tmp$R, S = tmp$S,
                                Ww = wt_tmp$Wt, Fw = wt_tmp$Fecundity, PNw = wt_tmp$Prop, nw = max(wt_tmp$Wt_bin))
 
-          bspvar <- sqrt(VarBsp(P0 = tmp$P0, VP0 = tmp_var$P0^2,
+          bspvar <- sqrt(VarBsp(P0 = tmp$P0, VP0 = tmp_var$P0,
                                 A = tmp$A, VA = 0,
                                 R = tmp$R,  VR = tmp_var$R,
                                 S = tmp$S,  VS = tmp_var$S,
@@ -1126,7 +1126,7 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
                                 PNw = wt_tmp$Prop, VPNw = wt_tmp$Prop_var ))/1000
 
 
-          NfemVar <- sqrt(VarNfem(P0 = tmp$P0, VP0 = tmp_var$P0^2,
+          NfemVar <- sqrt(VarNfem(P0 = tmp$P0, VP0 = tmp_var$P0,
                                   A = tmp$A, VA = 0,
                                   S = tmp$S,  VS = tmp_var$S,
                                   nw = max(wt_tmp$Wt_bin),
@@ -1134,7 +1134,7 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
                                   PNw = wt_tmp$Prop, VPNw = wt_tmp$Prop_var ))
 
 
-          NfemWtVar <- sqrt(VarNfemWt(P0 = tmp$P0, VP0 = tmp_var$P0^2,
+          NfemWtVar <- sqrt(VarNfemWt(P0 = tmp$P0, VP0 = tmp_var$P0,
                                       A = tmp$A, VA = 0,
                                       S = tmp$S,  VS = tmp_var$S,
                                       nw = max(wt_tmp$Wt_bin),
@@ -1186,7 +1186,7 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
         res <- BspNfemNfemWt(P0 = tmp$P0, A = tmp$A, R = tmp$R, S = tmp$S,
                              Ww = wt_tmp$Wt, Fw = wt_tmp$Fecundity, PNw = wt_tmp$Prop, nw = max(wt_tmp$Wt_bin))
 
-        bspvar <- sqrt(VarBsp(P0 = tmp$P0, VP0 = tmp_var$P0^2,
+        bspvar <- sqrt(VarBsp(P0 = tmp$P0, VP0 = tmp_var$P0,
                               A = tmp$A, VA = 0,
                               R = tmp$R,  VR = tmp_var$R,
                               S = tmp$S,  VS = tmp_var$S,
@@ -1196,7 +1196,7 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
                               PNw = wt_tmp$Prop, VPNw = wt_tmp$Prop_var ))/1000
 
 
-        NfemVar <- sqrt(VarNfem(P0 = tmp$P0, VP0 = tmp_var$P0^2,
+        NfemVar <- sqrt(VarNfem(P0 = tmp$P0, VP0 = tmp_var$P0,
                                 A = tmp$A, VA = 0,
                                 S = tmp$S,  VS = tmp_var$S,
                                 nw = max(wt_tmp$Wt_bin),
@@ -1204,7 +1204,7 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
                                 PNw = wt_tmp$Prop, VPNw = wt_tmp$Prop_var ))
 
 
-        NfemWtVar <- sqrt(VarNfemWt(P0 = tmp$P0, VP0 = tmp_var$P0^2,
+        NfemWtVar <- sqrt(VarNfemWt(P0 = tmp$P0, VP0 = tmp_var$P0,
                                     A = tmp$A, VA = 0,
                                     S = tmp$S,  VS = tmp_var$S,
                                     nw = max(wt_tmp$Wt_bin),
@@ -1249,7 +1249,7 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
         res <- BspNfemNfemWt(P0 = tmp$P0, A = tmp$A, R = tmp$R, S = tmp$S,
                              Ww = wt_tmp$Wt, Fw = wt_tmp$Fecundity, PNw = wt_tmp$Prop, nw = max(wt_tmp$Wt_bin))
 
-        bspvar <- sqrt(VarBsp(P0 = tmp$P0, VP0 = tmp_var$P0^2,
+        bspvar <- sqrt(VarBsp(P0 = tmp$P0, VP0 = tmp_var$P0,
                               A = tmp$A, VA = 0,
                               R = tmp$R,  VR = tmp_var$R,
                               S = tmp$S,  VS = tmp_var$S,
@@ -1259,7 +1259,7 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
                               PNw = wt_tmp$Prop, VPNw = wt_tmp$Prop_var ))/1000
 
 
-        NfemVar <- sqrt(VarNfem(P0 = tmp$P0, VP0 = tmp_var$P0^2,
+        NfemVar <- sqrt(VarNfem(P0 = tmp$P0, VP0 = tmp_var$P0,
                                 A = tmp$A, VA = 0,
                                 S = tmp$S,  VS = tmp_var$S,
                                 nw = max(wt_tmp$Wt_bin),
@@ -1267,7 +1267,7 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
                                 PNw = wt_tmp$Prop, VPNw = wt_tmp$Prop_var ))
 
 
-        NfemWtVar <- sqrt(VarNfemWt(P0 = tmp$P0, VP0 = tmp_var$P0^2,
+        NfemWtVar <- sqrt(VarNfemWt(P0 = tmp$P0, VP0 = tmp_var$P0,
                                     A = tmp$A, VA = 0,
                                     S = tmp$S,  VS = tmp_var$S,
                                     nw = max(wt_tmp$Wt_bin),
@@ -1311,7 +1311,7 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
       res <- BspNfemNfemWt(P0 = tmp$P0, A = tmp$A, R = tmp$R, S = tmp$S,
                            Ww = wt_tmp$Wt, Fw = wt_tmp$Fecundity, PNw = wt_tmp$Prop, nw = max(wt_tmp$Wt_bin))
 
-      bspvar <- sqrt(VarBsp(P0 = tmp$P0, VP0 = tmp_var$P0^2,
+      bspvar <- sqrt(VarBsp(P0 = tmp$P0, VP0 = tmp_var$P0,
                             A = tmp$A, VA = 0,
                             R = tmp$R,  VR = tmp_var$R,
                             S = tmp$S,  VS = tmp_var$S,
@@ -1321,13 +1321,13 @@ Estimate_DEPMWt_biomass<- function(adult.pars, adult.vars, weight.pars.vars){
                             PNw = wt_tmp$Prop, VPNw = wt_tmp$Prop_var ))/1000
 
 
-      NfemVar <- sqrt(VarNfem(P0 = tmp$P0, VP0 = tmp_var$P0^2,
+      NfemVar <- sqrt(VarNfem(P0 = tmp$P0, VP0 = tmp_var$P0,
                               A = tmp$A, VA = 0,
                               S = tmp$S,  VS = tmp_var$S,
                               nw = max(wt_tmp$Wt_bin),
                               Fw = wt_tmp$Fecundity, VFw = wt_tmp$Fec_var,
                               PNw = wt_tmp$Prop, VPNw = wt_tmp$Prop_var ))
-      NfemWtVar <- sqrt(VarNfemWt(P0 = tmp$P0, VP0 = tmp_var$P0^2,
+      NfemWtVar <- sqrt(VarNfemWt(P0 = tmp$P0, VP0 = tmp_var$P0,
                                   A = tmp$A, VA = 0,
                                   S = tmp$S,  VS = tmp_var$S,
                                   nw = max(wt_tmp$Wt_bin),
